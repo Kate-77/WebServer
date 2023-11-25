@@ -1,0 +1,35 @@
+name: PR to main
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push request events for "feat/" or "fix/" branches
+  push:
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+
+jobs:
+  automatic-pr:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: make
+        run: make
+        
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "${{ github.actor }} added a new PR for ${{ steps.extract_branch.outputs.branch }}"
+          delete-branch: true
+          title: "${{ github.actor }} added a new PR for ${{ steps.extract_branch.outputs.branch }}"
+          body: "This is an auto-generated PR with changes for branch ${{ steps.extract_branch.outputs.branch }}"
+          branch: ${{ steps.extract_branch.outputs.branch }}
+          base: 'main'
