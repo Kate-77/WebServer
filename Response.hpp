@@ -42,6 +42,7 @@ class Response
         std::string _server; // server name
         std::string _error; // error message
         std::string _error_status; // error status code
+        std::map<int, std::string> _status_code; // map of status code and status message
 };
 
 #endif

@@ -1,6 +1,6 @@
 NAME = WebServ
 
-SRCS = Response.cpp
+SRCS = main.cpp Response.cpp
 
 CPP = c++
 
