@@ -16,6 +16,34 @@ Response::Response(Response const & src)
     return ;
 }
 
+Response & Response::operator=(Response const & rhs)
+{
+    if (this != &rhs)
+    {
+        this->_response = rhs._response;
+        this->_status = rhs._status;
+        this->_location = rhs._location;
+        this->_content_type = rhs._content_type;
+        this->_content_length = rhs._content_length;
+        this->_server = rhs._server;
+        this->_error = rhs._error;
+        this->_error_status = rhs._error_status;
+        this->_body = rhs._body;
+    }
+    return (*this);
+}
+
+std::ostream & operator<<(std::ostream & o, Response const & rhs)
+{
+    o << rhs.getResponse();
+    return (o);
+}
+
+/*****************************************************************/
+/*****************************************************************/
+/*****************************************************************/
+/*****************************************************************/
+
 void    Response::setResponse(Request & request, WebServ & server)
 {
     this->setBody(request, server);
@@ -28,6 +56,23 @@ void    Response::setResponse(Request & request, WebServ & server)
     this->setErrorStatus(request, server);
     this->_response = this->_status + this->_location + this->_content_type + this->_content_length + this->_server + this->_error + this->_error_status + "\r\n" + this->_body;
     return ;
+}
+
+void    Response::sendHttpResponse(int clientSocket, const std::string& content) {
+    // HTTP response headers
+    std::ostringstream responseStream;
+    //responseStream << "HTTP/1.1 200 OK\r\n";
+    responseStream << this->_status << "\r\n";
+    //responseStream << "Content-Type: text/html\r\n";
+    responseStream << this->_content_type << "\r\n";
+    //responseStream << "Content-Length: " << content.length() << "\r\n";
+    responseStream << this->_content_length << "\r\n";
+    responseStream << "\r\n";
+    responseStream << content;
+
+    // Send the response to the client
+    std::string response = responseStream.str();
+    send(clientSocket, response.c_str(), response.length(), 0);
 }
 
 const  std::map<int, std::string> _status_code = {
@@ -262,27 +307,4 @@ void    Response::setErrorStatus(Request & request, WebServ & server)
 std::string     Response::getResponse()
 {
     return (this->_response);
-}
-
-Response & Response::operator=(Response const & rhs)
-{
-    if (this != &rhs)
-    {
-        this->_response = rhs._response;
-        this->_status = rhs._status;
-        this->_location = rhs._location;
-        this->_content_type = rhs._content_type;
-        this->_content_length = rhs._content_length;
-        this->_server = rhs._server;
-        this->_error = rhs._error;
-        this->_error_status = rhs._error_status;
-        this->_body = rhs._body;
-    }
-    return (*this);
-}
-
-std::ostream & operator<<(std::ostream & o, Response const & rhs)
-{
-    o << rhs.getResponse();
-    return (o);
 }
