@@ -1,11 +1,11 @@
 NAME	= webserve
 
-SRC		= main.cpp
+SRC		= main.cpp HttpRequestParser.cpp
 				
 all: $(NAME)
 
 $(NAME):
-	c++  -Wall -Werror -Wextra -std=c++98 $(SRC) -o $(NAME)
+	c++ -Wall -Werror -Wextra -std=c++98 $(SRC) -o $(NAME)
 
 clean:
 	rm -rf $(NAME)
