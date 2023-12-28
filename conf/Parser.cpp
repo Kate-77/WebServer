@@ -226,7 +226,6 @@ void Parser::secondparser(_type::const_iterator & it)
 
   return ;
 }
-
 std::vector<address_port *> & Parser::getListen(void) 
 {
   return (this->_listen);
@@ -241,9 +240,61 @@ std::map<std::string, Parser *> & Parser::getLocation(void)
 {
   return (this->_location);
 }
+
 std::map<int, std::string>  &         Parser::getstatuscode(void)
 {
   return (this->_code_status);
+}
+
+std::string &                         Parser::getRoot(void)
+{
+      return (this->_root);
+}
+
+std::string &                         Parser::getAlias(void)
+{
+      return (this->_alias);
+} 
+
+std::vector<std::string>         &    Parser::getIndex(void)
+{
+      return (this->_index);
+} 
+
+bool        &                         Parser::getAutoindex(void)
+{
+      return (this->_autoindex);
+} 
+
+std::map<int, std::string>            Parser::getError_page(void)
+{
+      return (this->_error_page);
+} 
+
+std::vector<std::string>              Parser::getLimit_except(void)
+{
+      return (this->_limit_except);
+} 
+
+std::string &                         Parser::getClient_max_body_size(void)
+{
+      return (this->_client_max_body_size);
+} 
+
+std::string &                         Parser::getUpload_store(void)
+{
+  return (this->_upload_store);
+      
+} 
+
+std::map<int, std::string>            Parser::getReturn(void)
+{
+      return (this->_return);
+} 
+
+std::map<std::string, std::string>    Parser::getCgi(void)
+{
+      return (this->_cgi);
 }
 
 Parser * Parser::copyLocation(void) 

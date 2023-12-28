@@ -15,7 +15,8 @@ class Server {
 		fd_set master_read_fds, master_write_fds;
 		fd_set tmp_read_fds, tmp_write_fds;
 		int fdmax;
-		Client client;
+		// Client client;
+		std::vector<std::pair<Client, Parser *> > clients;
 
 
 	public:
@@ -30,6 +31,8 @@ class Server {
 		//setters
 
 		//methods
-		void handleServers(Socket socket);
+		void handleServers(std::vector<std::pair<Socket, Parser *> > & servers);
+		void add_servers(std::vector<std::pair<Socket, Parser *> > & servers, fd_set & master_read_fds);
+		void handle_new_connections(std::vector<std::pair<Socket, Parser *> > & servers, fd_set & tmp_read_fds);
 
 };
