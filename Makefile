@@ -1,15 +1,32 @@
-NAME	= webserve
+NAME	=		webserv
 
-SRC		= main.cpp HttpRequestParser.cpp
-				
-all: $(NAME)
+CC		= 		c++
+CFLAGS	= 		-Wall -Wextra -Werror -std=c++98 -g
 
-$(NAME):
-	c++ -Wall -Werror -Wextra -std=c++98 $(SRC) -o $(NAME)
+SRC		=		main.cpp conf/Lexer.cpp conf/Parser.cpp cgi/cgi.cpp server/Socket.cpp server/Server.cpp server/Client.cpp
+
+OBJ		= 		$(SRC:%.cpp=%.o)
+
+
+all:			$(NAME)
+
+$(NAME):		$(OBJ)
+				$(CC) $(CFLAGS) $^ -o $@
+%.o: %.cpp
+				$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(NAME)
+				rm -rf $(OBJ) 
 
-fclean: clean
+fclean: 		clean
+				rm -rf $(NAME)
+
 
 re: fclean all
+
+.PHONY: all re clean fclean
+
+test:  re
+		make clean && ./webserv 
+
+	
