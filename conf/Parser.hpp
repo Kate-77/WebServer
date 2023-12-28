@@ -44,7 +44,6 @@ class Parser {
     std::map<int, std::string>            _return; //Stops processing and returns the specified code to a client.
     std::map<std::string, std::string>    _cgi;
     std::map<int, std::string>      _code_status;
-
     //Copy constructor / inutile
     Parser(const Parser & other); 
 
@@ -88,6 +87,16 @@ class Parser {
     std::vector<std::string> &            getServerName(void);
     std::map<std::string, Parser *> &     getLocation(void);
     std::map<int, std::string>  &         getstatuscode(void);
+    std::string &                         getRoot(void);
+    std::string &                         getAlias(void); 
+    std::vector<std::string>         &    getIndex(void); 
+    bool        &                         getAutoindex(void); 
+    std::map<int, std::string>            getError_page(void); 
+    std::vector<std::string>              getLimit_except(void); 
+    std::string &                         getClient_max_body_size(void); 
+    std::string &                         getUpload_store(void); 
+    std::map<int, std::string>            getReturn(void); 
+    std::map<std::string, std::string>    getCgi(void);
     
 
     //exeception nested class

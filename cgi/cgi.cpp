@@ -176,8 +176,8 @@ int CGI::execute(void)
     //buffer.get()
     this->_body.insert(this->_body.length(), buffer, static_cast<std::string::size_type>(aux_ret)); //save the output
   }  
-  std::cout << "-------CGI OUTPUT-------" << std::endl;
-  std::cout << this->_body << std::endl;
+  // std::cout << "-------CGI OUTPUT-------" << std::endl;
+  // std::cout << this->_body << std::endl;
   return (200); // 200 ok
 }
 
@@ -243,12 +243,12 @@ int CGI::initEnv(void)
     ++aux;
   }
   *aux = NULL;
-  std::cout << "-------Meta-variables-------" << std::endl;
-  for(std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++)
-    {
-        std::cout << it->first << "=" << it->second << std::endl;
-    }
-    std::cout << std::endl;
+  // std::cout << "-------Meta-variables-------" << std::endl;
+  // for(std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++)
+  //   {
+  //       std::cout << it->first << "=" << it->second << std::endl;
+  //   }
+  //   std::cout << std::endl;
 
   return (0);
 }
