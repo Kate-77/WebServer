@@ -147,8 +147,11 @@ int CGI::execute(void)
       return (500); // 500 internal server error
     }
 
-    execve(this->_av[0], this->_av, this->_env);
-    //check error
+    if(execve(this->_av[0], this->_av, this->_env) == -1)
+    {
+      std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
+      exit(-1); // error exit
+    }
     exit(1); // error exit
   }
 
