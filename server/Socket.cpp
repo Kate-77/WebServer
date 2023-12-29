@@ -6,12 +6,10 @@ Socket::Socket() {
 	memset(&this->server_address, 0, sizeof(this->server_address));
 }
 
-Socket::~Socket(){
-}
+Socket::~Socket() {}
 
 Socket::Socket(const Socket &socket) {
-	this->server_socket = socket.server_socket;
-	this->server_address = socket.server_address;
+	*this = socket;
 }
 
 Socket &Socket::operator=(const Socket &socket) {

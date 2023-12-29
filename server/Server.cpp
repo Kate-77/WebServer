@@ -1,5 +1,76 @@
 #include "Server.hpp"
 
+Server::Server() {
+	FD_ZERO(&master_read_fds);
+	FD_ZERO(&master_write_fds);
+	FD_ZERO(&tmp_read_fds);
+	FD_ZERO(&tmp_write_fds);
+	fdmax = 0;
+}
+
+Server::~Server() {}
+
+Server::Server(const Server &server) {
+	*this = server;
+}
+
+Server &Server::operator=(const Server &server) {
+	this->master_read_fds = server.master_read_fds;
+	this->master_write_fds = server.master_write_fds;
+	this->tmp_read_fds = server.tmp_read_fds;
+	this->tmp_write_fds = server.tmp_write_fds;
+	this->fdmax = server.fdmax;
+	this->clients = server.clients;
+	return *this;
+}
+
+fd_set Server::getMasterReadFds() {
+	return this->master_read_fds;
+}
+
+fd_set Server::getMasterWriteFds() {
+	return this->master_write_fds;
+}
+
+fd_set Server::getTmpReadFds() {
+	return this->tmp_read_fds;
+}
+
+fd_set Server::getTmpWriteFds() {
+	return this->tmp_write_fds;
+}
+
+int Server::getFdmax() {
+	return this->fdmax;
+}
+
+std::vector<std::pair<Client, Parser *> > Server::getClients() {
+	return this->clients;
+}
+
+void Server::setMasterReadFds(fd_set master_read_fds) {
+	this->master_read_fds = master_read_fds;
+}
+
+void Server::setMasterWriteFds(fd_set master_write_fds) {
+	this->master_write_fds = master_write_fds;
+}
+
+void Server::setTmpReadFds(fd_set tmp_read_fds) {
+	this->tmp_read_fds = tmp_read_fds;
+}
+
+void Server::setTmpWriteFds(fd_set tmp_write_fds) {
+	this->tmp_write_fds = tmp_write_fds;
+}
+
+void Server::setFdmax(int fdmax) {
+	this->fdmax = fdmax;
+}
+
+void Server::setClients(std::vector<std::pair<Client, Parser *> > clients) {
+	this->clients = clients;
+}
 
 
 
@@ -17,51 +88,47 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 			perror("select");
 			exit(1);
 		}
-		
+
 		// handle new connections
 		handle_new_connections(servers, tmp_read_fds);
 
 
+		// std::cout << "Number of clients: " << clients.size() << std::endl;
 
-		// run through the existing connections looking for data to read
-		
-				// else
-				// {
-				// 	// handle data from a client
-				// 	int nbytes;
-				// 	char buf[1024];
-				// 	if ((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0)
-				// 	{
-				// 		// got error or connection closed by client
-				// 		if (nbytes == 0)	// connection closed
-				// 			std::cout << "Connection closed by client on socket" << i << " !!hung up!!" << std::endl;
-				// 		else
-				// 			perror("recv");
-				// 		close(i);
-				// 		FD_CLR(i, &master_read_fds); // remove from master set
-				// 	}
-				// 	else
-				// 	{
-				// 		// we got some data from a client
-				// 		std::cout << "Received data from client on socket " << i << std::endl;
-				// 		std::cout << buf << std::endl;
-				// 		// send(i, buf, nbytes, 0);
-				// 		std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nHello, world!";
-				// 		if (send(i, httpResponse.c_str(), httpResponse.length(), 0) == -1)
-				// 			perror("send");
-				// 		close(i);
-				// 		FD_CLR(i, &master_read_fds);
-				// 	}
-				// }
-			
+
+		// run through the existing client connections looking for data to read or write
+		for(size_t i = 0; i < clients.size(); i++)
+		{
+			//check for read
+			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_read_fds))
+			{
+				unsigned char buf[1024];
+				ssize_t nbytes;
+				
+				if ((nbytes = recv(clients[i].first.getClientSocket(), buf, sizeof(buf), 0)) <= 0)
+				{
+					// handle recv error
+					handle_recv_err(clients[i].first.getClientSocket(), nbytes, i, master_read_fds, master_write_fds);
+					break;
+					
+				}
+				else
+				{
+					//parse request
+					parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
+	
+				}
+
+			}
+			//check for write
+
+
+		}		
 	}
 
 }
 
-	
-
-
-void Server::add_servers(std::vector<std::pair<Socket, Parser *>> &servers, fd_set &master_read_fds)
+void Server::add_servers(std::vector<std::pair<Socket, Parser *> > &servers, fd_set &master_read_fds)
 {
 	for(std::vector<std::pair<Socket, Parser *> >::iterator it = servers.begin(); it != servers.end(); it++)
 	{
@@ -71,7 +138,7 @@ void Server::add_servers(std::vector<std::pair<Socket, Parser *>> &servers, fd_s
 	}
 }
 
-void Server::handle_new_connections(std::vector<std::pair<Socket, Parser *>> &servers, fd_set &tmp_read_fds)
+void Server::handle_new_connections(std::vector<std::pair<Socket, Parser *> > &servers, fd_set &tmp_read_fds)
 {
 	for(std::vector<std::pair<Socket, Parser *> >::iterator it = servers.begin(); it != servers.end(); it++)
 	{
@@ -96,11 +163,36 @@ void Server::handle_new_connections(std::vector<std::pair<Socket, Parser *>> &se
 	}
 }
 
-Server::Server()
+void Server::handle_recv_err(int socket, ssize_t nbytes, int i, fd_set &master_read_fds, fd_set &master_write_fds)
 {
-	FD_ZERO(&master_read_fds);
-	FD_ZERO(&master_write_fds);
-	fdmax = 0;
+	// got error or connection closed by client
+	if (nbytes == 0)	// connection closed
+		{
+			std::cout << "Connection closed by client on socket" << i << " !!hung up!!" << std::endl;
+			FD_CLR(socket, &master_read_fds); // remove from master set
+			FD_CLR(socket, &master_write_fds); // remove from master set
+			close(socket);
+			clients.erase(clients.begin() + i);
+		}
+	else
+	{
+		perror("recv");
+	}
 }
 
-Server::~Server() { }
+void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_set &master_read_fds, fd_set &master_write_fds)
+{
+	int Done = 0;
+	client.request.parseRequest(nbytes, buf, Done);
+	if (client.request.getStatusCode() != -1)
+		Done = 1;
+	if (Done == 1)
+	{
+		//move client to write set
+		FD_CLR(client.getClientSocket(), &master_read_fds);
+		FD_SET(client.getClientSocket(), &master_write_fds);
+	}
+}
+
+
+
