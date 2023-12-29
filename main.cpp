@@ -1,20 +1,3 @@
-// #include "WebServ.hpp"
-// #include "Request.hpp"
-// #include "Response.hpp"
-
-// int main(int argc, char **argv)
-// {
-//     WebServ     server;
-//     Request     request;
-//     Response    response;
-
-//     server.setConfig(argv[1]);
-//     request.setRequest(argv[2]);    
-//     response.setResponse(request, server);
-//     std::cout << response.getResponse() << std::endl;
-//     return (0);
-// }
-
 #include <iostream>
 #include <sstream>
 #include <cstring>

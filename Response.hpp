@@ -41,6 +41,7 @@ class Response
         std::string _content_length; // content length of resource
         std::string _server; // server name
         std::string _error; // error message
+        std::string _error_page;
         std::string _error_status; // error status code
         std::map<int, std::string> _status_code; // map of status code and status message
 };
