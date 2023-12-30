@@ -16,7 +16,7 @@ CGI::CGI(void)
   std::string cwd = tmp;
   free(tmp);
 
-  this->_Bin = "/usr/bin/php"; //get binary file from request
+  this->_Bin = "/usr/local/bin/php"; //get binary file from request
   if ('/' == this->_Bin[0]) //if absoluth path then okay
   {
     this->_Path = this->_Bin;
@@ -147,8 +147,11 @@ int CGI::execute(void)
       return (500); // 500 internal server error
     }
 
-    execve(this->_av[0], this->_av, this->_env);
-    //check error
+    if(execve(this->_av[0], this->_av, this->_env) == -1)
+    {
+      std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
+      exit(-1); // error exit
+    }
     exit(1); // error exit
   }
 
@@ -252,3 +255,27 @@ int CGI::initEnv(void)
 
   return (0);
 }
+
+  //  Lexer *              _Lexer; //ici define inside the classs
+  //   const std::vector<Parser *> * _Servers; // icidefine inside the class
+  //   try
+  //   {
+  //   this->_Lexer = new Lexer(); //ici we create a lexer because the Lexer divide each server
+  //   this->_Lexer->start(NULL); // ici  we start Parsing each server
+  //   _Servers = _Lexer->getparserv(); // ici we get all servers
+  //   }
+  //   catch(std::exception & e)
+  //       {
+  //               std::cerr << e.what() << std::endl;
+  //               return ;
+  //       }
+  //   //ici we iterate server by server
+  //   for ( std::vector<Parser *>::const_iterator it = this->_Servers->begin(); it != this->_Servers->end(); ++it )
+  //   {
+  //   std::map<std::string, Parser *> & locations = (*it)->getLocation(); //ici we get Location  for ech server
+  //   for (std::map<std::string, Parser *>::const_iterator b = locations.begin();b != locations.end(); ++b)
+  //   {
+  //     std::cout << "    " << b->first << std::endl;
+  //     b->second->printparser("----Location Block----"); //ici you can print all dir    
+  //     // b->second->getx() // ici you can acces to all directives here
+  //     } 

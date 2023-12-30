@@ -8,6 +8,7 @@
 # include "Lexer.hpp"
 # include <algorithm> //count
 # include <ios> //boolalpha
+# include <arpa/inet.h>
 
 const std::string       Default_Root = "/var/www/"; 
 const std::string           ClientMaxBodySize = "1M";
@@ -30,7 +31,11 @@ class Parser {
     std::map<std::string, _typedirective> _lDirectives;
 
     //directives attribues
-    std::vector<address_port *>           _listen; 
+    in_addr_t                             _host;
+		uint16_t                              _port;
+    std::string                           _hostnormal;
+    unsigned int                          _portnormal;
+    std::vector<address_port *>           _listen;
     std::map<std::string, Parser *>       _location; //allows to route request to correct location within the file system. 
     std::vector<std::string>              _server_name; //determine which server block is used for a given request.
     std::string                           _root; //site's document root folder
@@ -44,7 +49,6 @@ class Parser {
     std::map<int, std::string>            _return; //Stops processing and returns the specified code to a client.
     std::map<std::string, std::string>    _cgi;
     std::map<int, std::string>      _code_status;
-
     //Copy constructor / inutile
     Parser(const Parser & other); 
 
@@ -98,6 +102,11 @@ class Parser {
     std::string &                         getUpload_store(void); 
     std::map<int, std::string>            getReturn(void); 
     std::map<std::string, std::string>    getCgi(void);
+    uint16_t & getPort(void);
+		in_addr_t & getHost(void);
+    unsigned int  &  getPortnormal();
+    std::string & getHostnormal();
+    
 
     //exeception nested class
     class ParserException : public std::exception 

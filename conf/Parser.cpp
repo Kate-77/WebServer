@@ -226,6 +226,7 @@ void Parser::secondparser(_type::const_iterator & it)
 
   return ;
 }
+
 std::vector<address_port *> & Parser::getListen(void) 
 {
   return (this->_listen);
@@ -297,6 +298,26 @@ std::map<std::string, std::string>    Parser::getCgi(void)
       return (this->_cgi);
 }
 
+uint16_t  & Parser::getPort(void)
+{
+  return this->_port;
+}
+
+in_addr_t & Parser::getHost(void)
+{
+  return this->_host;
+}
+
+unsigned int  & Parser::getPortnormal()
+{
+  return this->_portnormal;
+}
+
+ std::string & Parser::getHostnormal()
+{
+  return this->_hostnormal;
+}
+
 Parser * Parser::copyLocation(void) 
 {
   Parser * location = new Parser();
@@ -320,13 +341,6 @@ void Parser::parseLocation(_type::const_iterator & it)
   {
     throw Parser::ParserException("Error! duplicate value in  'location' block ");
   }
-  //match modifier
-  if(it->find_first_not_of("=~*^") == std::string::npos)
-   {
-    location.append(" ");
-      it++;
-    location.append(*it);
-   }
   //uri
   if(it->find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%\\") == std::string::npos)
     it++;
@@ -489,15 +503,26 @@ void Parser::parseListen(_type::const_iterator & it)
     throw Parser::ParserException("Error! invalid value on 'listen' directive");
   }
   address_port * ip_port = new address_port();
-  ip_port->_address = ip;
-  ip_port->_port = port;
+  ip_port->_address = "0";
+  ip_port->_port = 1000000;
   // check value not duplicated
   // if (std::find(this->_listen.begin(), this-> _listen.end(), ip_port) != this->_listen.end()) 
+  // for (std::vector<address_port *>::const_iterator it = this->_listen.begin(); it != this->_listen.end(); ++it) 
+  // {
+  //   if((*it)->_address == ip_port->_address && (*it)->_port == ip_port->_port)
+  //     throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+  // }
   for (std::vector<address_port *>::const_iterator it = this->_listen.begin(); it != this->_listen.end(); ++it) 
   {
-    if((*it)->_address == ip_port->_address && (*it)->_port == ip_port->_port)
-      throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+    if((*it)->_address != "0" && (*it)->_port != 1000000 )
+      throw Parser::ParserException("Error! too many directives 'listen'");
   }
+  ip_port->_address = ip;
+  ip_port->_port = port;
+  this->_portnormal = port;
+  this->_hostnormal = ip;
+  this->_host = inet_addr(ip.c_str());
+  this->_port = htons(port);
   // save
   this->_listen.push_back(ip_port);
   // check semicolon

@@ -42,11 +42,15 @@ void Socket::createServers(const std::vector<Parser *>       *  servers, std::ve
 		static int number = 0;
 		std::cout << "server number n = " << number++ << std::endl;
 		// std::cout << "    " << "address: " << (*it)->_address << " port: " << (*it)->_port << std::endl;
-		
+		std::cout << "address :" << (*it)->getHostnormal() << " Port: " << (*it)->getPortnormal() << std::endl;
+		std::cout << "address casted :" << (*it)->getHost() << " Port casted: " << (*it)->getPort() << std::endl;
 		server_address.sin_family = AF_INET;
-		server_address.sin_port = htons(5000);	//Change to (*it)->_port()
-		// server_address.sin_port = htons((*it)->_listen->_port);
-		server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+		// server_address.sin_port = htons(5000);	//Change to (*it)->_port()
+		// server_address.sin_port = htons((*it)->getPortnormal()); // you can use the casted one getPort()
+		server_address.sin_port = (*it)->getPort(); 
+		// server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+		// server_address.sin_addr.s_addr = inet_addr(((*it)->getHostnormal()).c_str()); // you can use the casted one gethost() //not working
+		server_address.sin_addr.s_addr = (*it)->getHost();  //not working
 		// server_address.sin_addr.s_addr = inet_addr("10.32.116.45");
 		memset(server_address.sin_zero, '\0', sizeof(server_address.sin_zero));
 
