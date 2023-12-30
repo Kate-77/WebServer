@@ -298,11 +298,11 @@ std::map<std::string, std::string>    Parser::getCgi(void)
       return (this->_cgi);
 }
 
-uint16_t  & Access::getPort(void){
+uint16_t  & Parser::getPort(void){
   return this->_port;
 }
 
-in_addr_t & Access::getHost(void)
+in_addr_t & Parser::getHost(void)
 {
   return this->_host;
 }

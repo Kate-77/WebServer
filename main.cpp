@@ -25,9 +25,9 @@ int main(int ac, char **av)
 		return 1;
 	}
 
-    const std::vector<Parser *> * _Servers = a.getparserv();
+    // const std::vector<Parser *> * _Servers = a.getparserv();
 
-    const std::vector<Parser *>::iterator & it = _Servers;
+    // const std::vector<Parser *>::iterator & it = _Servers;
     // std::cout << it->getPort() << std::endl;
     CGI b;
     b.execute();

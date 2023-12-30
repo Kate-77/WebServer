@@ -8,6 +8,7 @@
 # include "Lexer.hpp"
 # include <algorithm> //count
 # include <ios> //boolalpha
+# include <arpa/inet.h>
 
 const std::string       Default_Root = "/var/www/"; 
 const std::string           ClientMaxBodySize = "1M";
