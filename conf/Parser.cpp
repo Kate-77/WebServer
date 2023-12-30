@@ -298,6 +298,14 @@ std::map<std::string, std::string>    Parser::getCgi(void)
       return (this->_cgi);
 }
 
+uint16_t  & Access::getPort(void){
+  return this->_port;
+}
+
+in_addr_t & Access::getHost(void)
+{
+  return this->_host;
+}
 
 Parser * Parser::copyLocation(void) 
 {
@@ -500,6 +508,8 @@ void Parser::parseListen(_type::const_iterator & it)
   }
   ip_port->_address = ip;
   ip_port->_port = port;
+  this->_host = inet_addr(ip.c_str());
+  this->_port = htons(port);
   // save
   this->_listen.push_back(ip_port);
   // check semicolon

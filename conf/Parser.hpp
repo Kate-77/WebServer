@@ -30,7 +30,9 @@ class Parser {
     std::map<std::string, _typedirective> _lDirectives;
 
     //directives attribues
-    std::vector<address_port *>           _listen; 
+    in_addr_t                             _host;
+		uint16_t                              _port;
+    std::vector<address_port *>           _listen;
     std::map<std::string, Parser *>       _location; //allows to route request to correct location within the file system. 
     std::vector<std::string>              _server_name; //determine which server block is used for a given request.
     std::string                           _root; //site's document root folder
@@ -97,6 +99,8 @@ class Parser {
     std::string &                         getUpload_store(void); 
     std::map<int, std::string>            getReturn(void); 
     std::map<std::string, std::string>    getCgi(void);
+    uint16_t & getPort(void);
+		in_addr_t & getHost(void);
     
 
     //exeception nested class

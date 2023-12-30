@@ -26,13 +26,9 @@ int main(int ac, char **av)
 	}
 
     const std::vector<Parser *> * _Servers = a.getparserv();
-    Access c;
-    for ( std::vector<Parser *>::const_iterator it = _Servers->begin(); it != _Servers->end(); ++it )
-    {
 
-        c.start(it);
-
-    }
+    const std::vector<Parser *>::iterator & it = _Servers;
+    // std::cout << it->getPort() << std::endl;
     CGI b;
     b.execute();
 
