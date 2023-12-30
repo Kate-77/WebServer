@@ -53,6 +53,13 @@ std::ostream & operator<<(std::ostream & o, Response const & rhs)
 // starting here
 void    Response::handleResponse(Request & request, Server &server)
 {
+    std::vector<Location>::const_iterator locationPath = findLocation(server.getServerLocations(), request.getUrl());
+    
+    if (locationPath == server.getServerLocations().end())
+    {
+        callErrorPage(server, 404);
+        return;
+    }
     if (request.status_code != 0)
     {
         callErrorPage(server, request.status_code);

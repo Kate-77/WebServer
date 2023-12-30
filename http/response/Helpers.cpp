@@ -173,3 +173,24 @@ void Response::generateErrorPage(int code) {
     this->head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(errorBody.size()) + "\r\n\r\n";
     this->response = errorBody;
 }
+
+// Check if url matched a conf location
+std::vector<Location>::const_iterator findLocation(const std::vector<location>& locations, const std::string& path) {
+    auto it = locations.begin();
+    
+    while (it != locations.end()) {
+        std::string locationPath = it->getLocationPath();
+
+        // If locationPath contains a slash at the end, remove it
+        if (!locationPath.empty() && locationPath.back() == '/') {
+            locationPath.pop_back();
+        }
+
+        if (locationPath == path) {
+            return it; // Match found
+        }
+
+        ++it;
+    }
+    return locations.end(); // No match found
+}
