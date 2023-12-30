@@ -33,6 +33,8 @@ class Parser {
     //directives attribues
     in_addr_t                             _host;
 		uint16_t                              _port;
+    std::string                           _hostnormal;
+    unsigned int                          _portnormal;
     std::vector<address_port *>           _listen;
     std::map<std::string, Parser *>       _location; //allows to route request to correct location within the file system. 
     std::vector<std::string>              _server_name; //determine which server block is used for a given request.
@@ -102,6 +104,8 @@ class Parser {
     std::map<std::string, std::string>    getCgi(void);
     uint16_t & getPort(void);
 		in_addr_t & getHost(void);
+    unsigned int  &  getPortnormal();
+    std::string & getHostnormal();
     
 
     //exeception nested class

@@ -298,13 +298,24 @@ std::map<std::string, std::string>    Parser::getCgi(void)
       return (this->_cgi);
 }
 
-uint16_t  & Parser::getPort(void){
+uint16_t  & Parser::getPort(void)
+{
   return this->_port;
 }
 
 in_addr_t & Parser::getHost(void)
 {
   return this->_host;
+}
+
+unsigned int  & Parser::getPortnormal()
+{
+  return this->_portnormal;
+}
+
+ std::string & Parser::getHostnormal()
+{
+  return this->_hostnormal;
 }
 
 Parser * Parser::copyLocation(void) 
@@ -508,6 +519,8 @@ void Parser::parseListen(_type::const_iterator & it)
   }
   ip_port->_address = ip;
   ip_port->_port = port;
+  this->_portnormal = port;
+  this->_hostnormal = ip;
   this->_host = inet_addr(ip.c_str());
   this->_port = htons(port);
   // save
