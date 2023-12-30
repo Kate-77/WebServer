@@ -491,15 +491,22 @@ void Parser::parseListen(_type::const_iterator & it)
     throw Parser::ParserException("Error! invalid value on 'listen' directive");
   }
   address_port * ip_port = new address_port();
-  ip_port->_address = ip;
-  ip_port->_port = port;
+  ip_port->_address = "0";
+  ip_port->_port = 1000000;
   // check value not duplicated
   // if (std::find(this->_listen.begin(), this-> _listen.end(), ip_port) != this->_listen.end()) 
+  // for (std::vector<address_port *>::const_iterator it = this->_listen.begin(); it != this->_listen.end(); ++it) 
+  // {
+  //   if((*it)->_address == ip_port->_address && (*it)->_port == ip_port->_port)
+  //     throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+  // }
   for (std::vector<address_port *>::const_iterator it = this->_listen.begin(); it != this->_listen.end(); ++it) 
   {
-    if((*it)->_address == ip_port->_address && (*it)->_port == ip_port->_port)
-      throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+    if((*it)->_address != "0" && (*it)->_port != 1000000 )
+      throw Parser::ParserException("Error! too many directives 'listen'");
   }
+  ip_port->_address = ip;
+  ip_port->_port = port;
   // save
   this->_listen.push_back(ip_port);
   // check semicolon
