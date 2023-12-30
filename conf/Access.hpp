@@ -3,16 +3,19 @@
 # include "Parser.hpp"
 # include "Lexer.hpp"
 # include <iostream>
+# include <arpa/inet.h>
+//class for get directives from a server
 class Access {
     private:
-    Lexer *              _Lexer; //ici define inside the classs
-    const std::vector<Parser *> * _Servers; // icidefine inside the class
-		// in_addr_t _host;
-		// std::string _root;
+		in_addr_t _host;
+		uint16_t _port;
     public:
-    void start(void);
+        void start(std::vector<Parser *>::const_iterator it);
+        uint16_t & getPort(void);
+		in_addr_t & getHost(void);
+    
+    // std::string _root;
     // std::string _server_name;
-	// 	uint16_t _port;
 	// 	unsigned long _client_max_body_size;
 	// 	std::string _index;
 	// 	bool _autoindex;

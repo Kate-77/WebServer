@@ -2,6 +2,9 @@
 #include "conf/Parser.hpp"
 #include "cgi/cgi.hpp"
 #include "conf/Access.hpp"
+#include <arpa/inet.h>
+
+
 int main(int ac, char **av)
 {
     Lexer a;
@@ -15,14 +18,21 @@ int main(int ac, char **av)
              a.start(av[1]);
         else
              a.start(NULL);
-        Access c;
-        c.start();
     }
     catch(std::exception & e)
 	{
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}
+
+    const std::vector<Parser *> * _Servers = a.getparserv();
+    Access c;
+    for ( std::vector<Parser *>::const_iterator it = _Servers->begin(); it != _Servers->end(); ++it )
+    {
+
+        c.start(it);
+
+    }
     CGI b;
     b.execute();
 
