@@ -113,7 +113,7 @@ void Access::start(void)
         std::cout << "    root l :" << lroot << std::endl;
 
       std::vector<std::string>         &   lindexes =  b->second->getIndex(); 
-      i f(lindexes.empty() == false)
+      if(lindexes.empty() == false)
       {
         for (std::vector<std::string>::const_iterator its = lindexes.begin(); its != lindexes.end(); ++its) 
         {
@@ -122,7 +122,7 @@ void Access::start(void)
       }
 
       std::map<int, std::string>          lreturnnnn =  b->second->getReturn();
-      if(lreturnnnn.empty()) 
+      if(lreturnnnn.empty() == false) 
       {
         for (std::map<int, std::string>::const_iterator its = lreturnnnn.begin(); its != lreturnnnn.end(); ++its) 
         {
