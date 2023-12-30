@@ -15,8 +15,8 @@ int main(int ac, char **av)
              a.start(av[1]);
         else
              a.start(NULL);
-        Access c;
-        c.start();
+        // Access c;
+        // c.start();
     }
     catch(std::exception & e)
 	{

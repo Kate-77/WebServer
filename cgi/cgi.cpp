@@ -179,8 +179,8 @@ int CGI::execute(void)
     //buffer.get()
     this->_body.insert(this->_body.length(), buffer, static_cast<std::string::size_type>(aux_ret)); //save the output
   }  
-  // std::cout << "-------CGI OUTPUT-------" << std::endl;
-  // std::cout << this->_body << std::endl;
+  std::cout << "-------CGI OUTPUT-------" << std::endl;
+  std::cout << this->_body << std::endl;
   return (200); // 200 ok
 }
 

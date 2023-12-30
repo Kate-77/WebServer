@@ -113,7 +113,7 @@ void Access::start(void)
         std::cout << "    root l :" << lroot << std::endl;
 
       std::vector<std::string>         &   lindexes =  b->second->getIndex(); 
-      if(lindexes.empty() == false)
+      i f(lindexes.empty() == false)
       {
         for (std::vector<std::string>::const_iterator its = lindexes.begin(); its != lindexes.end(); ++its) 
         {
