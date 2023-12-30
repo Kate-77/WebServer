@@ -322,13 +322,6 @@ void Parser::parseLocation(_type::const_iterator & it)
   {
     throw Parser::ParserException("Error! duplicate value in  'location' block ");
   }
-  //match modifier
-  if(it->find_first_not_of("=~*^") == std::string::npos)
-   {
-    location.append(" ");
-      it++;
-    location.append(*it);
-   }
   //uri
   if(it->find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%\\") == std::string::npos)
     it++;
