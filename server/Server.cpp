@@ -91,7 +91,7 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 
 		// handle new connections
 		handle_new_connections(servers, tmp_read_fds);
-
+		// std::cout << "Number of clients: " << clients.size() << std::endl;
 
 		// std::cout << "Number of clients: " << clients.size() << std::endl;
 
@@ -115,7 +115,8 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 				else
 				{
 					//parse request
-					parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
+					// parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
+					std::cout << "buf = " << buf << std::endl;
 	
 				}
 
@@ -136,6 +137,7 @@ void Server::add_servers(std::vector<std::pair<Socket, Parser *> > &servers, fd_
 		if ((*it).first.getServerSocket() > fdmax)
 			fdmax = (*it).first.getServerSocket();
 	}
+	// std::cout << "fdmax = " << fdmax << std::endl;
 }
 
 void Server::handle_new_connections(std::vector<std::pair<Socket, Parser *> > &servers, fd_set &tmp_read_fds)
@@ -183,9 +185,14 @@ void Server::handle_recv_err(int socket, ssize_t nbytes, int i, fd_set &master_r
 void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_set &master_read_fds, fd_set &master_write_fds)
 {
 	int Done = 0;
-	client.request.parseRequest(nbytes, buf, Done);
-	if (client.request.getStatusCode() != -1)
+
+	try {
+		client.request.parseRequest(nbytes, buf, Done);
+	}
+	catch (int code) {
+		client.request.setStatusCode(code);
 		Done = 1;
+	}
 	if (Done == 1)
 	{
 		//move client to write set

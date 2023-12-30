@@ -3,9 +3,10 @@ NAME	=		webserv
 CC		= 		c++
 CFLAGS	= 		-Wall -Wextra -Werror -std=c++98 -g
 
-SRC		=		main.cpp conf/Lexer.cpp conf/Parser.cpp cgi/cgi.cpp server/Socket.cpp server/Server.cpp server/Client.cpp http/request/HttpRequestParser.cpp
+SRC		=		main.cpp conf/Lexer.cpp conf/Parser.cpp cgi/cgi.cpp server/Socket.cpp server/Server.cpp server/Client.cpp request/HttpRequestParser.cpp
 
 OBJ		= 		$(SRC:%.cpp=%.o)
+
 
 all:			$(NAME)
 
@@ -19,6 +20,7 @@ clean:
 
 fclean: 		clean
 				rm -rf $(NAME)
+
 
 re: fclean all
 
