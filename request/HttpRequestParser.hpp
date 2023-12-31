@@ -18,6 +18,8 @@ class HttpRequestParser {
 		std::string version;
 		std::string bodyFileName;
 		int bodyFileFD;
+
+		std::map<std::string, std::string> headers_map;//
 	public:
 
 		//canonical form
@@ -51,4 +53,5 @@ class HttpRequestParser {
 		// void parseBody(unsigned char* bodyStart, size_t bodyLength);
 		void parse_request_line(std::string request_line);
 		std::string generateName();
+		void parse_headers(std::istringstream &headers);
 };

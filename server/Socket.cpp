@@ -48,9 +48,9 @@ void Socket::createServers(const std::vector<Parser *>       *  servers, std::ve
 		// server_address.sin_port = htons(5000);	//Change to (*it)->_port()
 		// server_address.sin_port = htons((*it)->getPortnormal()); // you can use the casted one getPort()
 		server_address.sin_port = (*it)->getPort(); 
-		// server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+		server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 		// server_address.sin_addr.s_addr = inet_addr(((*it)->getHostnormal()).c_str()); // you can use the casted one gethost() //not working
-		server_address.sin_addr.s_addr = (*it)->getHost();  //not working
+		// server_address.sin_addr.s_addr = (*it)->getHost();  //not working
 		// server_address.sin_addr.s_addr = inet_addr("10.32.116.45");
 		memset(server_address.sin_zero, '\0', sizeof(server_address.sin_zero));
 

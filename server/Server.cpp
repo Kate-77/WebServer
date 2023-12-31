@@ -115,8 +115,8 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 				else
 				{
 					//parse request
-					// parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
-					std::cout << "buf = " << buf << std::endl;
+					parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
+					// std::cout << "buf = " << buf << std::endl;
 	
 				}
 

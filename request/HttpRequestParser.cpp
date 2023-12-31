@@ -92,17 +92,26 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 	// Find the empty request_line that separates headers and body
 	const char* doubleCRLF = "\r\n\r\n";
 	unsigned char* bodyStartPtr = static_cast<unsigned char*>(memmem(buf, nbytes, doubleCRLF, strlen(doubleCRLF)));
-
+	
 	if (bodyStartPtr != NULL)
 	{
-		reqLine_Headers_Length = bodyStartPtr - buf;
+		reqLine_Headers_Length = bodyStartPtr - buf + 2;
         bodyStart = bodyStartPtr + strlen(doubleCRLF);
         reqLine_Headers.assign(reinterpret_cast<char *>(buf), reqLine_Headers_Length);
 	}
 	else
 		throw 400;
-
    	parseRequestLine_Headers(reqLine_Headers);
+
+	//print headers_map
+
+	for(std::map<std::string, std::string>::iterator it = headers_map.begin(); it != headers_map.end(); it++)
+	{
+		std::cout << "key = " << it->first << " value = " << it->second << std::endl;
+	}
+
+
+	
 	
 	if (getMethod() == "POST")
 	{
@@ -111,7 +120,7 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 	}
 	else
 		Done = 1;
-	std::cout << "bodyLength = " << bodyLength << std::endl;
+	std::cout << "bodyLength =************ " << bodyLength << std::endl;
 	std::cout << "bodyStart = " << bodyStart << std::endl;
 }
 
@@ -119,16 +128,20 @@ void HttpRequestParser::parseRequestLine_Headers(std::string reqLine_Headers)
 {
 	std::istringstream iss(reqLine_Headers);
 	std::string request_line;
-	std::string headers;
+
+	std::getline(iss, request_line);
 
 	// Parse the request request_line
-	std::getline(iss, request_line);
 	parse_request_line(request_line);
-	
+	printf("request_line = %s\n", request_line.c_str());
+	printf("method = %s\n", getMethod().c_str());
+	printf("path = %s\n", getPath().c_str());
+	printf("query = %s\n", getQuery().c_str());
+	printf("version = %s\n", getVersion().c_str());
+
 	// Parse the headers
-
-
-
+	// printf("headers = %s\n", iss.str().c_str());
+	parse_headers(iss);
 }
 
 // void HttpRequestParser::parseBody(unsigned char *bodyStart, size_t bodyLength)
@@ -177,4 +190,35 @@ std::string HttpRequestParser::generateName()
 	name = ss.str();
 	i++;
 	return name;
+}
+
+void HttpRequestParser::parse_headers(std::istringstream &headers)
+{
+	std::string header_line;
+	std::string key;
+	std::string value;
+
+	while (std::getline(headers, header_line))
+	{
+		// printf("header_line = %s\n", header_line.c_str());
+
+		size_t pos = header_line.find(": ");
+		if (pos == std::string::npos)
+			throw 400;
+		else
+		{
+			key = header_line.substr(0, pos);
+			header_line.erase(0, pos + 2);
+		}
+		// printf("key = [%s]\n", key.c_str());
+		pos = header_line.find("\r");
+		if (pos == std::string::npos)
+			throw 400;
+		else
+		{
+			value = header_line.substr(0, pos);
+		}
+		// printf("value = [%s]\n", value.c_str());
+		headers_map.insert(std::pair<std::string, std::string>(key, value));
+	}
 }

@@ -33,12 +33,12 @@ int main(int ac, char **av)
 	socket.createServers(servers, final_servers);
 
 	//print final_servers
-	for(std::vector<std::pair<Socket, Parser *> >::iterator it = final_servers.begin(); it != final_servers.end(); it++)
-	{
-		std::cout << "server number n = " << std::endl;
-		std::cout << "    " << "Socket: " << (*it).first.getServerSocket() << std::endl;
-		// std::cout << "    " << "address: " << (*it).second->_address << " port: " << (*it).second->_port << std::endl;
-	}
+	// for(std::vector<std::pair<Socket, Parser *> >::iterator it = final_servers.begin(); it != final_servers.end(); it++)
+	// {
+	// 	std::cout << "server number n = " << std::endl;
+	// 	std::cout << "    " << "Socket: " << (*it).first.getServerSocket() << std::endl;
+	// 	// std::cout << "    " << "address: " << (*it).second->_address << " port: " << (*it).second->_port << std::endl;
+	// }
 
 
 	server.handleServers(final_servers);
