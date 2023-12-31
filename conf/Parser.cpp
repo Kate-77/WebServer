@@ -183,6 +183,7 @@ void Parser::printparser(const std::string & str) const
     for (std::map<std::string, Parser *>::const_iterator it = this->_location.begin(); it != this->_location.end(); ++it)
     {
       std::cout << "    " << it->first << std::endl;
+      std::cout << "string location " << it->second->getslocation() << std::endl;
       it->second->printparser("----Location Block----");
     }
   }
@@ -222,7 +223,7 @@ void Parser::secondparser(_type::const_iterator & it)
       throw Parser::ParserException("Error! unknown directive: '" + *it + "' in 'server' block");
     }
   }  
-  //this->printparser("----Server Block----");
+  this->printparser("----Server Block----");
 
   return ;
 }
@@ -318,6 +319,11 @@ unsigned int  & Parser::getPortnormal()
   return this->_hostnormal;
 }
 
+std::string & Parser::getslocation()
+{
+  return this->_slocation;
+}
+
 Parser * Parser::copyLocation(void) 
 {
   Parser * location = new Parser();
@@ -391,6 +397,8 @@ void Parser::parseLocation(_type::const_iterator & it)
 
   // add location value
   this->_location[location] = copy;
+  //save string 
+  this->_location[location]->_slocation = location;
   return ;
 }
 

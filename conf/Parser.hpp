@@ -49,6 +49,7 @@ class Parser {
     std::map<int, std::string>            _return; //Stops processing and returns the specified code to a client.
     std::map<std::string, std::string>    _cgi;
     std::map<int, std::string>      _code_status;
+    std::string                           _slocation;
     //Copy constructor / inutile
     Parser(const Parser & other); 
 
@@ -102,6 +103,7 @@ class Parser {
     std::string &                         getUpload_store(void); 
     std::map<int, std::string>            getReturn(void); 
     std::map<std::string, std::string>    getCgi(void);
+    std::string &                         getslocation(void);
     uint16_t & getPort(void);
 		in_addr_t & getHost(void);
     unsigned int  &  getPortnormal();
