@@ -228,48 +228,36 @@ std::string Response::constructFilePath(const std::string &path) {
     return repetetiveSlash(file);
 }
 
-// void Response::listDir(std::string file, Request &request, Server_storage &server) {
-//     std::string path = constructFilePath(request.getUrl());
-//     std::string body = "<!DOCTYPE html>\n";
-//     body += "<html>\n";
-//     body += "<head>\n";
-//     body += "<title>Index of " + path + "</title>\n";
-//     body += "<style>\n";
-//     body += "body {display: flex; justify-content: center; align-items:center; flex-direction: column; font-family: Arial, sans-serif; margin: 0; padding: 20px;}\n";
-//     body += "h1 {font-size: 24px;}\n";
-//     body += "p {font-size: 16px;}\n";
-//     body += "</style>\n";
-//     body += "</head>\n";
-//     body += "<body>\n";
-//     body += "<h1>Index of " + path + "</h1>\n";
-//     body += "<hr>\n";
-//     body += "<table>\n";
-//     body += "<tr><th>Name</th><th>Last Modified</th><th>Size</th></tr>\n";
+void Response::listDirectory(std::string file, Request &request, Server_storage &server) {
+    std::vector<Location>::const_iterator locationPath;
+    std::string output = "<html><body><ul>";
 
-//     DIR *dir;
-//     struct dirent *ent;
-//     if ((dir = opendir (path.c_str())) != NULL) {
-//         while ((ent = readdir (dir)) != NULL) {
-//             if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
-//                 std::string filePath = path + ent->d_name;
-//                 struct stat info;
-//                 stat(filePath.c_str(), &info);
-//                 std::string size = printNumber(info.st_size);
-//                 std::string lastModified = std::asctime(std::localtime(&info.st_mtime));
-//                 body += "<tr><td><a href=\"" + ent->d_name + "\">" + ent->d_name + "</a></td><td>" + lastModified + "</td><td>" + size + "</td></tr>\n";
-//             }
-//         }
-//         closedir (dir);
-//     } else {
-//         callErrorPage(server, 403);
-//     }
+    DIR *dir = opendir(file.c_str());
+    if (dir != NULL) {
+        struct dirent *ent;
+        while ((ent = readdir(dir)) != NULL) {
+            std::string dirEntryPath;
+            if (locationPath->getLocationPath() == "/" && request.getUrl() == "/") {
+                dirEntryPath = request.getUrl() + ent->d_name;
+            } 
+            else {
+                dirEntryPath = request.getUrl() + "/" + ent->d_name;
+            }
 
-//     body += "</table>\n";
-//     body += "<hr>\n";
-//     body += "</body>\n";
-//     body += "</html>";
+            output += "<li><a href=\"" + dirEntryPath + "\">" + ent->d_name + "</a></li>";
+        }
+        closedir(dir);
 
-//     contentTrack = body.size();
-//     this->head = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(body.size()) + "\r\n\r\n";
-//     this->response = body;
-// }
+        output += "</ul></body></html>";
+        std::string header = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
+                             "Connection: close\r\n"
+                             "Content-Type: text/html\r\n"
+                             "Content-Length: " + printNumber(output.size()) + "\r\n\r\n";
+
+        this->response = header + output;
+        this->contentTrack = response.size();
+    } 
+    else {
+        callErrorPage(server, 403);
+    }
+}
