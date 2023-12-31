@@ -131,3 +131,31 @@ void Response::handleDeleteRequest(Request &request, Server &server) {
     else
         callErrorPage(server, 204);
 }
+
+
+// const std::vector<Parser *> servers = lexer.getparserv(); //request get all servers
+// //loop iterate servers and choose the right server for the response
+// for(std::vector<std::pair<Socket, Parser *> >::iterator it = servers.begin(); it != servers.end(); it++)
+// {
+//     if{} //some code
+//     else{} // some
+
+//     Parser * right_server = (*it); // send it to response
+// } 
+
+// ///response part
+// //get all locations
+// std::map<std::string, Parser *> locations = this->right_server->getLocation();
+// Parser * match;
+// std::string uri = "abc.html"
+// //compare the strings to choose the right location
+// for ( std::map<std::string, ServerConfig *>::const_iterator it = locations.begin(); it != locations.end(); ++it ) {
+//     if (uri.find(it->first) == 0) 
+//     {
+//             match = (*it)->second;
+//     }
+//   }
+
+
+// match->getRoot();
+// match->getError_page();
