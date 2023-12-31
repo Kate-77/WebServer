@@ -140,16 +140,16 @@ void Response::handleDeleteRequest(Request &request, Server &server) {
 //     if{} //some code
 //     else{} // some
 
-//     Parser * right_server = (*it); // send it to response
+//     Parser * right_server = (*it)->second; // send it to response
 // } 
 
 // ///response part
 // //get all locations
 // std::map<std::string, Parser *> locations = this->right_server->getLocation();
 // Parser * match;
-// std::string uri = "abc.html"
+// std::string uri = "abc.html";
 // //compare the strings to choose the right location
-// for ( std::map<std::string, ServerConfig *>::const_iterator it = locations.begin(); it != locations.end(); ++it ) {
+// for ( std::map<std::string, Parser *>::const_iterator it = locations.begin(); it != locations.end(); ++it ) {
 //     if (uri.find(it->first) == 0) 
 //     {
 //             match = (*it)->second;
