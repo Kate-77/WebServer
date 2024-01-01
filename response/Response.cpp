@@ -5,10 +5,10 @@ Response::Response()
     _response = ""; // response to send to client
     _body = ""; // body of response
     _status_code = 0; // status code
-    _location; // location of resource
     _content_type = ""; // content type of resource
     _content_length = 0; // content length of resource
     _head = ""; // head of response
+    _location = NULL; // location of resource
 }
 
 Response::~Response()
@@ -51,33 +51,40 @@ std::ostream & operator<<(std::ostream & o, Response const & rhs)
 /*****************************************************************/
 
 // starting here
-void    Response::handleResponse(Request & request, Server &server)
+void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
-    std::vector<Location>::const_iterator locationPath = findLocation(server.getServerLocations(), request.getUrl());
+    this->_location = findLocation(server.getLocation(), request.getUrl());
     
-    if (locationPath == server.getServerLocations().end())
+    if (this->_location == server.getLocation().end()) 
     {
         callErrorPage(server, 404);
         return;
     }
-    if (request.status_code != 0)
-    {
-        callErrorPage(server, request.status_code);
+
+    if (request.status_code != 0) {
+        this->_status_code = request.status_code;
+        callErrorPage(server, _status_code);
         return;
     }
-    if (request.getMethod() == "GET")
-        handleGetRequest(request, server);
-    else if (request.getMethod() == "POST")
-        handlePostRequest(request, server);
-    else if (request.getMethod() == "DELETE")
-        handleDeleteRequest(request, server);
-    else
+
+    if (this->_location->getAllowedMethods().find(request.getMethod()) == this->_location->getAllowedMethods().end()) {
         callErrorPage(server, 405);
+        return;
+    }
+    else {
+        if (request.getMethod() == "GET")
+            handleGetRequest(request, server);
+        else if (request.getMethod() == "POST")
+            handlePostRequest(request, server);
+        else if (request.getMethod() == "DELETE")
+            handleDeleteRequest(request, server);
+    }
     return ;
 }
 
 // Errors
-void Response::callErrorPage(Server server, int code) {
+void Response::callErrorPage(Parser server, int code) 
+{
     std::string path;
     const std::map<int, std::string> &_error_pages = server.getError_page();
 
@@ -106,7 +113,8 @@ void Response::callErrorPage(Server server, int code) {
 }
 
 // Delete Method
-void Response::handleDeleteRequest(Request &request, Server &server) {
+void Response::handleDeleteRequest(HttpRequestParser &request, Server &server) 
+{
     std::string path;
     path = request.getUrl();
 
@@ -132,30 +140,25 @@ void Response::handleDeleteRequest(Request &request, Server &server) {
         callErrorPage(server, 204);
 }
 
+void Response::handleGet(HttpRequestParser &request, Parser &server) 
+{
+    std::string file = constructFilePath(request.getUrl());
 
-// const std::vector<Parser *> servers = lexer.getparserv(); //request get all servers
-// //loop iterate servers and choose the right server for the response
-// for(std::vector<std::pair<Socket, Parser *> >::iterator it = servers.begin(); it != servers.end(); it++)
-// {
-//     if{} //some code
-//     else{} // some
+    if (checkDirectory(file))
+        handleDirectoryGet(file, request, server);
+    else
+        handleFileGet(file, request, server);
+}
 
-//     Parser * right_server = (*it)->second; // send it to response
-// } 
+void Response::handlePost(HttpRequestParser &request, Parser &server)
+{
+    std::string file = constructFilePath(request.getUrl());
+    std::string extension = getExtension(file);
 
-// ///response part
-// //get all locations
-// std::map<std::string, Parser *> locations = this->right_server->getLocation();
-// Parser * match;
-// std::string uri = "abc.html";
-// //compare the strings to choose the right location
-// for ( std::map<std::string, Parser *>::const_iterator it = locations.begin(); it != locations.end(); ++it ) {
-//     if (uri.find(it->first) == 0) 
-//     {
-//             match = (*it)->second;
-//     }
-//   }
-
-
-// match->getRoot();
-// match->getError_page();
+    if (!_location->getUpload().empty())
+        handleFilePost(request, server, file);
+    else if (checkDirectory(request.getUrl()))
+        handleDirectoryPost(request, server, file);
+    else
+        handleFileUpload(request, server, file);
+}
