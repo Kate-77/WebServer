@@ -256,26 +256,24 @@ int CGI::initEnv(void)
   return (0);
 }
 
-  //  Lexer *              _Lexer; //ici define inside the classs
-  //   const std::vector<Parser *> * _Servers; // icidefine inside the class
-  //   try
-  //   {
-  //   this->_Lexer = new Lexer(); //ici we create a lexer because the Lexer divide each server
-  //   this->_Lexer->start(NULL); // ici  we start Parsing each server
-  //   _Servers = _Lexer->getparserv(); // ici we get all servers
-  //   }
-  //   catch(std::exception & e)
-  //       {
-  //               std::cerr << e.what() << std::endl;
-  //               return ;
-  //       }
-  //   //ici we iterate server by server
-  //   for ( std::vector<Parser *>::const_iterator it = this->_Servers->begin(); it != this->_Servers->end(); ++it )
-  //   {
-  //   std::map<std::string, Parser *> & locations = (*it)->getLocation(); //ici we get Location  for ech server
-  //   for (std::map<std::string, Parser *>::const_iterator b = locations.begin();b != locations.end(); ++b)
-  //   {
-  //     std::cout << "    " << b->first << std::endl;
-  //     b->second->printparser("----Location Block----"); //ici you can print all dir    
-  //     // b->second->getx() // ici you can acces to all directives here
-  //     } 
+//    //iterate cgi extensions one by one to find the exact extension of the file
+// for ( std::map<std::string, std::string>::const_iterator it = getcgi().begin(); it != getCgi().end(); ++it ) {
+//      //compare the extension of cgi with the extension of the file
+//     if ( getextension() == it->first ) 
+//      {
+//     CGI a =  new Cgi(request, response)); call cgi and fill the parameters with the data of request and response 
+
+//     int b = a->execute(); //execute cgi and return status code
+//     if ( b >= 400 ) //check failure
+//      {
+//       this->_statuscode = b;
+//       return (this->_statuscode);
+//     }
+
+//     a->parseHeadersAndBody( this->_headers, this->_body ); //I parse here the header and send you the cgi output in your body
+//     this->_headers["Content-Length"] = this->_body.length(); //update the content length
+
+//     this->_statusCode = b;
+//     return (this->_statuscode);
+//   }
+// }
