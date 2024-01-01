@@ -4,7 +4,7 @@
 
 
 
-Parser::Parser(void) : _root(Default_Root), _autoindex(false), _client_max_body_size(ClientMaxBodySize), _return() 
+Parser::Parser(void) : _root(Default_Root), _autoindex(false), _client_max_body_size(ClientMaxBodySize), _return(), _body_size_bytes(1000000) 
 {
   //server block
   //the second iterator is a pointer to function of return type void and  vector iterator parametre
@@ -162,7 +162,7 @@ void Parser::printparser(const std::string & str) const
     std::cout << "    " << *it << std::endl;
   }
 
-  std::cout << "client_max_body_size: " << this->_client_max_body_size << std::endl;
+  std::cout << "client_max_body_size: " << this->_client_max_body_size << " in bytes: " << this->_body_size_bytes << std::endl;
   std::cout << "upload_store:         " << this->_upload_store << std::endl;
 
   std::cout << "return:" << std::endl;
@@ -223,7 +223,7 @@ void Parser::secondparser(_type::const_iterator & it)
       throw Parser::ParserException("Error! unknown directive: '" + *it + "' in 'server' block");
     }
   }  
-  // this->printparser("----Server Block----");
+  this->printparser("----Server Block----");
 
   return ;
 }
@@ -322,6 +322,11 @@ unsigned int  & Parser::getPortnormal()
 std::string & Parser::getslocation()
 {
   return this->_slocation;
+}
+
+unsigned int &          Parser::getbodysizebytes()
+{
+  return this->_body_size_bytes;
 }
 
 Parser * Parser::copyLocation(void) 
@@ -770,6 +775,12 @@ void Parser::parseClientMaxBodySize(_type::const_iterator & it)
   }
   // save 
   this->_client_max_body_size = static_cast<std::string>(it->c_str());
+  if(this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'M' || this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'm')
+      this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()) * 1000000);
+  else if (this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'K' || this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'k')
+        this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()) * 1000);
+  else 
+      throw Parser::ParserException("Error! missing size unit(k K m M) near directive 'client_max_body_size'");
   // check semicolon
   ++it;
   if ("}" == *it) 
