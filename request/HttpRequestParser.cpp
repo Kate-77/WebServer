@@ -1,13 +1,25 @@
 #include "HttpRequestParser.hpp"
 #include <fstream>
 
+std::string HttpRequestParser::generateName()
+{
+	std::string name;
+	static int i = 0;
+	std::stringstream ss;
+	ss << i;
+	name = ss.str();
+	i++;
+	return name;
+}
+
 HttpRequestParser::HttpRequestParser() {
 	status_code_ = -1;
 	method = "";
 	path = "";
 	query = "";
 	version = "";
-	bodyFileName = "/var/tmp/file_" + generateName();
+	bodyFileName = "/Users/zowa/Desktop/" + generateName();
+	bodyFileFD = -1;
 }
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -19,6 +31,12 @@ HttpRequestParser::HttpRequestParser(const HttpRequestParser &http_request_parse
 HttpRequestParser &HttpRequestParser::operator=(const HttpRequestParser &http_request_parser) {
 	this->status_code_ = http_request_parser.status_code_;
 	this->method = http_request_parser.method;
+	this->path = http_request_parser.path;
+	this->query = http_request_parser.query;
+	this->version = http_request_parser.version;
+	this->bodyFileName = http_request_parser.bodyFileName;
+	this->bodyFileFD = http_request_parser.bodyFileFD;
+	this->headers_map = http_request_parser.headers_map;
 	return *this;
 }
 
@@ -52,6 +70,10 @@ int HttpRequestParser::getBodyFileFD() const
 	return bodyFileFD;
 }
 
+std::map<std::string, std::string> HttpRequestParser::getHeadersMap() const {
+	return headers_map;
+}
+
 void HttpRequestParser::setStatusCode(int status_code) {
 	this->status_code_ = status_code;
 }
@@ -80,6 +102,11 @@ void HttpRequestParser::setBodyFileFD(int bodyFileFD) {
 	this->bodyFileFD = bodyFileFD;
 }
 
+void HttpRequestParser::setHeadersMap(std::map<std::string, std::string> headers_map)
+{
+	this->headers_map = headers_map;
+}
+
 void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Done)
 {
 	std::string reqLine_Headers;
@@ -101,27 +128,17 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 	}
 	else
 		throw 400;
+
    	parseRequestLine_Headers(reqLine_Headers);
 
-	//print headers_map
 
-	for(std::map<std::string, std::string>::iterator it = headers_map.begin(); it != headers_map.end(); it++)
-	{
-		std::cout << "key = " << it->first << " value = " << it->second << std::endl;
-	}
-
-
-	
-	
 	if (getMethod() == "POST")
 	{
-        bodyLength = nbytes - reqLine_Headers_Length - strlen(doubleCRLF);
-		// parseBody(bodyStart, bodyLength);
+        bodyLength = nbytes - reqLine_Headers_Length - 2;
+		parse_body(bodyStart, bodyLength, Done);
 	}
 	else
 		Done = 1;
-	std::cout << "bodyLength =************ " << bodyLength << std::endl;
-	std::cout << "bodyStart = " << bodyStart << std::endl;
 }
 
 void HttpRequestParser::parseRequestLine_Headers(std::string reqLine_Headers)
@@ -133,20 +150,10 @@ void HttpRequestParser::parseRequestLine_Headers(std::string reqLine_Headers)
 
 	// Parse the request request_line
 	parse_request_line(request_line);
-	printf("request_line = %s\n", request_line.c_str());
-	printf("method = %s\n", getMethod().c_str());
-	printf("path = %s\n", getPath().c_str());
-	printf("query = %s\n", getQuery().c_str());
-	printf("version = %s\n", getVersion().c_str());
 
 	// Parse the headers
-	// printf("headers = %s\n", iss.str().c_str());
 	parse_headers(iss);
 }
-
-// void HttpRequestParser::parseBody(unsigned char *bodyStart, size_t bodyLength)
-// {
-// }
 
 void HttpRequestParser::parse_request_line(std::string request_line)
 {
@@ -156,40 +163,36 @@ void HttpRequestParser::parse_request_line(std::string request_line)
 
 	if (iss.fail())
 		throw 400;
-	iss >> this->method;
-	iss >> uri;
 
+	iss >> this->method;
+
+	iss >> uri;
 	std::istringstream tmp_path(uri);
 	getline(tmp_path, uri, '?');
 	this->path = uri;
 	if (this->path.size() > 2048)
 		throw 414;
+
 	tmp_path >> this->query;
 
 	iss >> this->version;
+
 	iss >> empty;
 	if (!empty.empty())
 		throw 400;
+
 	if (this->method != "GET" && this->method != "POST" && this->method != "DELETE")
 		throw 501;
 
 	if (this->version != "HTTP/1.1")
 		throw 505;
+
 	if (this->method == "POST")
 	{
 		this->bodyFileFD = open(this->bodyFileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
+		if (this->bodyFileFD == -1)
+			throw 500;
 	}
-}
-
-std::string HttpRequestParser::generateName()
-{
-	std::string name;
-	static int i = 0;
-	std::stringstream ss;
-	ss << i;
-	name = ss.str();
-	i++;
-	return name;
 }
 
 void HttpRequestParser::parse_headers(std::istringstream &headers)
@@ -200,8 +203,6 @@ void HttpRequestParser::parse_headers(std::istringstream &headers)
 
 	while (std::getline(headers, header_line))
 	{
-		// printf("header_line = %s\n", header_line.c_str());
-
 		size_t pos = header_line.find(": ");
 		if (pos == std::string::npos)
 			throw 400;
@@ -210,7 +211,6 @@ void HttpRequestParser::parse_headers(std::istringstream &headers)
 			key = header_line.substr(0, pos);
 			header_line.erase(0, pos + 2);
 		}
-		// printf("key = [%s]\n", key.c_str());
 		pos = header_line.find("\r");
 		if (pos == std::string::npos)
 			throw 400;
@@ -218,7 +218,60 @@ void HttpRequestParser::parse_headers(std::istringstream &headers)
 		{
 			value = header_line.substr(0, pos);
 		}
-		// printf("value = [%s]\n", value.c_str());
+
+		if (key == "Content-Length")
+		{
+			if (value.empty())
+                throw 400;
+            if (value.find_first_not_of("0123456789") != std::string::npos)
+                throw 400;
+        }
+
+		if (key == "Transfer-Encoding")
+		{
+			if (value.empty())
+				throw 400;
+			if (value != "chunked")
+				throw 501;
+		}
+
+		if (key == "Content-Type")
+		{
+			if (value.empty())
+			throw 400;
+		}
+
 		headers_map.insert(std::pair<std::string, std::string>(key, value));
+	}
+
+	if (this->method == "POST" && (this->headers_map.find("Content-Length") == this->headers_map.end() && this->headers_map.find("Transfer-Encoding") == this->headers_map.end()))
+        throw 400;
+
+	if (this->headers_map.find("Host") == this->headers_map.end())
+		throw 400;
+
+}
+
+void HttpRequestParser::parse_body(unsigned char *buf, ssize_t nbytes, int &Done)
+{
+	//handle parsing normal
+	if (headers_map.find("Content-Length") != headers_map.end())
+	{
+		ssize_t bytes_written = write(this->bodyFileFD, buf, nbytes);
+		if (bytes_written == -1)
+			throw 500;
+		ssize_t content_length = atoi(headers_map.find("Content-Length")->second.c_str());
+		if (bytes_written > content_length)
+			throw 409;
+		if (content_length == bytes_written)
+		{
+			Done = 1;
+			close(this->bodyFileFD);
+		}
+	}
+	//handle chunked
+	else if (headers_map.find("Transfer-Encoding") != headers_map.end())
+	{
+
 	}
 }

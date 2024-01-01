@@ -17,7 +17,6 @@ class Server {
 		fd_set master_read_fds, master_write_fds;
 		fd_set tmp_read_fds, tmp_write_fds;
 		int fdmax;
-		// Client client;
 		std::vector<std::pair<Client, Parser *> > clients;
 
 

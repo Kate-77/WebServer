@@ -18,8 +18,7 @@ class HttpRequestParser {
 		std::string version;
 		std::string bodyFileName;
 		int bodyFileFD;
-
-		std::map<std::string, std::string> headers_map;//
+		std::map<std::string, std::string> headers_map;
 	public:
 
 		//canonical form
@@ -37,6 +36,7 @@ class HttpRequestParser {
 		std::string getVersion() const;
 		std::string getBodyFileName() const;
 		int getBodyFileFD() const;
+		std::map<std::string, std::string> getHeadersMap() const;
 
 		//setters
 		void setStatusCode(int status_code);
@@ -46,12 +46,13 @@ class HttpRequestParser {
 		void setVersion(std::string version);
 		void setBodyFileName(std::string bodyFileName);
 		void setBodyFileFD(int bodyFileFD);
+		void setHeadersMap(std::map<std::string, std::string> headers_map);
 		
 
 		void parseRequest(ssize_t nbytes, unsigned char *buf, int &Done);
 		void parseRequestLine_Headers(std::string reqLine_Headers);
-		// void parseBody(unsigned char* bodyStart, size_t bodyLength);
 		void parse_request_line(std::string request_line);
 		std::string generateName();
 		void parse_headers(std::istringstream &headers);
+		void parse_body(unsigned char *buf, ssize_t nbytes, int &Done);
 };

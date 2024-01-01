@@ -91,11 +91,7 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 
 		// handle new connections
 		handle_new_connections(servers, tmp_read_fds);
-		// std::cout << "Number of clients: " << clients.size() << std::endl;
-
-		// std::cout << "Number of clients: " << clients.size() << std::endl;
-
-
+		
 		// run through the existing client connections looking for data to read or write
 		for(size_t i = 0; i < clients.size(); i++)
 		{
@@ -110,20 +106,13 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 					// handle recv error
 					handle_recv_err(clients[i].first.getClientSocket(), nbytes, i, master_read_fds, master_write_fds);
 					break;
-					
 				}
 				else
-				{
 					//parse request
 					parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
-					// std::cout << "buf = " << buf << std::endl;
-	
-				}
-
 			}
 			//check for write
-
-
+			
 		}		
 	}
 
@@ -137,7 +126,6 @@ void Server::add_servers(std::vector<std::pair<Socket, Parser *> > &servers, fd_
 		if ((*it).first.getServerSocket() > fdmax)
 			fdmax = (*it).first.getServerSocket();
 	}
-	// std::cout << "fdmax = " << fdmax << std::endl;
 }
 
 void Server::handle_new_connections(std::vector<std::pair<Socket, Parser *> > &servers, fd_set &tmp_read_fds)
@@ -170,7 +158,7 @@ void Server::handle_recv_err(int socket, ssize_t nbytes, int i, fd_set &master_r
 	// got error or connection closed by client
 	if (nbytes == 0)	// connection closed
 		{
-			std::cout << "Connection closed by client on socket" << i << " !!hung up!!" << std::endl;
+			std::cout << "Connection closed by client "  << std::endl;
 			FD_CLR(socket, &master_read_fds); // remove from master set
 			FD_CLR(socket, &master_write_fds); // remove from master set
 			close(socket);
@@ -193,6 +181,7 @@ void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_se
 		client.request.setStatusCode(code);
 		Done = 1;
 	}
+		printf("code = %d\n", client.request.getStatusCode());
 	if (Done == 1)
 	{
 		//move client to write set
@@ -200,6 +189,3 @@ void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_se
 		FD_SET(client.getClientSocket(), &master_write_fds);
 	}
 }
-
-
-
