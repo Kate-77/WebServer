@@ -178,10 +178,75 @@ bool checkDirectoryEmpty(std::string path)
     }
 }
 
+const  std::map<int, std::string> _status_codes = {
+    {100, "Continue"},
+    {101, "Switching Protocols"},
+    {102, "Processing"},
+    {200, "OK"},
+    {201, "Created"},
+    {202, "Accepted"},
+    {203, "Non-Authoritative Information"},
+    {204, "No Content"},
+    {205, "Reset Content"},
+    {206, "Partial Content"},
+    {207, "Multi-Status"},
+    {208, "Already Reported"},
+    {226, "IM Used"},
+    {300, "Multiple Choices"},
+    {301, "Moved Permanently"},
+    {302, "Found"},
+    {303, "See Other"},
+    {304, "Not Modified"},
+    {305, "Use Proxy"},
+    {306, "Switch Proxy"},
+    {307, "Temporary Redirect"},
+    {308, "Permanent Redirect"},
+    {400, "Bad Request"},
+    {401, "Unauthorized"},
+    {402, "Payment Required"},
+    {403, "Forbidden"},
+    {404, "Not Found"},
+    {405, "Method Not Allowed"},
+    {406, "Not Acceptable"},
+    {407, "Proxy Authentication Required"},
+    {408, "Request Timeout"},
+    {409, "Conflict"},
+    {410, "Gone"},
+    {411, "Length Required"},
+    {412, "Precondition Failed"},
+    {413, "Payload Too Large"},
+    {414, "URI Too Long"},
+    {415, "Unsupported Media Type"},
+    {416, "Range Not Satisfiable"},
+    {417, "Expectation Failed"},
+    {418, "I'm a teapot"},
+    {421, "Misdirected Request"},
+    {422, "Unprocessable Entity"},
+    {423, "Locked"},
+    {424, "Failed Dependency"},
+    {425, "Too Early"},
+    {426, "Upgrade Required"},
+    {428, "Precondition Required"},
+    {429, "Too Many Requests"},
+    {431, "Request Header Fields Too Large"},
+    {451, "Unavailable For Legal Reasons"},
+    {500, "Internal Server Error"},
+    {501, "Not Implemented"},
+    {502, "Bad Gateway"},
+    {503, "Service Unavailable"},
+    {504, "Gateway Timeout"},
+    {505, "HTTP Version Not Supported"},
+    {506, "Variant Also Negotiates"},
+    {507, "Insufficient Storage"},
+    {508, "Loop Detected"},
+    {510, "Not Extended"},
+    {511, "Network Authentication Required"}
+};
+
 std::string Response::statusMessage(int code) 
 {
-    auto it = _status_code.find(code);
-    if (it != _status_code.end()) {
+    auto it = _status_codes.find(code);
+    if (it != _status_codes.end()) {
         return it->second;
     } else {
         return "Unknown Status";
@@ -303,14 +368,16 @@ void Response::handleCgi(Request &request, const std::string &cgiPath, Server_st
 
 void Response::renderFile(Parser &server, const std::string &file)
 {
-    std::ifstream fileStream(file, std::ios::binary | std::ios::ate);
-    
-    if (fileStream.is_open()) {
-        std::ifstream::pos_type fileSize = fileStream.tellg();
-        fileStream.seekg(0, std::ios::beg);
+    this->_file_path = file;
+
+    this->_file_fd(file, std::ios::binary | std::ios::ate);
+    if (_file_fd.is_open())
+    {
+        std::ifstream::pos_type fileSize = _file_fd.tellg();
+        _file_fd.seekg(0, std::ios::beg);
 
         std::vector<char> fileBuffer(fileSize);
-        if (fileStream.read(fileBuffer.data(), fileSize)) {
+        if (_file_fd.read(fileBuffer.data(), fileSize)) {
             this->head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
                          "Connection: close\r\n"
                          "Content-Type: " + getFileType(file) + "\r\n"
@@ -322,7 +389,7 @@ void Response::renderFile(Parser &server, const std::string &file)
             callErrorPage(server, 500); // Internal Server Error
         }
 
-        fileStream.close();
+        _file_fd.close();
     } 
     else
         callErrorPage(server, 403); // Forbidden

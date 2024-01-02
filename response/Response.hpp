@@ -2,7 +2,7 @@
 #define RESPONSE_HPP
 
 #include "../request/HttpRequestParser.hpp"
-#include "../conf/Parser.hpp" // TBD
+#include "../conf/Parser.hpp"
 
 class Parser;
 class HttpRequestParser;
@@ -14,7 +14,18 @@ class Response
 		int client_fd; //zowa
 		bool res_initialized; //zowa
 		bool client_done; //zowa
-        std::fstream    _file_fd;
+        std::string     _file_path; // path of file
+        std::fstream    _file_fd; // file descriptor
+        std::string     _response; // response to send to client
+        std::string     _body; // body of response
+        std::string     _head; // head of response
+        int             _status_code; // status code
+        std::string     _locationPath; // location of resource
+        Parser          *_location; // server
+        std::string     _content_type; // content type of resource
+        int             _content_length; // content length of resource
+        std::map<std::string, Parser *>& locations; // map of locations
+        std::map<int, std::string> _status_codes; // map of status code and status message
 
         Response();
         ~Response();
@@ -55,24 +66,7 @@ class Response
         std::string getStatus(); // get status code
         std::string getLocation(); // get location of resource
         std::string getContentType(); // get content type of resource
-        std::string getContentLength(); // get content length of resource
-		
-    
-    private:
-        std::string     _response; // response to send to client
-        std::string     _body; // body of response
-        std::string     _head; // head of response
-        int             _status_code; // status code
-        std::string     _locationPath; // location of resource
-        Parser          *_location; // server
-        std::string     _content_type; // content type of resource
-        int             _content_length; // content length of resource
-        std::string     _file_path;
-        std::map<std::string, Parser *>& locations; // map of locations
-        std::map<int, std::string> _status_code; // map of status code and status message
-
-		
-        
+        std::string getContentLength(); // get content length of resource   
 };
 
 std::string getFileType(const std::string& filePath);
@@ -82,7 +76,7 @@ bool        checkDirectory(std::string path);
 bool        checkDirectoryEmpty(std::string path);
 std::string printNumber(int value);
 std::string repetetiveSlash(std::string file);
-static bool endSlash(std::string file);
+bool endSlash(std::string file);
 std::string createPath(const std::string &path);
 std::string generateName();
 
