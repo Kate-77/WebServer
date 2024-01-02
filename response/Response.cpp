@@ -9,6 +9,10 @@ Response::Response()
     _content_length = 0; // content length of resource
     _head = ""; // head of response
     _location = NULL; // location of resource
+
+	client_fd = -1;
+	res_initialized = false;
+	client_done = false;
 }
 
 Response::~Response()
@@ -35,6 +39,7 @@ Response & Response::operator=(Response const & rhs)
         this->_content_length = rhs._content_length;
         this->_file_path = rhs._file_path;
         this->_file_fd = rhs._file_fd;
+		
     }
     return (*this);
 }

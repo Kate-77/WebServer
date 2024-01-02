@@ -2,6 +2,7 @@
 #include <netinet/in.h>
 #include <cstring>
 #include "../request/HttpRequestParser.hpp"
+#include "../response/Response.hpp"
 
 class HttpRequestParser;
 
@@ -11,6 +12,7 @@ class Client {
 		struct sockaddr_in client_address;
 	public:
 		HttpRequestParser request;
+		Response response; //
 
 		//canonical form
 		Client();

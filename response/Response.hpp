@@ -10,6 +10,12 @@ class HttpRequestParser;
 class Response
 {
     public:
+
+		int client_fd; //zowa
+		bool res_initialized; //zowa
+		bool client_done; //zowa
+        std::fstream    _file_fd;
+
         Response();
         ~Response();
         Response(Response const & src);
@@ -50,6 +56,7 @@ class Response
         std::string getLocation(); // get location of resource
         std::string getContentType(); // get content type of resource
         std::string getContentLength(); // get content length of resource
+		
     
     private:
         std::string     _response; // response to send to client
@@ -61,9 +68,10 @@ class Response
         std::string     _content_type; // content type of resource
         int             _content_length; // content length of resource
         std::string     _file_path;
-        std::fstream    _file_fd;
         std::map<std::string, Parser *>& locations; // map of locations
         std::map<int, std::string> _status_code; // map of status code and status message
+
+		
         
 };
 

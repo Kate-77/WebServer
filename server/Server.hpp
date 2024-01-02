@@ -49,5 +49,5 @@ class Server {
 		void handle_new_connections(std::vector<std::pair<Socket, Parser *> > & servers, fd_set & tmp_read_fds);
 		void handle_recv_err(int socket, ssize_t nbytes, int i, fd_set & master_read_fds, fd_set & master_write_fds);
 		void parse_req(Client & client, unsigned char * buf, ssize_t nbytes, fd_set & master_read_fds, fd_set & master_write_fds);
-
+		void resp_send(Response & response);
 };

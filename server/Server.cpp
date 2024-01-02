@@ -98,6 +98,7 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 			//check for read
 			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_read_fds))
 			{
+				printf("read\n");
 				unsigned char buf[1024];
 				ssize_t nbytes;
 				
@@ -112,6 +113,35 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 					parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
 			}
 			//check for write
+			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_write_fds))
+			{
+				clients[i].first.response.client_fd = clients[i].first.getClientSocket();
+
+				if(!clients[i].first.response.res_initialized)
+				{
+					// clients[i].first.response.handleResponse(clients[i].first.request , *clients[i].second);
+					clients[i].first.response.res_initialized = true;
+				}
+
+				if (clients[i].first.response.client_done)
+				{
+					FD_CLR(clients[i].first.getClientSocket(), &master_write_fds);
+					close(clients[i].first.getClientSocket());
+					clients[i].first.response._file_fd.close();
+					if (access(clients[i].first.request.bodyFileName.c_str(), F_OK) != -1)
+						remove(clients[i].first.request.bodyFileName.c_str());
+					else
+						std::cout << "Error deleting bodyfile file" << std::endl;
+					clients.erase(clients.begin() + i);
+					i--;
+				}
+				else
+				{
+					//send response
+					resp_send(clients[i].first.response);
+				}
+
+			} 
 			
 		}		
 	}
@@ -136,6 +166,8 @@ void Server::handle_new_connections(std::vector<std::pair<Socket, Parser *> > &s
 		{
 			Client client;
 			socklen_t sin_size;
+			client.response.client_done = false;
+			client.response.res_initialized = false;
 			struct sockaddr_in client_addr;
 			sin_size = sizeof(client_addr);
 			int client_socket = accept((*it).first.getServerSocket(), (struct sockaddr *)&client_addr, &sin_size);
@@ -175,17 +207,30 @@ void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_se
 	int Done = 0;
 
 	try {
+		printf("parse\n");
 		client.request.parseRequest(nbytes, buf, Done);
 	}
 	catch (int code) {
 		client.request.setStatusCode(code);
 		Done = 1;
 	}
-		printf("code = %d\n", client.request.getStatusCode());
+	  printf("code = %d\n", client.request.getStatusCode());
 	if (Done == 1)
 	{
+		printf("Done\n");
 		//move client to write set
 		FD_CLR(client.getClientSocket(), &master_read_fds);
 		FD_SET(client.getClientSocket(), &master_write_fds);
 	}
+}
+
+void Server::resp_send(Response &response)
+{
+	const char* message = "Hello, world!";
+    if (send(response.client_fd, message, strlen(message), 0) == -1) {
+        perror("send***********");
+        // close(new_fd);
+        // close(sockfd);
+        exit(EXIT_FAILURE);
+    }
 }

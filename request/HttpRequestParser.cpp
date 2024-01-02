@@ -20,6 +20,8 @@ HttpRequestParser::HttpRequestParser() {
 	version = "";
 	bodyFileName = "/Users/zowa/Desktop/" + generateName();
 	bodyFileFD = -1;
+	req_done = false;
+	reqLine_Headers = "";
 }
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -37,6 +39,7 @@ HttpRequestParser &HttpRequestParser::operator=(const HttpRequestParser &http_re
 	this->bodyFileName = http_request_parser.bodyFileName;
 	this->bodyFileFD = http_request_parser.bodyFileFD;
 	this->headers_map = http_request_parser.headers_map;
+	this->req_done = http_request_parser.req_done;
 	return *this;
 }
 
@@ -74,6 +77,11 @@ std::map<std::string, std::string> HttpRequestParser::getHeadersMap() const {
 	return headers_map;
 }
 
+bool HttpRequestParser::getReqDone() const
+{
+	return req_done;
+}
+
 void HttpRequestParser::setStatusCode(int status_code) {
 	this->status_code_ = status_code;
 }
@@ -107,37 +115,58 @@ void HttpRequestParser::setHeadersMap(std::map<std::string, std::string> headers
 	this->headers_map = headers_map;
 }
 
+void HttpRequestParser::setReqDone(bool req_done)
+{
+	this->req_done = req_done;
+}
+
 void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Done)
 {
 	std::string reqLine_Headers;
 	size_t reqLine_Headers_Length;
-	unsigned char* bodyStart = nullptr;
+	unsigned char* bodyStart = buf;
 	size_t bodyLength = 0;
+	bool bodyfrstprt = false;
 
 	buf[nbytes] = '\0';
 
-	// Find the empty request_line that separates headers and body
-	const char* doubleCRLF = "\r\n\r\n";
-	unsigned char* bodyStartPtr = static_cast<unsigned char*>(memmem(buf, nbytes, doubleCRLF, strlen(doubleCRLF)));
-	
-	if (bodyStartPtr != NULL)
+	if (req_done == false)
 	{
-		reqLine_Headers_Length = bodyStartPtr - buf + 2;
-        bodyStart = bodyStartPtr + strlen(doubleCRLF);
-        reqLine_Headers.assign(reinterpret_cast<char *>(buf), reqLine_Headers_Length);
+		printf("header parse\n");
+		const char* doubleCRLF = "\r\n\r\n";
+		unsigned char* bodyStartPtr = static_cast<unsigned char*>(memmem(buf, nbytes, doubleCRLF, strlen(doubleCRLF)));
+		
+		if (bodyStartPtr != NULL)
+		{
+			reqLine_Headers_Length = bodyStartPtr - buf + 2;
+			bodyStart = bodyStartPtr + strlen(doubleCRLF);
+			buf[reqLine_Headers_Length] = '\0';
+			reqLine_Headers += reinterpret_cast<char *>(buf);
+		}
+		else
+		{
+			reqLine_Headers += reinterpret_cast<char *>(buf);
+			return;
+		}
+   		parseRequestLine_Headers(reqLine_Headers);
+		printf("headers done\n");
+		if (bodyStart)
+			bodyfrstprt = true;
+		req_done = true;
 	}
-	else
-		throw 400;
+	printf("body parse\n");
 
-   	parseRequestLine_Headers(reqLine_Headers);
-
-
-	if (getMethod() == "POST")
+	if (getMethod() == "POST" && bodyStart && req_done)
 	{
-        bodyLength = nbytes - reqLine_Headers_Length - 2;
+		// printf("body start = [%s]\n", bodyStart);
+		bodyLength = nbytes;
+		if (bodyfrstprt)
+		{
+        	bodyLength = nbytes - reqLine_Headers_Length - 2;
+		}
 		parse_body(bodyStart, bodyLength, Done);
 	}
-	else
+	else if (req_done && getMethod() != "POST")
 		Done = 1;
 }
 
@@ -272,6 +301,94 @@ void HttpRequestParser::parse_body(unsigned char *buf, ssize_t nbytes, int &Done
 	//handle chunked
 	else if (headers_map.find("Transfer-Encoding") != headers_map.end())
 	{
-
+		// write(this->bodyFileFD, "buff:: [", 9);
+		// write(this->bodyFileFD, buf, nbytes);
+		// write(this->bodyFileFD, " ]", 2);
+		// write(this->bodyFileFD, "nbytes:: [", 10);
+		// write(this->bodyFileFD, std::to_string(nbytes).c_str(), std::to_string(nbytes).size());
+		// write(this->bodyFileFD, " ]", 2);
+		// printf("buf = [%s]\n", buf);
+		parse_chunked_body(buf, nbytes, Done);
 	}
 }
+bool verif_chunk(unsigned char *buffer)
+{
+    std::string firstLine(reinterpret_cast<char *>(buffer));
+    std::size_t pos = firstLine.find("\r\n");
+    std::string hexNum = firstLine.substr(0, pos);
+
+    if (pos != std::string::npos)
+    {
+        for (std::string::iterator it = hexNum.begin(); it != hexNum.end(); ++it)
+        {
+            if (!std::isxdigit(*it))
+                return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+void HttpRequestParser::parse_chunked_body(unsigned char *buf, ssize_t nbytes, int &Done)
+{
+	if (memmem(buf, nbytes, "0\r\n\r\n", 5) == NULL)
+	{
+		if (memmem(buf, nbytes, "\r\n", 2) != NULL && verif_chunk((unsigned char *)memmem(buf, nbytes, "\r\n", 2) + 2))
+		{
+			// ssize_t chunk = 1;
+			// while(chunk > 0)
+			// {
+				ssize_t lefts = (unsigned char *)memmem(buf, nbytes, "\r\n", 2) - buf;
+				write(this->bodyFileFD, buf, lefts);
+				ssize_t chunk = nbytes - lefts - 2;
+				buf = (unsigned char *)memmem(buf, nbytes, "\r\n", 2) + 2;
+				chunk = chunk - ((unsigned char *)memmem(buf, chunk, "\r\n", 2) + 2 - buf);
+				buf = (unsigned char *)memmem(buf, chunk, "\r\n", 2) + 2;
+				write(this->bodyFileFD, buf, chunk);
+
+				// unsigned char *tmp = (unsigned char *)memmem(buf, chunk, "\r\n", 2) + 2;
+				// chunk = chunk - (tmp - buf);
+				// if (chunk >0 )
+				// {
+				// // 	// buf = tmp;
+				// // 	// parse_chunked_body(buf, chunk, Done);
+				// // 	// printf("tmp = [%s]\n", tmp);
+				// write(this->bodyFileFD, "*****", 5);
+				// write(this->bodyFileFD, tmp, chunk);
+				// 	throw 999;
+				// }
+			// }
+		}
+		else
+		{
+			if(verif_chunk(buf))
+			{
+				nbytes = nbytes - ((unsigned char *)memmem(buf, nbytes, "\r\n", 2) + 2 - buf);
+				buf = (unsigned char *)memmem(buf, nbytes, "\r\n", 2) + 2;
+			}
+			if (write(this->bodyFileFD, buf, nbytes) == -1)
+				throw 500;
+		}
+	}
+	else
+	{
+		
+		nbytes = nbytes - 7;
+				printf("nbytes = [%ld]\n", nbytes);
+				// printf("buf = [%s]\n", buf);
+		// if (nbytes > 0)
+		// {
+			if(write(this->bodyFileFD, buf, nbytes) == -1)
+				{
+					printf("buf = [%s]\n", buf);
+					printf("nbytes = [%ld]\n", nbytes);
+				throw 5000;
+				}
+				else 
+				printf("mzyaaaaaaaan\n");
+
+		// }
+		Done = 1;
+	}
+}
+

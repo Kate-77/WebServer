@@ -4,6 +4,7 @@ Client::Client() {
 	this->client_socket = -1;
 	memset(&this->client_address, 0, sizeof(this->client_address));
 	this->request = HttpRequestParser();
+	this->response = Response();
 }
 
 Client::~Client() {}
@@ -16,6 +17,7 @@ Client &Client::operator=(const Client &client) {
 	this->client_socket = client.client_socket;
 	this->client_address = client.client_address;
 	this->request = client.request;
+	this->response = client.response;
 	return *this;
 }
 

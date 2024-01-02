@@ -31,13 +31,6 @@ int main(int ac, char **av)
 	std::vector<std::pair<Socket, Parser *> >  final_servers;
 
 	socket.createServers(servers, final_servers);
-	//print final_servers
-	// for(std::vector<std::pair<Socket, Parser *> >::iterator it = final_servers.begin(); it != final_servers.end(); it++)
-	// {
-	// 	std::cout << "server_socket = " << it->first.getServerSocket() << std::endl;
-	// 	std::cout << "host = " << it->second->getHostnormal() << std::endl;
-	// 	std::cout << "port = " << it->second->getPortnormal() << std::endl;		
-	// }
 	
 	server.handleServers(final_servers);
     return 0;
