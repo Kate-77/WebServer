@@ -3,7 +3,7 @@
 // Content type
 std::string getFileType(const std::string& filePath)
 {
-    std::unordered_map<std::string, std::string> fileExtensions = {
+    std::map<std::string, std::string> fileExtensions = {
         {".html", "text/html"},
         {".txt", "text/plain"},
         {".pdf", "application/pdf"},
@@ -86,7 +86,7 @@ std::string getExtension(const std::string &path)
 
 std::string getExtensionFromType(const std::string &contentType)
 {
-    std::unordered_map<std::string, std::string> contentTypeToExtension = {
+    std::map<std::string, std::string> contentTypeToExtension = {
         {"text/html", ".html"},
         {"text/plain", ".txt"},
         {"application/pdf", ".pdf"},
@@ -105,7 +105,7 @@ std::string getExtensionFromType(const std::string &contentType)
         {"application/javascript", ".js"},
         {"application/json", ".json"},
         {"video/mpeg", ".mpeg"},
-        {"application/vnd.apple.installer+xml". ".mpkg"},
+        {"application/vnd.apple.installer+xml", ".mpkg"},
         {"application/vnd.oasis.opendocument.presentation", ".odp"},
         {"application/vnd.oasis.opendocument.spreadsheet", ".ods"},
         {"application/vnd.oasis.opendocument.text", ".odt"},
@@ -310,9 +310,9 @@ void Response::generateErrorPage(int code)
     errorBody += "</body>\n";
     errorBody += "</html>";
     
-    contentTrack = errorBody.size();
-    this->head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(errorBody.size()) + "\r\n\r\n";
-    this->response = errorBody;
+    _errorContentLength = errorBody.size();
+    this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(errorBody.size()) + "\r\n\r\n";
+    this->_response = errorBody;
 }
 
 // Check if url matched a conf location
@@ -321,14 +321,14 @@ Parser *Response::findLocation(const std::map<std::string, Parser *>& locations,
     auto it = locations.begin();
     
     while (it != locations.end()) {
-        std::string locationPath = it->first; or it->second->getslocation();
+        this->_locationPath = it->first;
 
         // If locationPath contains a slash at the end, remove it
-        if (!locationPath.empty() && locationPath.back() == '/') {
-            locationPath.pop_back();
+        if (!this->_locationPath.empty() && this->_locationPath.back() == '/') {
+            this->_locationPath.pop_back();
         }
 
-        if (locationPath == path)
+        if (this->_locationPath == path)
         {
             return it->second; // Match found
         }
@@ -340,10 +340,11 @@ Parser *Response::findLocation(const std::map<std::string, Parser *>& locations,
 
 void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server) 
 {
+
     if (!_location->getIndex().empty()) {
-        std::string indexPath = constructFilePath(directoryPath + "/" + _location->getIndex());
-        handleCgiOrFile(request, indexPath, server);
-    } 
+        std::string indexPath = constructFilePath(directoryPath + "/" + _location->getIndex().begin());
+        handleCgiOrFileGet(request, indexPath, server);
+    }
     else if (_location->getAutoindex()) {
         listDirectory(directoryPath, request, server);
     } 
@@ -351,18 +352,24 @@ void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestP
         callErrorPage(server, 403);
 }
 
-void Response::handleFileGet(const std::string &filePath, Request &request, Server_storage &server) 
+void Response::handleFileGet(const std::string &filePath, HttpRequestParser &request, Parser &server) 
 {
-    handleCgiOrFile(request, filePath, server);
+    handleCgiOrFileGet(request, filePath, server);
 }
 
-void Response::handleCgiOrFileGet(Request &request, const std::string &path, Server_storage &server) 
+void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    // CGI HANDLER
+    (void)request;
+    (void)path;
+    (void)server;
+    // CGI HANDLER php py perl c c++
 }
 
-void Response::handleCgi(Request &request, const std::string &cgiPath, Server_storage &server) 
+void Response::handleCgi(HttpRequestParser &request, const std::string &cgiPath, Parser &server) 
 {
+    (void)request;
+    (void)cgiPath;
+    (void)server;
     // CGI HANDLER
 }
 
@@ -370,7 +377,7 @@ void Response::renderFile(Parser &server, const std::string &file)
 {
     this->_file_path = file;
 
-    this->_file_fd(file, std::ios::binary | std::ios::ate);
+    this->_file_fd.open(file, std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
         std::ifstream::pos_type fileSize = _file_fd.tellg();
@@ -378,13 +385,13 @@ void Response::renderFile(Parser &server, const std::string &file)
 
         std::vector<char> fileBuffer(fileSize);
         if (_file_fd.read(fileBuffer.data(), fileSize)) {
-            this->head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
+            this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
                          "Connection: close\r\n"
                          "Content-Type: " + getFileType(file) + "\r\n"
                          "Content-Length: " + printNumber(fileSize) + "\r\n\r\n";
             
-            this->response = std::string(fileBuffer.data(), fileSize);
-            this->contentTrack = fileSize;
+            this->_response = std::string(fileBuffer.data(), fileSize);
+            this->_errorContentLength = fileSize;
         } else {
             callErrorPage(server, 500); // Internal Server Error
         }
@@ -395,7 +402,7 @@ void Response::renderFile(Parser &server, const std::string &file)
         callErrorPage(server, 403); // Forbidden
 }
 
-void Response::serveFile(const std::string &filePath, Server_storage &server) 
+void Response::serveFile(const std::string &filePath, Parser &server) 
 {
     std::ifstream fileStream(filePath);
     if (fileStream.good())
@@ -420,7 +427,7 @@ std::string repetetiveSlash(std::string file)
     return file;
 }
 
-static bool endSlash(std::string file)
+bool endSlash(std::string file)
 {
     if (file.back() == '/')
         return 1;
@@ -431,16 +438,14 @@ static bool endSlash(std::string file)
 std::string createPath(const std::string &path)
 {
     // Check if the string is empty
-    if (path.empty()) {
+    if (path.empty())
         return "/";
-    }
 
     // Add a slash at the end if it's not already there
-    if (path.back() != '/') {
+    if (path.back() != '/')
         return path + '/';
-    }
 
-    return result;
+    return path;
 }
 
 std::string Response::constructFilePath(const std::string &path)
@@ -463,11 +468,11 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
         struct dirent *ent;
         while ((ent = readdir(dir)) != NULL) {
             std::string dirEntryPath;
-            if (this->_location->getslocation()) == "/" && request.getUrl() == "/") {
-                dirEntryPath = request.getUrl() + ent->d_name;
+            if ((this->_location->getslocation() == "/") && (request.getPath() == "/")) {
+                dirEntryPath = request.getPath() + ent->d_name;
             } 
             else {
-                dirEntryPath = request.getUrl() + "/" + ent->d_name;
+                dirEntryPath = request.getPath() + "/" + ent->d_name;
             }
 
             output += "<li><a href=\"" + dirEntryPath + "\">" + ent->d_name + "</a></li>";
@@ -475,13 +480,13 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
         closedir(dir);
 
         output += "</ul></body></html>";
-        std::string header = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
+        this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
                              "Connection: close\r\n"
                              "Content-Type: text/html\r\n"
                              "Content-Length: " + printNumber(output.size()) + "\r\n\r\n";
 
-        this->response = header + output;
-        this->contentTrack = response.size();
+        this->_response = this->_head + output;
+        this->_errorContentLength = this->_response.size();
     } 
     else {
         callErrorPage(server, 403);
@@ -500,10 +505,10 @@ std::string generateName()
 
 void Response::handleFilePost(HttpRequestParser &request, Parser &server, const std::string &file) 
 {
-    this->contentType = request.headers_map.find("Content-Type")->second;  
+    this->_contentType = request.getHeadersMap().find("Content-Type")->second;  
     std::string name = generateName();
     //this->contentType = getFileType(file);
-    std::string filename = name + getExtensionFromType(contentType);
+    std::string filename = name + getExtensionFromType(_contentType);
     std::string uploadDirectory = constructFilePath(_location->getRoot() + "/uploads/");
 
     // Check if the upload directory exists
@@ -522,13 +527,13 @@ void Response::handleFilePost(HttpRequestParser &request, Parser &server, const 
 
     // Respond with 201 Created and location header
     this->_head = "HTTP/1.1 201 Created\r\nContent-Type: " + getFileType(file) +
-           "\r\nContent-Length: 0\r\nLocation: " + constructFilePath(this->_locations->getslocation() + "/uploads/") + filename + "\r\n\r\n";
+           "\r\nContent-Length: 0\r\nLocation: " + constructFilePath(this->_location->getslocation() + "/uploads/") + filename + "\r\n\r\n";
 }
 
 void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file)
 {
     // Handle directory requests
-    if (endSlash(request.getUrl())) {
+    if (endSlash(request.getPath())) {
         if (!this->_location->getIndex().empty())
             handleDirectoryWithIndex(request, server, file);
         else
@@ -540,23 +545,29 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 
 void Response::handleDirectoryWithIndex(HttpRequestParser &request, Parser &server, const std::string &file)
 {
+    (void)request;
+    (void)file;
+    (void)server;
     // Handle directory requests with index file
-    if (getExtension(request.getUrl()) == "php") 
-    {
-        // Handle CGI for directory
-    } 
-    else
-        callErrorPage(server, 403);
+    // if (getExtension(request.getPath()) == "php") 
+    // {
+    //     // Handle CGI for directory
+    // } 
+    // else
+    //     callErrorPage(server, 403);
 }
 
 void Response::handleFileUpload(HttpRequestParser &request, Parser &server, const std::string &file) 
 {
+    (void)request;
+    (void)file;
+    (void)server;
     // Handle file requests
-    if (getExtension(request.getUrl()) == "php") {
-        // Handle CGI for files
-        Cgi cgi(request, file);
-        //....
-    } 
-    else
-        callErrorPage(server, 403);
+//     if (getExtension(request.getPath()) == "php") {
+//         // Handle CGI for files
+//         Cgi cgi(request, file);
+//         //....
+//     } 
+//     else
+//         callErrorPage(server, 403);
 }

@@ -5,11 +5,10 @@ Response::Response()
     _response = ""; // response to send to client
     _body = ""; // body of response
     _status_code = 0; // status code
-    _content_type = ""; // content type of resource
-    _content_length = 0; // content length of resource
+    _contentType = ""; // content type of resource
+    _contentLength = 0; // content length of resource
     _head = ""; // head of response
     _location = NULL; // location of resource
-
 	client_fd = -1;
 	res_initialized = false;
 	client_done = false;
@@ -35,19 +34,13 @@ Response & Response::operator=(Response const & rhs)
         this->_head = rhs._head;
         this->_status_code = rhs._status_code;
         this->_location = rhs._location;
-        this->_content_type = rhs._content_type;
-        this->_content_length = rhs._content_length;
+        this->_contentType = rhs._contentType;
+        this->_contentLength = rhs._contentLength;
         this->_file_path = rhs._file_path;
-        this->_file_fd = rhs._file_fd;
-		
+        this->_file_fd.open(rhs._file_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+        this->_file_fd << rhs._file_fd.rdbuf();	
     }
     return (*this);
-}
-
-std::ostream & operator<<(std::ostream & o, Response const & rhs)
-{
-    o << rhs.getResponse();
-    return (o);
 }
 
 /*****************************************************************/
@@ -58,21 +51,23 @@ std::ostream & operator<<(std::ostream & o, Response const & rhs)
 // starting here
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
-    this->_location = findLocation(server.getLocation(), request.getUrl());
+    this->_location = findLocation(server.getLocation(), request.getPath());
     
-    if (this->_location == server.getLocation().end()) 
+    if (this->_location == server.getLocation().end()->second) 
     {
         callErrorPage(server, 404);
         return;
     }
 
-    if (request.status_code != 0) {
-        this->_status_code = request.status_code;
+    if (request.getStatusCode() != 0) 
+    {
+        this->_status_code = request.getStatusCode();
         callErrorPage(server, _status_code);
         return;
     }
-
-    if (this->_location->getAllowedMethods().find(request.getMethod()) == this->_location->getAllowedMethods().end()) {
+    // if (std::find(v.begin(), v.end(), "abc") != v.end())
+    if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
+    {
         callErrorPage(server, 405);
         return;
     }
@@ -88,14 +83,14 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 }
 
 // Errors
-void Response::callErrorPage(Parser server, int code) 
+void Response::callErrorPage(Parser& server, int code) 
 {
     std::string path;
     const std::map<int, std::string> &_error_pages = server.getError_page();
 
     if (code == 301) {
         // Handle redirect separately
-        this->head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nLocation: " + this->location + "/" + "\r\n\r\n";
+        this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nLocation: " + this->_locationPath + "/" + "\r\n\r\n";
         return;
     }
 
@@ -105,10 +100,10 @@ void Response::callErrorPage(Parser server, int code)
         this->_file_fd.open(path, std::ios::in | std::ios::binary | std::ios::ate);
 
         if (this->_file_fd.is_open()) {
-            this->_content_length = this->_file_fd.tellg();
+            this->_errorContentLength = this->_file_fd.tellg();
             this->_file_fd.seekg(0, std::ios::beg);
 
-            this->head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_content_length) + "\r\n\r\n";
+            this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_errorContentLength) + "\r\n\r\n";
         } else {
             generateErrorPage(code);
         }
@@ -118,10 +113,10 @@ void Response::callErrorPage(Parser server, int code)
 }
 
 // Delete Method
-void Response::handleDeleteRequest(HttpRequestParser &request, Server &server) 
+void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server) 
 {
     std::string path;
-    path = request.getUrl();
+    path = request.getPath();
 
     // check file existence
     if (access(path.c_str(), F_OK) == -1)
@@ -145,9 +140,9 @@ void Response::handleDeleteRequest(HttpRequestParser &request, Server &server)
         callErrorPage(server, 204);
 }
 
-void Response::handleGet(HttpRequestParser &request, Parser &server) 
+void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
-    std::string file = constructFilePath(request.getUrl());
+    std::string file = constructFilePath(request.getPath());
 
     if (checkDirectory(file))
         handleDirectoryGet(file, request, server);
@@ -155,14 +150,14 @@ void Response::handleGet(HttpRequestParser &request, Parser &server)
         handleFileGet(file, request, server);
 }
 
-void Response::handlePost(HttpRequestParser &request, Parser &server)
+void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
 {
-    std::string file = constructFilePath(request.getUrl());
+    std::string file = constructFilePath(request.getPath());
     std::string extension = getExtension(file);
 
-    if (!_location->getUpload().empty())
+    if (!_location->getUpload_store().empty())
         handleFilePost(request, server, file);
-    else if (checkDirectory(request.getUrl()))
+    else if (checkDirectory(request.getPath()))
         handleDirectoryPost(request, server, file);
     else
         handleFileUpload(request, server, file);
