@@ -1,6 +1,3 @@
-#ifndef RESPONSE_HPP
-#define RESPONSE_HPP
-
 #include "../request/HttpRequestParser.hpp"
 #include "../conf/Parser.hpp"
 #include "../cgi/cgi.hpp"
@@ -84,5 +81,3 @@ std::string repetetiveSlash(std::string file);
 bool endSlash(std::string file);
 std::string createPath(const std::string &path);
 std::string generateName();
-
-#endif

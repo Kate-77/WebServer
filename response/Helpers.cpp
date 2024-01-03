@@ -3,66 +3,66 @@
 // Content type
 std::string getFileType(const std::string& filePath)
 {
-    std::map<std::string, std::string> fileExtensions = {
-        {".html", "text/html"},
-        {".txt", "text/plain"},
-        {".pdf", "application/pdf"},
-        {".aac", "audio/aac"},
-        {".css", "text/css"},
-        {".csv", "text/csv"},
-        {".doc", "application/msword"},
-        {".epub", "application/epub+zip"},
-        {".gif", "image/gif"},
-        {".htm", "text/html"},
-        {".html", "text/html"},
-        {".ics", "text/calendar"},
-        {".jar", "application/java-archive"},
-        {".jpeg", "image/jpeg"},
-        {".jpg", "image/jpeg"},
-        {".js", "application/javascript"},
-        {".json", "application/json"},
-        {".mpeg", "video/mpeg"},
-        {".mpkg", "application/vnd.apple.installer+xml"},
-        {".odp", "application/vnd.oasis.opendocument.presentation"},
-        {".ods", "application/vnd.oasis.opendocument.spreadsheet"},
-        {".odt", "application/vnd.oasis.opendocument.text"},
-        {".oga", "audio/ogg"},
-        {".ogv", "video/ogg"},
-        {".ogx", "application/ogg"},
-        {".otf", "font/otf"},
-        {".png", "image/png"},
-        {".pdf", "application/pdf"},
-        {".ppt", "application/vnd.ms-powerpoint"},
-        {".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
-        {".rar", "application/x-rar-compressed"},
-        {".rtf", "application/rtf"},
-        {".sh", "application/x-sh"},
-        {".svg", "image/svg+xml"},
-        {".swf", "application/x-shockwave-flash"},
-        {".tar", "application/x-tar"},
-        {".tif", "image/tiff"},
-        {".tiff", "image/tiff"},
-        {".ts", "application/typescript"},
-        {".ttf", "font/ttf"},
-        {".vsd", "application/vnd.visio"},
-        {".wav", "audio/x-wav"},
-        {".weba", "audio/webm"},
-        {".webm", "video/webm"},
-        {".webp", "image/webp"},
-        {".xhtml", "application/xhtml+xml"},
-        {".xls", "application/vnd.ms-excel"},
-        {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-        {".xml", "application/xml"},
-        {".xul", "application/vnd.mozilla.xul+xml"},
-        {".zip", "application/zip"},
-        {".7z", "application/x-7z-compressed"}
-    };
+    std::map<std::string, std::string> fileExtensions;
+        fileExtensions[".html"] = "text/html";
+        fileExtensions[".txt"] = "text/plain";
+        fileExtensions[".pdf"] = "application/pdf";
+        fileExtensions[".aac"] = "audio/aac";
+        fileExtensions[".css"] = "text/css";
+        fileExtensions[".csv"] = "text/csv";
+        fileExtensions[".doc"] = "application/msword";
+        fileExtensions[".epub"] = "application/epub+zip";
+        fileExtensions[".gif"] = "image/gif";
+        fileExtensions[".htm"] = "text/html";
+        fileExtensions[".html"] = "text/html";
+        fileExtensions[".ics"] = "text/calendar";
+        fileExtensions[".jar"] = "application/java-archive";
+        fileExtensions[".jpeg"] = "image/jpeg";
+        fileExtensions[".jpg"] = "image/jpeg";
+        fileExtensions[".js"] = "application/javascript";
+        fileExtensions[".json"] = "application/json";
+        fileExtensions[".mpeg"] = "video/mpeg";
+        fileExtensions[".mpkg"] = "application/vnd.apple.installer+xml";
+        fileExtensions[".odp"] = "application/vnd.oasis.opendocument.presentation";
+        fileExtensions[".ods"] = "application/vnd.oasis.opendocument.spreadsheet";
+        fileExtensions[".odt"] = "application/vnd.oasis.opendocument.text";
+        fileExtensions[".oga"] = "audio/ogg";
+        fileExtensions[".ogv"] = "video/ogg";
+        fileExtensions[".ogx"] = "application/ogg";
+        fileExtensions[".otf"] = "font/otf";
+        fileExtensions[".png"] = "image/png";
+        fileExtensions[".pdf"] = "application/pdf";
+        fileExtensions[".ppt"] = "application/vnd.ms-powerpoint";
+        fileExtensions[".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+        fileExtensions[".rar"] = "application/x-rar-compressed";
+        fileExtensions[".rtf"] = "application/rtf";
+        fileExtensions[".sh"] = "application/x-sh";
+        fileExtensions[".svg"] = "image/svg+xml";
+        fileExtensions[".swf"] = "application/x-shockwave-flash";
+        fileExtensions[".tar"] = "application/x-tar";
+        fileExtensions[".tif"] = "image/tiff";
+        fileExtensions[".tiff"] = "image/tiff";
+        fileExtensions[".ts"] = "application/typescript";
+        fileExtensions[".ttf"] = "font/ttf";
+        fileExtensions[".vsd"] = "application/vnd.visio";
+        fileExtensions[".wav"] = "audio/x-wav";
+        fileExtensions[".weba"] = "audio/webm";
+        fileExtensions[".webm"] = "video/webm";
+        fileExtensions[".webp"] = "image/webp";
+        fileExtensions[".xhtml"] = "application/xhtml+xml";
+        fileExtensions[".xls"] = "application/vnd.ms-excel";
+        fileExtensions[".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        fileExtensions[".xml"] = "application/xml";
+        fileExtensions[".xul"] = "application/vnd.mozilla.xul+xml";
+        fileExtensions[".zip"] = "application/zip";
+        fileExtensions[".7z"] = "application/x-7z-compressed";
+
 
     std::string extension = getExtension(filePath);
     if (!extension.empty()) 
     {
         // Search for the file type in the map
-        auto it = fileExtensions.find(extension);
+        std::map<std::string, std::string>::const_iterator it = fileExtensions.find(extension);
         if (it != fileExtensions.end())
             return it->second; // Return the corresponding file type
     }
@@ -86,62 +86,61 @@ std::string getExtension(const std::string &path)
 
 std::string getExtensionFromType(const std::string &contentType)
 {
-    std::map<std::string, std::string> contentTypeToExtension = {
-        {"text/html", ".html"},
-        {"text/plain", ".txt"},
-        {"application/pdf", ".pdf"},
-        {"audio/aac", ".aac"},
-        {"text/css", ".css"},
-        {"text/csv", ".csv"},
-        {"application/msword", ".doc"},
-        {"application/epub+zip", ".epub"},
-        {"image/gif", ".gif"},
-        {"text/html", ".htm"},
-        {"text/html", ".html"},
-        {"text/calendar", ".ics"},
-        {"application/java-archive", ".jar"},
-        {"image/jpeg", ".jpeg"},
-        {"image/jpeg", ".jpg"},
-        {"application/javascript", ".js"},
-        {"application/json", ".json"},
-        {"video/mpeg", ".mpeg"},
-        {"application/vnd.apple.installer+xml", ".mpkg"},
-        {"application/vnd.oasis.opendocument.presentation", ".odp"},
-        {"application/vnd.oasis.opendocument.spreadsheet", ".ods"},
-        {"application/vnd.oasis.opendocument.text", ".odt"},
-        {"audio/ogg", ".oga"},
-        {"video/ogg", ".ogv"},
-        {"application/ogg", ".ogx"},
-        {"font/otf", ".otf"},
-        {"image/png", ".png"},
-        {"application/pdf", ".pdf"},
-        {"application/vnd.ms-powerpoint", ".ppt"},
-        {"application/vnd.openxmlformats-officedocument.presentationml.presentation", ".pptx"},
-        {"application/x-rar-compressed", ".rar"},
-        {"application/rtf", ".rtf"},
-        {"application/x-sh", ".sh"},
-        {"image/svg+xml", ".svg"},
-        {"application/x-shockwave-flash", ".swf"},
-        {"application/x-tar", ".tar"},
-        {"image/tiff", ".tif"},
-        {"image/tiff", ".tiff"},
-        {"application/typescript", ".ts"},
-        {"font/ttf", ".ttf"},
-        {"application/vnd.visio", ".vsd"},
-        {"audio/x-wav", ".wav"},
-        {"audio/webm", ".weba"},
-        {"video/webm", ".webm"},
-        {"image/webp", ".webp"},
-        {"application/xhtml+xml", ".xhtml"},
-        {"application/vnd.ms-excel", ".xls"},
-        {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx"},
-        {"application/xml", ".xml"},
-        {"application/vnd.mozilla.xul+xml", ".xul"},
-        {"application/zip", ".zip"},
-        {"application/x-7z-compressed", ".7z"}
-    };
+    std::map<std::string, std::string> contentTypeToExtension;
+        contentTypeToExtension["text/html"] = ".html";
+        contentTypeToExtension["text/plain"] = ".txt";
+        contentTypeToExtension["application/pdf"] = ".pdf";
+        contentTypeToExtension["audio/aac"] = ".aac";
+        contentTypeToExtension["text/css"] = ".css";
+        contentTypeToExtension["text/csv"] = ".csv";
+        contentTypeToExtension["application/msword"] = ".doc";
+        contentTypeToExtension["application/epub+zip"] = ".epub";
+        contentTypeToExtension["image/gif"] = ".gif";
+        contentTypeToExtension["text/html"] = ".htm";
+        contentTypeToExtension["text/html"] = ".html";
+        contentTypeToExtension["text/calendar"] = ".ics";
+        contentTypeToExtension["application/java-archive"] = ".jar";
+        contentTypeToExtension["image/jpeg"] = ".jpeg";
+        contentTypeToExtension["image/jpeg"] = ".jpg";
+        contentTypeToExtension["application/javascript"] = ".js";
+        contentTypeToExtension["application/json"] = ".json";
+        contentTypeToExtension["video/mpeg"] = ".mpeg";
+        contentTypeToExtension["application/vnd.apple.installer+xml"] = ".mpkg";
+        contentTypeToExtension["application/vnd.oasis.opendocument.presentation"] = ".odp";
+        contentTypeToExtension["application/vnd.oasis.opendocument.spreadsheet"] = ".ods";
+        contentTypeToExtension["application/vnd.oasis.opendocument.text"] = ".odt";
+        contentTypeToExtension["audio/ogg"] = ".oga";
+        contentTypeToExtension["video/ogg"] = ".ogv";
+        contentTypeToExtension["application/ogg"] = ".ogx";
+        contentTypeToExtension["font/otf"] = ".otf";
+        contentTypeToExtension["image/png"] = ".png";
+        contentTypeToExtension["application/pdf"] = ".pdf";
+        contentTypeToExtension["application/vnd.ms-powerpoint"] = ".ppt";
+        contentTypeToExtension["application/vnd.openxmlformats-officedocument.presentationml.presentation"] = ".pptx";
+        contentTypeToExtension["application/x-rar-compressed"] = ".rar";
+        contentTypeToExtension["application/rtf"] = ".rtf";
+        contentTypeToExtension["application/x-sh"] = ".sh";
+        contentTypeToExtension["image/svg+xml"] = ".svg";
+        contentTypeToExtension["application/x-shockwave-flash"] = ".swf";
+        contentTypeToExtension["application/x-tar"] = ".tar";
+        contentTypeToExtension["image/tiff"] = ".tif";
+        contentTypeToExtension["image/tiff"] = ".tiff";
+        contentTypeToExtension["application/typescript"] = ".ts";
+        contentTypeToExtension["font/ttf"] = ".ttf";
+        contentTypeToExtension["application/vnd.visio"] = ".vsd";
+        contentTypeToExtension["audio/x-wav"] = ".wav";
+        contentTypeToExtension["audio/webm"] = ".weba";
+        contentTypeToExtension["video/webm"] = ".webm";
+        contentTypeToExtension["image/webp"] = ".webp";
+        contentTypeToExtension["application/xhtml+xml"] = ".xhtml";
+        contentTypeToExtension["application/vnd.ms-excel"] = ".xls";
+        contentTypeToExtension["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] = ".xlsx";
+        contentTypeToExtension["application/xml"] = ".xml";
+        contentTypeToExtension["application/vnd.mozilla.xul+xml"] = ".xul";
+        contentTypeToExtension["application/zip"] = ".zip";
+        contentTypeToExtension["application/x-7z-compressed"] = ".7z";
 
-    auto it = contentTypeToExtension.find(contentType);
+     std::map<std::string, std::string>::const_iterator it = contentTypeToExtension.find(contentType);
     if (it != contentTypeToExtension.end()) {
         return it->second;
     }
@@ -178,74 +177,72 @@ bool checkDirectoryEmpty(std::string path)
     }
 }
 
-const  std::map<int, std::string> _status_codes = {
-    {100, "Continue"},
-    {101, "Switching Protocols"},
-    {102, "Processing"},
-    {200, "OK"},
-    {201, "Created"},
-    {202, "Accepted"},
-    {203, "Non-Authoritative Information"},
-    {204, "No Content"},
-    {205, "Reset Content"},
-    {206, "Partial Content"},
-    {207, "Multi-Status"},
-    {208, "Already Reported"},
-    {226, "IM Used"},
-    {300, "Multiple Choices"},
-    {301, "Moved Permanently"},
-    {302, "Found"},
-    {303, "See Other"},
-    {304, "Not Modified"},
-    {305, "Use Proxy"},
-    {306, "Switch Proxy"},
-    {307, "Temporary Redirect"},
-    {308, "Permanent Redirect"},
-    {400, "Bad Request"},
-    {401, "Unauthorized"},
-    {402, "Payment Required"},
-    {403, "Forbidden"},
-    {404, "Not Found"},
-    {405, "Method Not Allowed"},
-    {406, "Not Acceptable"},
-    {407, "Proxy Authentication Required"},
-    {408, "Request Timeout"},
-    {409, "Conflict"},
-    {410, "Gone"},
-    {411, "Length Required"},
-    {412, "Precondition Failed"},
-    {413, "Payload Too Large"},
-    {414, "URI Too Long"},
-    {415, "Unsupported Media Type"},
-    {416, "Range Not Satisfiable"},
-    {417, "Expectation Failed"},
-    {418, "I'm a teapot"},
-    {421, "Misdirected Request"},
-    {422, "Unprocessable Entity"},
-    {423, "Locked"},
-    {424, "Failed Dependency"},
-    {425, "Too Early"},
-    {426, "Upgrade Required"},
-    {428, "Precondition Required"},
-    {429, "Too Many Requests"},
-    {431, "Request Header Fields Too Large"},
-    {451, "Unavailable For Legal Reasons"},
-    {500, "Internal Server Error"},
-    {501, "Not Implemented"},
-    {502, "Bad Gateway"},
-    {503, "Service Unavailable"},
-    {504, "Gateway Timeout"},
-    {505, "HTTP Version Not Supported"},
-    {506, "Variant Also Negotiates"},
-    {507, "Insufficient Storage"},
-    {508, "Loop Detected"},
-    {510, "Not Extended"},
-    {511, "Network Authentication Required"}
-};
-
 std::string Response::statusMessage(int code) 
 {
-    auto it = _status_codes.find(code);
+    this->_status_codes[100] = "Continue";
+    this->_status_codes[101] = "Switching Protocols";
+    this->_status_codes[102] = "Processing";
+    this->_status_codes[200] = "OK";
+    this->_status_codes[201] = "Created";
+    this->_status_codes[202] = "Accepted";
+    this->_status_codes[203] = "Non-Authoritative Information";
+    this->_status_codes[204] = "No Content";
+    this->_status_codes[205] = "Reset Content";
+    this->_status_codes[206] = "Partial Content";
+    this->_status_codes[207] = "Multi-Status";
+    this->_status_codes[208] = "Already Reported";
+    this->_status_codes[226] = "IM Used";
+    this->_status_codes[300] = "Multiple Choices";
+    this->_status_codes[301] = "Moved Permanently";
+    this->_status_codes[302] = "Found";
+    this->_status_codes[303] = "See Other";
+    this->_status_codes[304] = "Not Modified";
+    this->_status_codes[305] = "Use Proxy";
+    this->_status_codes[306] = "Switch Proxy";
+    this->_status_codes[307] = "Temporary Redirect";
+    this->_status_codes[308] = "Permanent Redirect";
+    this->_status_codes[400] = "Bad Request";
+    this->_status_codes[401] = "Unauthorized";
+    this->_status_codes[402] = "Payment Required";
+    this->_status_codes[403] = "Forbidden";
+    this->_status_codes[404] = "Not Found";
+    this->_status_codes[405] = "Method Not Allowed";
+    this->_status_codes[406] = "Not Acceptable";
+    this->_status_codes[407] = "Proxy Authentication Required";
+    this->_status_codes[408] = "Request Timeout";
+    this->_status_codes[409] = "Conflict";
+    this->_status_codes[410] = "Gone";
+    this->_status_codes[411] = "Length Required";
+    this->_status_codes[412] = "Precondition Failed";
+    this->_status_codes[413] = "Payload Too Large";
+    this->_status_codes[414] = "URI Too Long";
+    this->_status_codes[415] = "Unsupported Media Type";
+    this->_status_codes[416] = "Range Not Satisfiable";
+    this->_status_codes[417] = "Expectation Failed";
+    this->_status_codes[418] = "I'm a teapot";
+    this->_status_codes[421] = "Misdirected Request";
+    this->_status_codes[422] = "Unprocessable Entity";
+    this->_status_codes[423] = "Locked";
+    this->_status_codes[424] = "Failed Dependency";
+    this->_status_codes[425] = "Too Early";
+    this->_status_codes[426] = "Upgrade Required";
+    this->_status_codes[428] = "Precondition Required";
+    this->_status_codes[429] = "Too Many Requests";
+    this->_status_codes[431] = "Request Header Fields Too Large";
+    this->_status_codes[451] = "Unavailable For Legal Reasons";
+    this->_status_codes[500] = "Internal Server Error";
+    this->_status_codes[501] = "Not Implemented";
+    this->_status_codes[502] = "Bad Gateway";
+    this->_status_codes[503] = "Service Unavailable";
+    this->_status_codes[504] = "Gateway Timeout";
+    this->_status_codes[505] = "HTTP Version Not Supported";
+    this->_status_codes[506] = "Variant Also Negotiates";
+    this->_status_codes[507] = "Insufficient Storage";
+    this->_status_codes[508] = "Loop Detected";
+    this->_status_codes[510] = "Not Extended";
+    this->_status_codes[511] = "Network Authentication Required";
+
+    std::map<int, std::string>::const_iterator it = _status_codes.find(code);
     if (it != _status_codes.end()) {
         return it->second;
     } else {
@@ -318,7 +315,7 @@ void Response::generateErrorPage(int code)
 // Check if url matched a conf location
 Parser *Response::findLocation(const std::map<std::string, Parser *>& locations, const std::string& path)
 {
-    auto it = locations.begin();
+    std::map<std::string, Parser *>::const_iterator it = locations.begin();
     
     while (it != locations.end()) {
         this->_locationPath = it->first;
