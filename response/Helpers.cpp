@@ -340,10 +340,18 @@ Parser *Response::findLocation(const std::map<std::string, Parser *>& locations,
 
 void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server) 
 {
-
     if (!_location->getIndex().empty()) {
-        std::string indexPath = constructFilePath(directoryPath + "/" + _location->getIndex().begin());
-        handleCgiOrFileGet(request, indexPath, server);
+        std::vector<std::string>::const_iterator it = this->_location->getIndex().begin();
+        while (it != this->_location->getIndex().end()) 
+        {
+            std::string indexPath = constructFilePath(directoryPath + "/" + *it);
+            if (!access(indexPath.c_str(), F_OK))
+            {
+                handleCgiOrFileGet(request, indexPath, server);
+                break ;
+            }
+            ++it;
+        }
     }
     else if (_location->getAutoindex()) {
         listDirectory(directoryPath, request, server);
@@ -359,18 +367,36 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    (void)request;
-    (void)path;
-    (void)server;
-    // CGI HANDLER php py perl c c++
+    std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
+    std::string fileExtension = getExtension(path);
+    while (it != server.getCgi().end()) 
+    {
+        if ( fileExtension == it->first) 
+            handleCgi(request, path, server);
+        ++it;
+    }
+    serveFile(path, server);
 }
 
-void Response::handleCgi(HttpRequestParser &request, const std::string &cgiPath, Parser &server) 
+void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    (void)request;
-    (void)cgiPath;
+    (void)path;
     (void)server;
-    // CGI HANDLER
+    (void)request;
+    // CGI cgi =  new CGI(request, this);
+    // this->_status_code = cgi->execute();
+    // if (this->_status_code == 500)
+    //     callErrorPage(server, 500);
+    // else if (this->_status_code == 404)
+    //     callErrorPage(server, 404);
+    // else 
+    // {
+    //     //this->_head = cgi._responseheaders + "HTTP/1.1 " + printNumber(this->_status_code) + " " + statusMessage(this->_status_code) +
+    //     //                 "\r\nConnection: close\r\nContent-Length: " + printNumber(cgi._body.size()) + "\r\n\r\n";
+    //     this->_response = cgi._body;
+    //     this->_body = cgi._body
+    //     this->_contentLength = cgi.body.size();
+    // }
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
@@ -406,16 +432,11 @@ void Response::serveFile(const std::string &filePath, Parser &server)
 {
     std::ifstream fileStream(filePath);
     if (fileStream.good())
-    {
         renderFile(server, filePath);
-    }
     else if (access(filePath.c_str(), F_OK))
-    {
         callErrorPage(server, 404);
-    } 
-    else {
+    else
         callErrorPage(server, 403);
-    }
 }
 
 std::string repetetiveSlash(std::string file)

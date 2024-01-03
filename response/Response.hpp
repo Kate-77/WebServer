@@ -3,11 +3,13 @@
 
 #include "../request/HttpRequestParser.hpp"
 #include "../conf/Parser.hpp"
+#include "../cgi/cgi.hpp"
 #include <sys/stat.h>
 #include <dirent.h>
 
 class Parser;
 class HttpRequestParser;
+class CGI;
 
 class Response
 {
@@ -26,6 +28,7 @@ class Response
       std::string     _contentType; // content type of resource
       size_t          _contentLength; // content length of resource
       ssize_t         _errorContentLength;
+
       //std::map<std::string, Parser *> locations; // map of locations
       std::map<int, std::string> _status_codes; // map of status code and status message
 
