@@ -52,7 +52,7 @@ Response & Response::operator=(Response const & rhs)
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
     this->_location = findLocation(server.getLocation(), request.getPath());
-    
+
     if (this->_location == server.getLocation().end()->second) 
     {
         callErrorPage(server, 404);

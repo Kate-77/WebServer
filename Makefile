@@ -1,7 +1,7 @@
 NAME	=		webserv
 
 CC		= 		c++
-CFLAGS	= 		-Wall -Wextra -Werror -std=c++98 -g
+CFLAGS	= 		-Wall -Wextra -Werror #-std=c++98 -g
 
 SRC		=		main.cpp conf/Lexer.cpp conf/Parser.cpp cgi/cgi.cpp server/Socket.cpp server/Server.cpp server/Client.cpp request/HttpRequestParser.cpp response/Response.cpp response/Helpers.cpp
 

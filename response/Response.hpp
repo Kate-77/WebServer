@@ -16,6 +16,7 @@ class Response
       bool client_done; //zowa
       std::string     _file_path; // path of file
       std::fstream    _file_fd; // file descriptor
+      std::string     _cgi_bin;
       std::string     _response; // response to send to client
       std::string     _body; // body of response
       std::string     _head; // head of response

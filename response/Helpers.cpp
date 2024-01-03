@@ -366,10 +366,14 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 {
     std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
     std::string fileExtension = getExtension(path);
+    //std::string cgiBin;
     while (it != server.getCgi().end()) 
     {
-        if ( fileExtension == it->first) 
+        if ( fileExtension == it->first)
+        {
+            //cgiBin = it->second;
             handleCgi(request, path, server);
+        }
         ++it;
     }
     serveFile(path, server);
@@ -415,9 +419,9 @@ void Response::renderFile(Parser &server, const std::string &file)
             
             this->_response = std::string(fileBuffer.data(), fileSize);
             this->_errorContentLength = fileSize;
-        } else {
+        } 
+        else
             callErrorPage(server, 500); // Internal Server Error
-        }
 
         _file_fd.close();
     } 
@@ -564,9 +568,9 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 void Response::handleDirectoryWithIndex(HttpRequestParser &request, Parser &server, const std::string &file)
 {
     (void)request;
-    (void)file;
     (void)server;
-    // Handle directory requests with index file
+    (void)file;
+    //Handle directory requests with index file
     // if (getExtension(request.getPath()) == "php") 
     // {
     //     // Handle CGI for directory
@@ -588,4 +592,5 @@ void Response::handleFileUpload(HttpRequestParser &request, Parser &server, cons
 //     } 
 //     else
 //         callErrorPage(server, 403);
+
 }
