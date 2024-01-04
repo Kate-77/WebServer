@@ -15,24 +15,22 @@ class CGI;
 class Response
 {
     public:
-      int client_fd; //zowa
-      bool res_initialized; //zowa
-      bool client_done; //zowa
-      std::string     _file;
-      std::string     _file_path; // path of file
-      std::fstream    _file_fd; // file descriptor
-      std::string     _cgi_bin;
-      std::string     _response; // response to send to client
-      std::string     _body; // body of response
-      std::string     _head; // head of response
-      int             _status_code; // status code
-      std::string     _locationPath; // location of resource
-      Parser          *_location; // server
-      std::string     _contentType; // content type of resource
-      size_t          _contentLength; // content length of resource
-      ssize_t         _errorContentLength;
-
-      //std::map<std::string, Parser *> locations; // map of locations
+      int                        client_fd; //zowa
+      bool                       res_initialized; //zowa
+      bool                       client_done; //zowa
+      std::string                _file;
+      std::string                _file_path; // path of file
+      std::fstream               _file_fd; // file descriptor
+      std::string                _cgi_bin;
+      std::string                _response; // response to send to client
+      std::string                _body; // body of response
+      std::string                _head; // head of response
+      int                        _status_code; // status code
+      std::string                _locationPath; // location of resource
+      Parser                     *_location; // server
+      std::string                _contentType; // content type of resource
+      size_t                     _contentLength; // content length of resource
+      ssize_t                    _errorContentLength;
       std::map<int, std::string> _status_codes; // map of status code and status message
 
       Response();
@@ -67,7 +65,7 @@ class Response
       void        handleFilePost(HttpRequestParser &request, Parser &server, const std::string &file);
       void        handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file);
       void        handleDirectoryWithIndex(HttpRequestParser &request, Parser &server, const std::string &file);
-      void        handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
+      void        handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path);
 
       //std::string getResponse(); // get response to send to client
       //std::string getBody(); // get body of response

@@ -335,6 +335,7 @@ Parser *Response::findLocation(const std::map<std::string, Parser *>& locations,
     return locations.end()->second; // No match found
 }
 
+// Get Method for directory case
 void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server) 
 {
     if (!_location->getIndex().empty()) {
@@ -357,11 +358,13 @@ void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestP
         callErrorPage(server, 403);
 }
 
+// Get Method for file case
 void Response::handleFileGet(const std::string &filePath, HttpRequestParser &request, Parser &server) 
 {
     handleCgiOrFileGet(request, filePath, server);
 }
 
+// Get Method (file?cgi:normal)
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
     std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
@@ -374,6 +377,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
             if (it1 != server.getCgi().end())
                 this->_cgi_bin = it1->second;
             handleCgi(request, path, server);
+            break ;
         }
         ++it;
     }
@@ -396,8 +400,6 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
         cgi_headers[key] = value; // assign
     }
     this->_file = path;
-    // (void)server;
-    // (void)request;
     CGI cgi = CGI(request, *this);
     this->_status_code = cgi.execute();
     if (this->_status_code == 500)
@@ -405,7 +407,7 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
     else if (this->_status_code == 404)
         callErrorPage(server, 404);
     else 
-        cgi.parseHeadersAndBody(this->_head, this->_body);
+        cgi.parseHeadersAndBody(cgi_headers, this->_body);
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
@@ -489,6 +491,7 @@ std::string Response::constructFilePath(const std::string &path)
     return repetetiveSlash(file);
 }
 
+// Get Method listing directory in autoindex case
 void Response::listDirectory(std::string file, HttpRequestParser &request, Parser &server)
 {
     std::string output = "<html><body><ul>";
@@ -586,9 +589,10 @@ void Response::handleDirFile(HttpRequestParser &request, Parser &server, const s
                 this->_cgi_bin = it1->second;
             handleCgi(request, path, server);
             cgi = 1;
+            break ;
         }
         ++it;
     }
     if (!cgi)
-        callErrorPage(server, 404);
+        callErrorPage(server, 403);
 }

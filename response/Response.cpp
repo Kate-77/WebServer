@@ -48,7 +48,7 @@ Response & Response::operator=(Response const & rhs)
 /*****************************************************************/
 /*****************************************************************/
 
-// starting here
+// Starting here
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
     this->_location = findLocation(server.getLocation(), request.getPath());
@@ -88,7 +88,8 @@ void Response::callErrorPage(Parser& server, int code)
     std::string path;
     const std::map<int, std::string> &_error_pages = server.getError_page();
 
-    if (code == 301) {
+    if (code == 301) 
+    {
         // Handle redirect separately
         this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nLocation: " + this->_locationPath + "/" + "\r\n\r\n";
         return;
@@ -104,12 +105,12 @@ void Response::callErrorPage(Parser& server, int code)
             this->_file_fd.seekg(0, std::ios::beg);
 
             this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_errorContentLength) + "\r\n\r\n";
-        } else {
+        } 
+        else
             generateErrorPage(code);
-        }
-    } else {
-        generateErrorPage(code);
     }
+    else
+        generateErrorPage(code);
 }
 
 // Delete Method
@@ -124,22 +125,25 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
     // if it exists, we check if it's writable to be able to delete it
     else if (access(path.c_str(), W_OK) == -1)
         callErrorPage(server, 403);
-    else if (checkDirectory(path)) {
+    else if (checkDirectory(path))
+    {
         // if it's a dir, we check if it's empty
         if (checkDirectoryEmpty(path)) {
             if (rmdir(path.c_str()))
                 callErrorPage(server, 403);
             else
                 callErrorPage(server, 204);
-        } else {
+        } 
+        else
             callErrorPage(server, 403);
-        }
-    } else if (std::remove(path.c_str()))
+    }
+    else if (std::remove(path.c_str()))
         callErrorPage(server, 403);
     else
         callErrorPage(server, 204);
 }
 
+// Get Method
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
     std::string file = constructFilePath(request.getPath());
@@ -150,6 +154,7 @@ void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
         handleFileGet(file, request, server);
 }
 
+// Post Method
 void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
 {
     std::string file = constructFilePath(request.getPath());
