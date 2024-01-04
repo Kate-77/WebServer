@@ -28,7 +28,7 @@ CGI::CGI(  HttpRequestParser & Request, Response & Response ) : _Request(Request
   {
     return ;
   }
-  this->_requestFilePath = cwd + "/" + Response._file_path; //get file from response
+  this->_requestFilePath = cwd + "/" + Response._file; //get file from response
   return ;
 }
 
@@ -209,60 +209,54 @@ std::string & CGI::trim(std::string & s, const char * t = " \t\n\r\f\v")
   return (lefttrim(righttrim(s, t), t));
 }
 
-void CGI::parseHeadersAndBody(std::string & headers, std::string & body) 
+void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std::string & body) 
 {
-  (void)headers;
-  // std::string key, value;
-  // std::string::size_type sep;
-  // // std::string::size_type found;
+  std::string key, value;
+  std::string::size_type sep;
 
-  // // iterate line by line //revision
-  // for (std::string::size_type eol = this->_body.find(end_of_file); eol != std::string::npos; eol = this->_body.find(end_of_file)) 
-  // {
-  //   // if no more headers (two consecutive new lines)
-  //   if (0 == eol) 
-  //   {
-  //     this->_body.erase(0, eol + end_of_file.length());
-  //     break ;
-  //   }
-  //   // parse headers // revision
-  //   sep = this->_body.find(':'); 
-  //   if (std::string::npos == sep || 0 == sep) 
-  //   {
-  //     this->_body.erase(0, eol + end_of_file.length());
-  //     continue ;
-  //   }
-  //   key   = this->_body.substr(0, sep);
-  //   value = this->_body.substr(sep + 1, eol - sep - 1);
-  //   // found = headers.find(key);
-  //   // std::string::size_type count = found;
-  //   // if (found != std::string::npos) 
-  //   {
-  //     this->_body.erase(0, eol + end_of_file.length());
-  //     continue ;
-    // }
-    // while(headers[count] != end_of_file.c_str())
-    //       count++;
-    // headers.insert(found,count, trim(value, "")) //erase whitespaces
-    // if (headers[found]) 
-    // {
-    //       headers.erase(found);
-    // }
-    // this->_body.erase(0, eol + end_of_file.length());
-  // }
+  // iterate line by line //revision
+  for (std::string::size_type eol = this->_body.find(end_of_file); eol != std::string::npos; eol = this->_body.find(end_of_file)) 
+  {
+    // if no more headers (two consecutive new lines)
+    if (0 == eol) 
+    {
+      this->_body.erase(0, eol + end_of_file.length());
+      break ;
+    }
+
+    // parse headers // revision
+    sep = this->_body.find(':'); 
+    if (std::string::npos == sep || 0 == sep) 
+    {
+      this->_body.erase(0, eol + end_of_file.length());
+      continue ;
+    }
+    key   = this->_body.substr(0, sep);
+    value = this->_body.substr(sep + 1, eol - sep - 1);
+    if (headers.end() != headers.find(key)) 
+    {
+      this->_body.erase(0, eol + end_of_file.length());
+      continue ;
+    }
+    headers[key] = trim(value, " "); //erase whitespaces
+    if (true == headers[key].empty()) 
+    {
+      headers.erase(key);
+    }
+
+    this->_body.erase(0, eol + end_of_file.length());
+  }
 
   // security reason exploiting 'stack-smashing' or 'stack-overflow' vulnerabilities of the operating system.
   // revision
-  // std::string::const_iterator contentLength = headers.find("Content-Length");
-  // if (headers.end() != contentLength) 
-  // {
-  //   this->_body.erase(static_cast<std::string::size_type>(atoi(contentLength->second.c_str())));
-  // }
+  std::map<std::string, std::string>::const_iterator contentLength = headers.find("Content-Length");
+  if (headers.end() != contentLength) 
+  {
+    this->_body.erase(static_cast<std::string::size_type>(atoi(contentLength->second.c_str())));
+  }
 
   // body
   body = this->_body;
-
-  return ;
 }
 
 int CGI::initEnv(void) 

@@ -382,7 +382,20 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 
 void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    (void)path;
+    std::string key, value; //split the key and the value
+    std::map<std::string, std::string>  cgi_headers; //create map headers
+    // const std::string   end_of_file = "\r\n"; //seperator
+    std::istringstream a(this->_head);
+    std::string line;
+    while(std::getline(a, line))
+    {
+        std::istringstream b(line);
+        std::getline(b, key, ':'); //key
+        std::getline(b, value); //value
+        std::cout << "key: " << key << "value: " << value << std::endl;
+        cgi_headers[key] = value; // assign
+    }
+    this->_file = path;
     // (void)server;
     // (void)request;
     CGI cgi = CGI(request, *this);
