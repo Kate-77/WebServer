@@ -4,6 +4,9 @@
 #include "../cgi/cgi.hpp"
 #include <sys/stat.h>
 #include <dirent.h>
+#include <iostream>
+#include <istream>
+#include <string> 
 
 class Parser;
 class HttpRequestParser;
@@ -15,6 +18,7 @@ class Response
       int client_fd; //zowa
       bool res_initialized; //zowa
       bool client_done; //zowa
+      std::string     _file;
       std::string     _file_path; // path of file
       std::fstream    _file_fd; // file descriptor
       std::string     _cgi_bin;

@@ -17,7 +17,8 @@
 # include "../request/HttpRequestParser.hpp"
 
 const size_t        Default_buffer = 8192;
-const std::string   end_of_file = "\r\n";
+
+
 const std::string random_tmp_file = "/tmp/a";
 
 class Response;
@@ -67,7 +68,7 @@ class CGI {
     
     int execute( void );
     //parse headers and body from response
-    void parseHeadersAndBody(std::string & headers, std::string & body);
+    void parseHeadersAndBody(std::map<std::string, std::string> &  headers, std::string & body);
     // void parseHeadersAndBody( void);
 
 };

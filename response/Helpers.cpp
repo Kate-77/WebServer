@@ -382,7 +382,20 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 
 void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    (void)path;
+    std::string key, value;
+    std::map<std::string, std::string>  cgi_headers;
+    const std::string   end_of_file = "\r\n";
+    std::istringstream a(this->_head);
+    std::string line;
+    while(std::getline(a, line))
+    {
+        std::istringstream b(line);
+        std::getline(b, key, ':');
+        std::getline(b, value);
+        std::cout << "key: " << key << "value: " << value << std::endl;
+        cgi_headers[key] = value;
+    }
+    this->_file = path;
     // (void)server;
     // (void)request;
     CGI cgi = CGI(request, *this);
@@ -398,7 +411,13 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
         // this->_response = cgi._body;
         // this->_body = cgi._body;
         // this->_contentLength = cgi.body.size();
-        cgi.parseHeadersAndBody(this->_head, this->_body);
+        cgi.parseHeadersAndBody(cgi_headers, this->_body);
+        for(std::map<std::string, std::string>::const_iterator it = cgi_headers.begin(); it != cgi_headers.end(); it++)
+        {
+            this->_head.erase();
+            this->_head+= it->first + ":" + it->second + end_of_file;
+        }
+        this->_head += "\r\n\r\n";
     }
 }
 
