@@ -68,6 +68,12 @@
 		"random": "cpp",
 		"type_traits": "cpp",
 		"utility": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"__functional_base": "cpp",
+		"__nullptr": "cpp",
+		"__string": "cpp",
+		"__tuple": "cpp",
+		"chrono": "cpp",
+		"stack": "cpp"
 	}
 }

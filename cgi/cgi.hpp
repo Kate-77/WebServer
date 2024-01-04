@@ -24,8 +24,8 @@ class Response;
 class HttpRequestParser;
 class CGI {
   private:
-    const HttpRequestParser & _Request;
-    const Response           & _Response;
+    HttpRequestParser & _Request;
+    Response           & _Response;
     //fd 0
     static const int fRead = 0;
     //fd 1
@@ -51,20 +51,23 @@ class CGI {
     //env has parsed request and meta-variables
 
     std::string       _body; // save cgi output into body
-
+    //trim
+    std::string & lefttrim(std::string & s, const char * t);
+    std::string & righttrim(std::string & s, const char * t);
+    std::string & trim(std::string & s, const char * t);
     //initialize env
     int initEnv( void );
 
   public:
     //Constructor
-    CGI( const HttpRequestParser & Request, const Response & Response );
+    CGI(HttpRequestParser & Request, Response & Response);
     // CGI(void);
     //Destructor
     ~CGI( void );
     
     int execute( void );
     //parse headers and body from response
-    void parseHeadersAndBody(std::map<std::string, std::string> & headers, std::string & body);
+    void parseHeadersAndBody(std::string & headers, std::string & body);
     // void parseHeadersAndBody( void);
 
 };

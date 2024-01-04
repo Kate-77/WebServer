@@ -371,6 +371,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
     {
         if ( fileExtension == it->first)
         {
+            this->_cgi_bin = it->second;
             //cgiBin = it->second;
             handleCgi(request, path, server);
         }
@@ -382,22 +383,23 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
     (void)path;
-    (void)server;
-    (void)request;
-    // CGI cgi =  new CGI(request, this);
-    // this->_status_code = cgi->execute();
-    // if (this->_status_code == 500)
-    //     callErrorPage(server, 500);
-    // else if (this->_status_code == 404)
-    //     callErrorPage(server, 404);
-    // else 
-    // {
-    //     //this->_head = cgi._responseheaders + "HTTP/1.1 " + printNumber(this->_status_code) + " " + statusMessage(this->_status_code) +
-    //     //                 "\r\nConnection: close\r\nContent-Length: " + printNumber(cgi._body.size()) + "\r\n\r\n";
-    //     this->_response = cgi._body;
-    //     this->_body = cgi._body
-    //     this->_contentLength = cgi.body.size();
-    // }
+    // (void)server;
+    // (void)request;
+    CGI cgi = CGI(request, *this);
+    this->_status_code = cgi.execute();
+    if (this->_status_code == 500)
+        callErrorPage(server, 500);
+    else if (this->_status_code == 404)
+        callErrorPage(server, 404);
+    else 
+    {
+        //this->_head = cgi._responseheaders + "HTTP/1.1 " + printNumber(this->_status_code) + " " + statusMessage(this->_status_code) +
+        //                 "\r\nConnection: close\r\nContent-Length: " + printNumber(cgi._body.size()) + "\r\n\r\n";
+        // this->_response = cgi._body;
+        // this->_body = cgi._body;
+        // this->_contentLength = cgi.body.size();
+        cgi.parseHeadersAndBody(this->_head, this->_body);
+    }
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
