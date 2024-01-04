@@ -547,17 +547,15 @@ void Response::handleFilePost(HttpRequestParser &request, Parser &server, const 
         return;
     }
 
-    std::string filePath = uploadDirectory + filename;
+    this->_file_path = uploadDirectory + filename;
     // Move the uploaded file to the destination
-    if (std::rename(filename.c_str(), filePath.c_str()) != 0) {
+    if (std::rename(filename.c_str(), this->_file_path.c_str()) != 0) {
         std::remove(filename.c_str());
-        callErrorPage(server, 500);
-        return;
     }
 
     // Respond with 201 Created and location header
     this->_head = "HTTP/1.1 201 Created\r\nContent-Type: " + getFileType(file) +
-           "\r\nContent-Length: 0\r\nLocation: " + constructFilePath(this->_location->getslocation() + "/uploads/") + filename + "\r\n\r\n";
+           "\r\nContent-Length: 0\r\nLocation: " + this->_file_path + "\r\n\r\n";
 }
 
 void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file)
