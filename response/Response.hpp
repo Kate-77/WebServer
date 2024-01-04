@@ -63,7 +63,7 @@ class Response
       void        handleFilePost(HttpRequestParser &request, Parser &server, const std::string &file);
       void        handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file);
       void        handleDirectoryWithIndex(HttpRequestParser &request, Parser &server, const std::string &file);
-      void        handleFileUpload(HttpRequestParser &request, Parser &server, const std::string &file);
+      void        handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 
       //std::string getResponse(); // get response to send to client
       //std::string getBody(); // get body of response

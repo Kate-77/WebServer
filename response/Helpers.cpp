@@ -366,13 +366,13 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 {
     std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
     std::string fileExtension = getExtension(path);
-    //std::string cgiBin;
     while (it != server.getCgi().end()) 
     {
         if ( fileExtension == it->first)
         {
-            this->_cgi_bin = it->second;
-            //cgiBin = it->second;
+            std::map<std::string, std::string>::const_iterator it1 = server.getCgi().find(it->first);
+            if (it1 != server.getCgi().end())
+                this->_cgi_bin = it1->second;
             handleCgi(request, path, server);
         }
         ++it;
@@ -392,14 +392,7 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
     else if (this->_status_code == 404)
         callErrorPage(server, 404);
     else 
-    {
-        //this->_head = cgi._responseheaders + "HTTP/1.1 " + printNumber(this->_status_code) + " " + statusMessage(this->_status_code) +
-        //                 "\r\nConnection: close\r\nContent-Length: " + printNumber(cgi._body.size()) + "\r\n\r\n";
-        // this->_response = cgi._body;
-        // this->_body = cgi._body;
-        // this->_contentLength = cgi.body.size();
         cgi.parseHeadersAndBody(this->_head, this->_body);
-    }
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
@@ -559,7 +552,7 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
     // Handle directory requests
     if (endSlash(request.getPath())) {
         if (!this->_location->getIndex().empty())
-            handleDirectoryWithIndex(request, server, file);
+            handleDirFile(request, server, file);
         else
             callErrorPage(server, 403);
     } 
@@ -567,32 +560,24 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
         callErrorPage(server, 301);
 }
 
-void Response::handleDirectoryWithIndex(HttpRequestParser &request, Parser &server, const std::string &file)
+void Response::handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 {
-    (void)request;
-    (void)server;
-    (void)file;
-    //Handle directory requests with index file
-    // if (getExtension(request.getPath()) == "php") 
-    // {
-    //     // Handle CGI for directory
-    // } 
-    // else
-    //     callErrorPage(server, 403);
-}
-
-void Response::handleFileUpload(HttpRequestParser &request, Parser &server, const std::string &file) 
-{
-    (void)request;
-    (void)file;
-    (void)server;
-    // Handle file requests
-//     if (getExtension(request.getPath()) == "php") {
-//         // Handle CGI for files
-//         Cgi cgi(request, file);
-//         //....
-//     } 
-//     else
-//         callErrorPage(server, 403);
-
+    // Handle directory requests with index file
+    std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
+    std::string fileExtension = getExtension(path);
+    bool cgi = 0;
+    while (it != server.getCgi().end()) 
+    {
+        if ( fileExtension == it->first)
+        {
+            std::map<std::string, std::string>::const_iterator it1 = server.getCgi().find(it->first);
+            if (it1 != server.getCgi().end())
+                this->_cgi_bin = it1->second;
+            handleCgi(request, path, server);
+            cgi = 1;
+        }
+        ++it;
+    }
+    if (!cgi)
+        callErrorPage(server, 404);
 }

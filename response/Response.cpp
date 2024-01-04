@@ -160,5 +160,5 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
     else if (checkDirectory(request.getPath()))
         handleDirectoryPost(request, server, file);
     else
-        handleFileUpload(request, server, file);
+        handleDirFile(request, server, file);
 }
