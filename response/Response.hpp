@@ -1,3 +1,4 @@
+#pragma once
 #include "../request/HttpRequestParser.hpp"
 #include "../conf/Parser.hpp"
 #include "../cgi/cgi.hpp"

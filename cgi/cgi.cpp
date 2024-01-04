@@ -1,12 +1,9 @@
 #include "cgi.hpp"
 
-
-// include request
-// include response
-
-CGI::CGI(void)
+// kill -9 $(lsof -ti:5000,5001,5002)
+CGI::CGI( const HttpRequestParser & Request, const Response & Response ) : _Request(Request), _Response(Response)
 {
- this->_requestBody = "sdvdfvdfbdfvdfvfgbgbdfvdfb"; //-->request body
+ this->_requestBody = this->_Request.bodyFileName;; //-->request body
   //get current directory pathname: Absolut Path ex: /Users/abboutah/....../websev/
   char * tmp = getcwd(NULL, 0); // arguments 1:current pathname to buf, size of buf
   if (NULL == tmp) 
@@ -16,7 +13,7 @@ CGI::CGI(void)
   std::string cwd = tmp;
   free(tmp);
 
-  this->_Bin = "/usr/local/bin/php"; //get binary file from request
+  this->_Bin = this->_Response._cgi_bin; //get binary file from request
   if ('/' == this->_Bin[0]) //if absoluth path then okay
   {
     this->_Path = this->_Bin;
@@ -31,7 +28,7 @@ CGI::CGI(void)
   {
     return ;
   }
-  this->_requestFilePath = cwd + "/" + "var/www/default.php"; //get file from response
+  this->_requestFilePath = cwd + "/" + Response._file_path; //get file from response
   return ;
 }
 
@@ -184,9 +181,10 @@ int CGI::execute(void)
   return (200); // 200 ok
 }
 
-void CGI::parseHeadersAndBody( void)
+void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std::string & body) 
 {
-
+    (void)headers;
+    (void)body;
 }
 
 int CGI::initEnv(void) 
@@ -200,7 +198,7 @@ int CGI::initEnv(void)
   // URI path (not URL-encoded)   which could identify the CGI script (rather than the script's output).
   env["SCRIPT_NAME"]        = this->_Path;
   // the method which should be used by the script to process the request
-  env["REQUEST_METHOD"]     = "GET"; //request
+  env["REQUEST_METHOD"]     = this->_Request.getMethod(); //request
   env["REQUEST_URI"]        = this->_requestFilePath;
   // path to be interpreted by the CGI script.
   env["PATH_INFO"]          = this->_requestFilePath;
@@ -208,7 +206,7 @@ int CGI::initEnv(void)
   // translation appropriate to map it onto the server's document repository structure.
   env["PATH_TRANSLATED"]    = this->_requestFilePath;
   //URL-encoded search or parameter string; it provides information to the CGI script to affect or refine the document to be returned by the script.
-  env["QUERY_STRING"]       = ""; //request
+  env["QUERY_STRING"]       = this->_Request.getQuery(); //request
   // the network address of the  client sending the request to the server.
   env["REMOTE_ADDR"]        = "127.0.0.1"; // request
   // the name of the server host to which the client request is directed. //for all requests
@@ -216,7 +214,7 @@ int CGI::initEnv(void)
   // the TCP/IP port number on which this request is received from the client.
   env["SERVER_PORT"]        = "80"; //request
   // the name and version of the application protocol used for this CGI request.
-  env["SERVER_PROTOCOL"]    = "HTTP/1.1"; //Request
+  env["SERVER_PROTOCOL"]    = this->_Request.getVersion(); //Request
   // the name and version of the information server software making the CGI request (and running the gateway). //for all requests
   env["SERVER_SOFTWARE"]    = ""; // empty for security reasons
 
@@ -224,9 +222,21 @@ int CGI::initEnv(void)
    {
     //contains the size of the message-body attached to the request
     env["CONTENT_LENGTH"] = this->_requestBody.length();
-    env["CONTENT_TYPE"] = "text"; //requesy
+    env["CONTENT_TYPE"] = this->_Request.getHeadersMap().find("Content-Type")->second; //requesy
    }
   //get all request header // revision
+  //get all request header and add HTTP + toupper
+  for (std::map<std::string, std::string>::const_iterator it = this->_Request.getHeadersMap().begin(); it != this->_Request.getHeadersMap().end(); ++it) 
+  {
+    if (false == it->second.empty()) 
+    {
+      std::string header = it->first;
+      std::transform(it->first.begin(), it->first.end(), header.begin(), static_cast<int(*)(int)>(std::toupper));
+      std::replace(header.begin(), header.end(), '-', '_');
+      header.insert(0, "HTTP_");
+      env[header] = it->second;
+    }
+  }
   // create **env
   this->_env = reinterpret_cast<char **>(malloc((env.size() + 1) * sizeof(char *)));
   if (nullptr == this->_env) 
