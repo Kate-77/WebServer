@@ -17,8 +17,7 @@
 # include "../request/HttpRequestParser.hpp"
 
 const size_t        Default_buffer = 8192;
-
-
+const std::string   end_of_file = "\r\n";
 const std::string random_tmp_file = "/tmp/a";
 
 class Response;

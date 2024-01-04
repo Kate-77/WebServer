@@ -382,18 +382,18 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 
 void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    std::string key, value;
-    std::map<std::string, std::string>  cgi_headers;
-    const std::string   end_of_file = "\r\n";
+    std::string key, value; //split the key and the value
+    std::map<std::string, std::string>  cgi_headers; //create map headers
+    // const std::string   end_of_file = "\r\n"; //seperator
     std::istringstream a(this->_head);
     std::string line;
     while(std::getline(a, line))
     {
         std::istringstream b(line);
-        std::getline(b, key, ':');
-        std::getline(b, value);
+        std::getline(b, key, ':'); //key
+        std::getline(b, value); //value
         std::cout << "key: " << key << "value: " << value << std::endl;
-        cgi_headers[key] = value;
+        cgi_headers[key] = value; // assign
     }
     this->_file = path;
     // (void)server;
@@ -411,7 +411,8 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
         // this->_response = cgi._body;
         // this->_body = cgi._body;
         // this->_contentLength = cgi.body.size();
-        cgi.parseHeadersAndBody(cgi_headers, this->_body);
+        cgi.parseHeadersAndBody(cgi_headers, this->_response); //_response instead of _body
+        //convert to string
         for(std::map<std::string, std::string>::const_iterator it = cgi_headers.begin(); it != cgi_headers.end(); it++)
         {
             this->_head.erase();
