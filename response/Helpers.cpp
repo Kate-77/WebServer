@@ -154,7 +154,7 @@ bool checkDirectory(std::string path)
 	struct stat info;
 
     if (stat(path.c_str(), &info) != 0)
-       return false;
+       return 0;
     return S_ISDIR(info.st_mode);
 }
 
@@ -280,6 +280,7 @@ std::string printNumber(int value)
 // Generate error html page
 void Response::generateErrorPage(int code)
 {
+    printf("generateError\n");
     std::string errorStatus = statusMessage(code);
     std::string errorBody = "<!DOCTYPE html>\n";
     errorBody += "<html>\n";
@@ -310,29 +311,32 @@ void Response::generateErrorPage(int code)
     _errorContentLength = errorBody.size();
     this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(errorBody.size()) + "\r\n\r\n";
     this->_response = errorBody;
+    this->_contentLength = errorBody.size();
+    printf("response: %s\n", this->_response.c_str());
 }
 
 // Check if url matched a conf location
-Parser *Response::findLocation(const std::map<std::string, Parser *>& locations, const std::string& path)
+int Response::findLocation(Parser &server, const std::string& path)
 {
-    std::map<std::string, Parser *>::const_iterator it = locations.begin();
+    std::map<std::string, Parser *> locations = server.getLocation();
+    std::map<std::string, Parser *>::reverse_iterator it = locations.rbegin();
     
-    while (it != locations.end()) {
+    while (it != locations.rend()) {
         this->_locationPath = it->first;
 
         // If locationPath contains a slash at the end, remove it
-        if (!this->_locationPath.empty() && this->_locationPath.back() == '/') {
-            this->_locationPath.pop_back();
-        }
-
-        if (this->_locationPath == path)
+        // if (!this->_locationPath.empty() && this->_locationPath.back() == '/') {
+        //     this->_locationPath.pop_back();
+        // }
+        if (path.compare(0, _locationPath.length(), _locationPath) == 0)
         {
-            return it->second; // Match found
+            this->_location = it->second;
+            printf("location: %s\n", _locationPath.c_str());
+            return 42; // Match found
         }
-
         ++it;
     }
-    return locations.end()->second; // No match found
+    return -1; // No match found
 }
 
 // Get Method for directory case

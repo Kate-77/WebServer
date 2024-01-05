@@ -12,6 +12,7 @@ Response::Response()
 	client_fd = -1;
 	res_initialized = false;
 	client_done = false;
+    sent = 0;
 }
 
 Response::~Response()
@@ -51,21 +52,21 @@ Response & Response::operator=(Response const & rhs)
 // Starting here
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
-    this->_location = findLocation(server.getLocation(), request.getPath());
-
-    if (this->_location == server.getLocation().end()->second) 
-    {
-        callErrorPage(server, 404);
-        return;
-    }
-
-    if (request.getStatusCode() != 0) 
+    
+    if (request.getStatusCode() != -1) 
     {
         this->_status_code = request.getStatusCode();
         callErrorPage(server, _status_code);
         return;
     }
-    // if (std::find(v.begin(), v.end(), "abc") != v.end())
+    int foundLocation = findLocation(server, request.getPath());
+    if (foundLocation == -1)
+    {
+        callErrorPage(server, 404);
+        return;
+    }
+    printf("location: %s\n", this->_locationPath.c_str());
+    printf("start3\n");
     if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
     {
         callErrorPage(server, 405);
@@ -78,6 +79,8 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
             handlePostRequest(request, server);
         else if (request.getMethod() == "DELETE")
             handleDeleteRequest(request, server);
+        else
+            callErrorPage(server, 405);
     }
     return ;
 }
@@ -94,7 +97,7 @@ void Response::callErrorPage(Parser& server, int code)
         this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nLocation: " + this->_locationPath + "/" + "\r\n\r\n";
         return;
     }
-
+    printf("callError\n");
     if (_error_pages.find(code) != _error_pages.end()) {
         path = _error_pages.find(code)->second;
         this->_file_path = path;
@@ -147,9 +150,10 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
     std::string file = constructFilePath(request.getPath());
-
     if (checkDirectory(file))
-        handleDirectoryGet(file, request, server);
+    {
+        printf("watti \n");
+        handleDirectoryGet(file, request, server);}
     else
         handleFileGet(file, request, server);
 }

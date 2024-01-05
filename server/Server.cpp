@@ -98,7 +98,7 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 			//check for read
 			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_read_fds))
 			{
-				printf("******read start*********\n");
+				// printf("******read start*********\n");
 				unsigned char buf[1024];
 				bzero(buf, 1024);
 				ssize_t nbytes;
@@ -124,14 +124,14 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 				printf("******read end*********\n");
 			}
 			// check for write
+			// printf("******write start*********\n");
 			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_write_fds))
 			{
-				printf("******write start*********\n");
 				clients[i].first.response.client_fd = clients[i].first.getClientSocket();
 
 				if(!clients[i].first.response.res_initialized)
 				{
-					// clients[i].first.response.handleResponse(clients[i].first.request , *clients[i].second);
+					clients[i].first.response.handleResponse(clients[i].first.request , *clients[i].second);
 					clients[i].first.response.res_initialized = true;
 				}
 
@@ -158,9 +158,9 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 				else
 				{
 					//send response
-					printf("sending response\n");
-					// resp_send(clients[i].first.response, clients[i].first.request);
-					resp_send(clients[i].first.response);
+					// printf("sending response\n");
+					resp_send(clients[i].first.response, clients[i].first.request);
+					// resp_send(clients[i].first.response);
 				}
 			} 
 		}		
@@ -240,98 +240,101 @@ void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_se
 
 	if (Done == 1)
 	{
-		printf("Req Done _ moved to write\n");
+		// printf("Req Done _ moved to write\n");
 		//move client to write set
 		FD_CLR(client.getClientSocket(), &master_read_fds);
 		FD_SET(client.getClientSocket(), &master_write_fds);
 	}
 }
-void Server::resp_send(Response &response)
-// void Server::resp_send(Response &response, HttpRequestParser &req)
+// void Server::resp_send(Response &response)
+void Server::resp_send(Response &response, HttpRequestParser &req)
 {
 	// //general response to test
-	std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nHello, world!";
+	// std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nHello, world!";
 
-	if (send(response.client_fd, httpResponse.c_str(), httpResponse.length(), 0) == -1)
-		perror("send");
+	// if (send(response.client_fd, httpResponse.c_str(), httpResponse.length(), 0) == -1)
+	// 	perror("send");
 
-	response.client_done = true;
+	// response.client_done = true;
 
 	// //send dlm39ol
 	// // 1-head
-	// ssize_t keep_track = 0;
-	// // printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sending response\n");
+	ssize_t keep_track = 0;
+	// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sending response\n");
+	printf("salaaaam \n");
+	if(response._head.size() != 0)
+    {
+		// printf("sending head: %s\n", response._head.c_str());
+        keep_track = send(response.client_fd, response._head.c_str(), response._head.size(), 0) ;
 
-	// if(response._head.size() != 0)
-    // {
-	// 	// printf("sending head: %s\n", response._head.c_str());
-    //     keep_track = send(response.client_fd, response._head.c_str(), response._head.size(), 0) ;
+        if(response.sent < 0)
+        {
+			// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n");
+            response.client_done = true;
+            return;
+        }
+        response._head = "";
+    }
+	else if (response._response.size() != 0)
+	{
+		printf("alleuh\n");
+		// std::cout << response._response.c_str() << std::endl;
+		keep_track = send(response.client_fd, response._response.c_str(), response._response.size(), 0);
+		if (keep_track <= 0)
+		{
+			// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2\n");
+			response.client_done = true;
+            return;
+		}
+		response._response = "";
+		response.sent += keep_track;
+	}
 
-    //     if(response.sent < 0)
-    //     {
-	// 		// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n");
-    //         response.client_done = true;
-    //         return;
-    //     }
-    //     response._head = "";
-    // }
-	// else if (response._response.size() != 0)
-	// {
-	// 	keep_track = send(response.client_fd, response._response.c_str(), response._response.size(), 0);
-	// 	if (keep_track <= 0)
-	// 	{
-	// 		// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2\n");
-	// 		response.client_done = true;
-    //         return;
-	// 	}
-	// 	response._response = "";
-	// 	response.sent += keep_track;
-	// }
+	else 
+	{
+		if (!response._file_fd.is_open() && response._file_path.size() != 0)
+		{
+			response._file_fd.open(response._file_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+			if (!response._file_fd.is_open())
+			{
+				// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!3\n");
+				response.client_done = true;
+				return;
+			}
+			response._file_fd.seekg(response.sent, std::ios::beg);
+		}
 
-	// else 
-	// {
-	// 	if (!response._file_fd.is_open() && response._file_path.size() != 0)
-	// 	{
-	// 		response._file_fd.open(response._file_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-	// 		if (!response._file_fd.is_open())
-	// 		{
-	// 			// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!3\n");
-	// 			response.client_done = true;
-	// 			return;
-	// 		}
-	// 		response._file_fd.seekg(response.sent, std::ios::beg);
-	// 	}
-
-	// 	char buf[1024];
-	// 	bzero(buf, 1024);
-	// 	response._file_fd.read(buf, 1024);
-	// 	size_t buffer_size = response._file_fd.gcount();
-	// 	if (buffer_size)
-	// 	{
-	// 		keep_track = send(response.client_fd, buf, buffer_size, 0);
-	// 		if (keep_track <= 0)
-	// 		{
-	// 			// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!4\n");
-	// 			response.client_done = true;
-	// 			return;
-	// 		}
-	// 		response.sent += keep_track;
-	// 		bzero((buf), 1024);
-	// 	}
-	// 	response._file_fd.close();
-	// }
-	// if (response.sent == response._contentLength)
-	// {
-	// 	// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!5\n");
-	// 	response.client_done = true;
-	// 	return;
-	// }
-	// if (req.getMethod() != "GET" && !response._contentLength)
-	// {
-	// 	// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!6\n");
-    // 	response.client_done = true;
-	// 	return;
-	// }
+		char buf[1024];
+		bzero(buf, 1024);
+		response._file_fd.read(buf, 1024);
+		size_t buffer_size = response._file_fd.gcount();
+		if (buffer_size)
+		{
+			keep_track = send(response.client_fd, buf, buffer_size, 0);
+			if (keep_track <= 0)
+			{
+				// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!4\n");
+				response.client_done = true;
+				return;
+			}
+			response.sent += keep_track;
+			bzero((buf), 1024);
+		}
+		response._file_fd.close();
+	}
+	std::cout << "sent:  " << response.sent << " constent length: " << response._contentLength << std::endl;
+	if (response.sent == response._contentLength)
+	{
+		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!5\n");
+		response.client_done = true;
+		return;
+	}
+	if (req.getMethod() != "GET" && !response._contentLength)
+	{
+		// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!6\n");
+    	response.client_done = true;
+		return;
+	}
 }
 
 

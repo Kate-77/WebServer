@@ -47,7 +47,7 @@ class Response
       //void        setContentLength(HttpRequestParser & request, Parser & server); // set content length of resource
       
       void        handleResponse(HttpRequestParser & request, Parser &server);
-      Parser      *findLocation(const std::map<std::string, Parser *>& locations, const std::string& path);
+      int         findLocation(Parser &server, const std::string& path);
       void        callErrorPage(Parser& server, int code);
       void        generateErrorPage(int code);
       std::string statusMessage(int code);
