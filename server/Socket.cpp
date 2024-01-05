@@ -41,8 +41,8 @@ void Socket::createServers(const std::vector<Parser *> *servers, std::vector<std
 	{
 		server_address.sin_family = AF_INET;
 		server_address.sin_port = (*it)->getPort(); 
-		server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-		// server_address.sin_addr.s_addr = (*it)->getHost();
+		// server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+		server_address.sin_addr.s_addr = (*it)->getHost();
 		memset(server_address.sin_zero, '\0', sizeof(server_address.sin_zero));
 
 		//create socket

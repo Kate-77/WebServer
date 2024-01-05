@@ -367,14 +367,17 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 // Get Method (file?cgi:normal)
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    std::map<std::string, std::string>cgis = server.getCgi();
-    std::map<std::string, std::string>::const_iterator it = cgis.begin();
+	std::map<std::string, std::string> pp = server.getCgi();
+    std::map<std::string, std::string>::const_iterator it = pp.begin();
     std::string fileExtension = getExtension(path);
-    while (it != cgis.end()) 
+    while (it != server.getCgi().end()) 
     {
         if ( fileExtension == it->first)
         {
-            this->_cgi_bin = it->second;
+			std::map<std::string, std::string> mm =server.getCgi();
+            std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
+            if (it1 != server.getCgi().end())
+                this->_cgi_bin = it1->second;
             handleCgi(request, path, server);
             break ;
         }
@@ -576,15 +579,19 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 void Response::handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 {
     // Handle directory requests with index file
-    std::map<std::string, std::string>cgis = server.getCgi();
-    std::map<std::string, std::string>::const_iterator it = cgis.begin();
+
+	std::map<std::string, std::string> ee;
+    std::map<std::string, std::string>::const_iterator it = ee.begin();
     std::string fileExtension = getExtension(path);
     bool cgi = 0;
-    while (it != cgis.end()) 
+    while (it != server.getCgi().end()) 
     {
         if ( fileExtension == it->first)
         {
-            this->_cgi_bin = it->second;
+			std::map<std::string, std::string> mm = server.getCgi();
+            std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
+            if (it1 != server.getCgi().end())
+                this->_cgi_bin = it1->second;
             handleCgi(request, path, server);
             cgi = 1;
             break ;

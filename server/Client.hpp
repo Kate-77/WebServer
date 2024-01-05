@@ -5,6 +5,7 @@
 #include "../response/Response.hpp"
 
 class HttpRequestParser;
+class Response;
 
 class Client {
 	private:

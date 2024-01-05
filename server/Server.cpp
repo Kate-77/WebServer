@@ -86,7 +86,7 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 		if (select(fdmax+1, &tmp_read_fds, &tmp_write_fds, NULL, NULL) == -1)
 		{
 			perror("select");
-			exit(1);
+			break;
 		}
 
 		// handle new connections
@@ -98,8 +98,9 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 			//check for read
 			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_read_fds))
 			{
-				printf("read\n");
+				// printf("******read start*********\n");
 				unsigned char buf[1024];
+				bzero(buf, 1024);
 				ssize_t nbytes;
 				
 				if ((nbytes = recv(clients[i].first.getClientSocket(), buf, sizeof(buf), 0)) <= 0)
@@ -111,41 +112,50 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 				else
 					//parse request
 					parse_req(clients[i].first, buf, nbytes, master_read_fds, master_write_fds);
+
+				// printf("method = [%s]\n", clients[i].first.request.getMethod().c_str());
+				// printf("path = [%s]\n", clients[i].first.request.getPath().c_str());
+				// printf("query = [%s]\n", clients[i].first.request.getQuery().c_str());
+				// printf("version = [%s]\n", clients[i].first.request.getVersion().c_str());
+				// std::map<std::string, std::string> headersMap = clients[i].first.request.getHeadersMap();
+				// for (std::map<std::string, std::string>::const_iterator it = headersMap.begin(); it != headersMap.end(); ++it) {
+   				// 	std::cout << it->first << " => " << it->second << '\n';}
+				// printf("******read end*********\n");
 			}
-			//check for write
-			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_write_fds))
-			{
-				clients[i].first.response.client_fd = clients[i].first.getClientSocket();
+			// check for write
+			// if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_write_fds))
+			// {
+			// 	// printf("******write start*********\n");
+			// 	clients[i].first.response.client_fd = clients[i].first.getClientSocket();
 
-				if(!clients[i].first.response.res_initialized)
-				{
-					// clients[i].first.response.handleResponse(clients[i].first.request , *clients[i].second);
-					clients[i].first.response.res_initialized = true;
-				}
+			// 	if(!clients[i].first.response.res_initialized)
+			// 	{
+			// 		clients[i].first.response.handleResponse(clients[i].first.request , *clients[i].second);
+			// 		clients[i].first.response.res_initialized = true;
+			// 	}
 
-				if (clients[i].first.response.client_done)
-				{
-					FD_CLR(clients[i].first.getClientSocket(), &master_write_fds);
-					close(clients[i].first.getClientSocket());
-					clients[i].first.response._file_fd.close();
-					if (access(clients[i].first.request.bodyFileName.c_str(), F_OK) != -1)
-						remove(clients[i].first.request.bodyFileName.c_str());
-					else
-						std::cout << "Error deleting bodyfile file" << std::endl;
-					clients.erase(clients.begin() + i);
-					i--;
-				}
-				else
-				{
-					//send response
-					resp_send(clients[i].first.response);
-				}
-
-			} 
-			
+			// 	if (clients[i].first.response.client_done)
+			// 	{
+			// 		// printf("client done & removed from write\n");
+			// 		FD_CLR(clients[i].first.getClientSocket(), &master_write_fds);
+			// 		close(clients[i].first.getClientSocket());
+			// 		clients[i].first.response._file_fd.close();
+			// 		if (access(clients[i].first.request.bodyFileName.c_str(), F_OK) != -1 && clients[i].first.request.getMethod() == "POST")
+			// 			remove(clients[i].first.request.bodyFileName.c_str());
+			// 		// else
+			// 		// 	std::cout << "Error delete" << std::endl;
+			// 		clients.erase(clients.begin() + i);
+			// 		i--;
+			// 	}
+			// 	else
+			// 	{
+			// 		//send response
+			// 		// printf("sending response\n");
+			// 		resp_send(clients[i].first.response, clients[i].first.request);
+			// 	}
+			// } 
 		}		
 	}
-
 }
 
 void Server::add_servers(std::vector<std::pair<Socket, Parser *> > &servers, fd_set &master_read_fds)
@@ -205,32 +215,114 @@ void Server::handle_recv_err(int socket, ssize_t nbytes, int i, fd_set &master_r
 void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_set &master_read_fds, fd_set &master_write_fds)
 {
 	int Done = 0;
+	buf[nbytes] = '\0';
 
 	try {
-		printf("parse\n");
+		// printf("***parse request****\n");
 		client.request.parseRequest(nbytes, buf, Done);
 	}
 	catch (int code) {
 		client.request.setStatusCode(code);
 		Done = 1;
 	}
-	  printf("code = %d\n", client.request.getStatusCode());
+
+	// printf("code = %d\n", client.request.getStatusCode());
+
 	if (Done == 1)
 	{
-		printf("Done\n");
+		// printf("Req Done _ moved to write\n");
 		//move client to write set
 		FD_CLR(client.getClientSocket(), &master_read_fds);
 		FD_SET(client.getClientSocket(), &master_write_fds);
 	}
 }
 
-void Server::resp_send(Response &response)
+void Server::resp_send(Response &response, HttpRequestParser &req)
 {
-	const char* message = "Hello, world!";
-    if (send(response.client_fd, message, strlen(message), 0) == -1) {
-        perror("send***********");
-        // close(new_fd);
-        // close(sockfd);
-        exit(EXIT_FAILURE);
+	// //general response to test
+	// std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nHello, world!";
+
+	// if (send(response.client_fd, httpResponse.c_str(), httpResponse.length(), 0) == -1)
+	// 	perror("send");
+
+	// response.client_done = true;
+
+	//send dlm39ol
+	// 1-head
+	ssize_t keep_track = 0;
+	// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sending response\n");
+
+	if(response._head.size() != 0)
+    {
+		// printf("sending head: %s\n", response._head.c_str());
+        keep_track = send(response.client_fd, response._head.c_str(), response._head.size(), 0) ;
+
+        if(response.sent < 0)
+        {
+			// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n");
+            response.client_done = true;
+            return;
+        }
+        response._head = "";
     }
+	else if (response._response.size() != 0)
+	{
+		keep_track = send(response.client_fd, response._response.c_str(), response._response.size(), 0);
+		if (keep_track <= 0)
+		{
+			// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2\n");
+			response.client_done = true;
+            return;
+		}
+		response._response = "";
+		response.sent += keep_track;
+	}
+
+	else 
+	{
+		if (!response._file_fd.is_open() && response._file_path.size() != 0)
+		{
+			response._file_fd.open(response._file_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+			if (!response._file_fd.is_open())
+			{
+				// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!3\n");
+				response.client_done = true;
+				return;
+			}
+			response._file_fd.seekg(response.sent, std::ios::beg);
+		}
+
+		char buf[1024];
+		bzero(buf, 1024);
+		response._file_fd.read(buf, 1024);
+		size_t buffer_size = response._file_fd.gcount();
+		if (buffer_size)
+		{
+			keep_track = send(response.client_fd, buf, buffer_size, 0);
+			if (keep_track <= 0)
+			{
+				// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!4\n");
+				response.client_done = true;
+				return;
+			}
+			response.sent += keep_track;
+			bzero((buf), 1024);
+		}
+		response._file_fd.close();
+	}
+	if (response.sent == response._contentLength)
+	{
+		// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!5\n");
+		response.client_done = true;
+		return;
+	}
+	if (req.getMethod() != "GET" && !response._contentLength)
+	{
+		// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!6\n");
+    	response.client_done = true;
+		return;
+	}
 }
+
+
+

@@ -18,6 +18,7 @@ class Response
       int                        client_fd; //zowa
       bool                       res_initialized; //zowa
       bool                       client_done; //zowa
+	  size_t					sent;
       std::string                _file;
       std::string                _file_path; // path of file
       std::fstream               _file_fd; // file descriptor

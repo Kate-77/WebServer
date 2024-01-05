@@ -298,8 +298,10 @@ int CGI::initEnv(void)
    }
   //get all request header // revision
   //get all request header and add HTTP + toupper
-  std::map<std::string, std::string>head_mp = this->_Request.getHeadersMap();
-  for (std::map<std::string, std::string>::const_iterator it = head_mp.begin(); it != head_mp.end(); ++it) 
+
+		std::map<std::string, std::string> headers = this->_Request.getHeadersMap();
+
+  for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) 
   {
     if (false == it->second.empty()) 
     {

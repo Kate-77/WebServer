@@ -20,8 +20,9 @@ class HttpRequestParser {
 		std::map<std::string, std::string> headers_map;
 		bool req_done;
 		std::string reqLine_Headers; //
+		ssize_t bytes_written; //
 	public:
-	
+
 		std::string bodyFileName;
 
 		//canonical form
