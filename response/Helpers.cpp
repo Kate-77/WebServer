@@ -577,16 +577,15 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 void Response::handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 {
     // Handle directory requests with index file
-    std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
+    std::map<std::string, std::string>cgis = server.getCgi();
+    std::map<std::string, std::string>::const_iterator it = cgis.begin();
     std::string fileExtension = getExtension(path);
     bool cgi = 0;
-    while (it != server.getCgi().end()) 
+    while (it != cgis.end()) 
     {
         if ( fileExtension == it->first)
         {
-            std::map<std::string, std::string>::const_iterator it1 = server.getCgi().find(it->first);
-            if (it1 != server.getCgi().end())
-                this->_cgi_bin = it1->second;
+            this->_cgi_bin = it->second;
             handleCgi(request, path, server);
             cgi = 1;
             break ;
