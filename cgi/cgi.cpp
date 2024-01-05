@@ -109,7 +109,7 @@ int CGI::execute(void)
     // WUNTRACED : recevoir l'information concernant également les fils bloqués si on ne l'a pas encore reçue.
     // Dans le cas où cela ne vous intéresse pas, il suffit de mettre le paramètre 0.
     // Notez que waitpid(-1, status, 0) correspond à la fonction wait.
-    ret = waitpid(pid, &status, 0); //WNOHANG
+    ret = waitpid(pid, &status, WNOHANG); //WNOHANG
     // WIFEXITED(status) Elle renvoie vrai si le statut provient d'un processus fils qui s'est terminé en quittant le main avec return ou avec un appel à exit.
     // WEXITSTATUS(status) Elle renvoie le code de retour du processus fils passé à exit ou à return.
     // Cette macro est utilisable uniquement si vous avez utilisé WIFEXITED avant, et que cette dernière a renvoyé vrai.
@@ -143,7 +143,11 @@ int CGI::execute(void)
     {
       return (500); // 500 internal server error
     }
-
+    struct rlimit a;
+    a.rlim_cur = 30;
+    a.rlim_max = 30;
+    setrlimit(RLIMIT_CPU, &a);
+    // alarm(30);
     if(execve(this->_av[0], this->_av, this->_env) == -1)
     {
       std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
