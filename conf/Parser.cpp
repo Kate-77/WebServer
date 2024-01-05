@@ -4,7 +4,7 @@
 
 
 
-Parser::Parser(void) : _root(Default_Root), _autoindex(false), _client_max_body_size(ClientMaxBodySize), _return() 
+Parser::Parser(void) : _root(Default_Root), _autoindex(false), _client_max_body_size(ClientMaxBodySize), _return(), _body_size_bytes(1000000) 
 {
   //server block
   //the second iterator is a pointer to function of return type void and  vector iterator parametre
@@ -162,7 +162,7 @@ void Parser::printparser(const std::string & str) const
     std::cout << "    " << *it << std::endl;
   }
 
-  std::cout << "client_max_body_size: " << this->_client_max_body_size << std::endl;
+  std::cout << "client_max_body_size: " << this->_client_max_body_size << " in bytes: " << this->_body_size_bytes << std::endl;
   std::cout << "upload_store:         " << this->_upload_store << std::endl;
 
   std::cout << "return:" << std::endl;
@@ -183,6 +183,7 @@ void Parser::printparser(const std::string & str) const
     for (std::map<std::string, Parser *>::const_iterator it = this->_location.begin(); it != this->_location.end(); ++it)
     {
       std::cout << "    " << it->first << std::endl;
+       std::cout << "string location " << it->second->getslocation() << std::endl;
       it->second->printparser("----Location Block----");
     }
   }
@@ -222,8 +223,7 @@ void Parser::secondparser(_type::const_iterator & it)
       throw Parser::ParserException("Error! unknown directive: '" + *it + "' in 'server' block");
     }
   }  
-  //this->printparser("----Server Block----");
-
+  // this->printparser("----Server Block----");
   return ;
 }
 
@@ -241,9 +241,91 @@ std::map<std::string, Parser *> & Parser::getLocation(void)
 {
   return (this->_location);
 }
+
 std::map<int, std::string>  &         Parser::getstatuscode(void)
 {
   return (this->_code_status);
+}
+
+std::string &                         Parser::getRoot(void)
+{
+      return (this->_root);
+}
+
+std::string &                         Parser::getAlias(void)
+{
+      return (this->_alias);
+} 
+
+std::vector<std::string>         &    Parser::getIndex(void)
+{
+      return (this->_index);
+} 
+
+bool        &                         Parser::getAutoindex(void)
+{
+      return (this->_autoindex);
+} 
+
+std::map<int, std::string>            Parser::getError_page(void)
+{
+      return (this->_error_page);
+} 
+
+std::vector<std::string>              Parser::getLimit_except(void)
+{
+      return (this->_limit_except);
+} 
+
+std::string &                         Parser::getClient_max_body_size(void)
+{
+      return (this->_client_max_body_size);
+} 
+
+std::string &                         Parser::getUpload_store(void)
+{
+  return (this->_upload_store);
+      
+} 
+
+std::map<int, std::string>            Parser::getReturn(void)
+{
+      return (this->_return);
+} 
+
+std::map<std::string, std::string>    Parser::getCgi(void)
+{
+      return (this->_cgi);
+}
+
+uint16_t  & Parser::getPort(void)
+{
+  return this->_port;
+}
+
+in_addr_t & Parser::getHost(void)
+{
+  return this->_host;
+}
+
+unsigned int  & Parser::getPortnormal()
+{
+  return this->_portnormal;
+}
+
+ std::string & Parser::getHostnormal()
+{
+  return this->_hostnormal;
+}
+
+std::string & Parser::getslocation()
+{
+  return this->_slocation;
+}
+
+unsigned int &          Parser::getbodysizebytes()
+{
+  return this->_body_size_bytes;
 }
 
 Parser * Parser::copyLocation(void) 
@@ -269,13 +351,6 @@ void Parser::parseLocation(_type::const_iterator & it)
   {
     throw Parser::ParserException("Error! duplicate value in  'location' block ");
   }
-  //match modifier
-  if(it->find_first_not_of("=~*^") == std::string::npos)
-   {
-    location.append(" ");
-      it++;
-    location.append(*it);
-   }
   //uri
   if(it->find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%\\") == std::string::npos)
     it++;
@@ -326,6 +401,8 @@ void Parser::parseLocation(_type::const_iterator & it)
 
   // add location value
   this->_location[location] = copy;
+  //save string
+  this->_location[location]->_slocation = location;
   return ;
 }
 
@@ -438,15 +515,26 @@ void Parser::parseListen(_type::const_iterator & it)
     throw Parser::ParserException("Error! invalid value on 'listen' directive");
   }
   address_port * ip_port = new address_port();
-  ip_port->_address = ip;
-  ip_port->_port = port;
+  ip_port->_address = "0";
+  ip_port->_port = 1000000;
   // check value not duplicated
   // if (std::find(this->_listen.begin(), this-> _listen.end(), ip_port) != this->_listen.end()) 
+  // for (std::vector<address_port *>::const_iterator it = this->_listen.begin(); it != this->_listen.end(); ++it) 
+  // {
+  //   if((*it)->_address == ip_port->_address && (*it)->_port == ip_port->_port)
+  //     throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+  // }
   for (std::vector<address_port *>::const_iterator it = this->_listen.begin(); it != this->_listen.end(); ++it) 
   {
-    if((*it)->_address == ip_port->_address && (*it)->_port == ip_port->_port)
-      throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+    if((*it)->_address != "0" && (*it)->_port != 1000000 )
+      throw Parser::ParserException("Error! too many directives 'listen'");
   }
+  ip_port->_address = ip;
+  ip_port->_port = port;
+  this->_portnormal = port;
+  this->_hostnormal = ip;
+  this->_host = inet_addr(ip.c_str());
+  this->_port = htons(port);
   // save
   this->_listen.push_back(ip_port);
   // check semicolon
@@ -686,6 +774,12 @@ void Parser::parseClientMaxBodySize(_type::const_iterator & it)
   }
   // save 
   this->_client_max_body_size = static_cast<std::string>(it->c_str());
+  if(this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'M' || this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'm')
+      this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()) * 1000000);
+  else if (this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'K' || this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'k')
+        this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()) * 1000);
+  else 
+      throw Parser::ParserException("Error! missing size unit(k K m M) near directive 'client_max_body_size'");
   // check semicolon
   ++it;
   if ("}" == *it) 

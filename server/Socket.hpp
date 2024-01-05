@@ -29,6 +29,6 @@ class Socket
 		void setServerAddress(struct sockaddr_in server_address);
 
 		//methods
-		void createServers();
+		void createServers(const std::vector<Parser *> *servers, std::vector<std::pair<Socket, Parser *> > & final_servers);
 };
 

@@ -171,6 +171,24 @@ void Lexer::preparsing(void)
   {
     throw Lexer::LexerException("Error! missing 'server' block");
   }
+  for(std::vector<Parser *>::const_iterator it = this->_parserv.begin(); it != this->_parserv.end(); it++)
+  {
+      std::vector<address_port *>  b = (*it)->getListen();
+      std::vector<address_port *>::const_iterator c = b.begin();
+      std::string ip = (*c)->_address;
+      unsigned int port = (*c)->_port;
+      // std::cout << "first " << ip << ":" <<port << std::endl;
+      for(std::vector<Parser *>::const_iterator its = this->_parserv.begin(); its != it; its++)
+      {
+        std::vector<address_port *> ip_port = (*its)->getListen();
+        for (std::vector<address_port *>::const_iterator itl = ip_port.begin(); itl != ip_port.end(); ++itl) 
+        {
+        // std::cout << "second " << (*itl)->_address << ":" <<(*itl)->_port << std::endl;
+          if((*itl)->_address == ip && (*itl)->_port == port)
+            throw Parser::ParserException("Error! duplicate value in directive 'listen'");
+        }
+      }
+  }
   return ;
 }
 

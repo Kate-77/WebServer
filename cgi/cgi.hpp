@@ -13,16 +13,19 @@
 # include <dirent.h> 
 # include <algorithm>
 # include <cstring> 
-
-//class Request;
-//class Response;
+# include "../response/Response.hpp"
+# include "../request/HttpRequestParser.hpp"
 
 const size_t        Default_buffer = 8192;
 const std::string   end_of_file = "\r\n";
 const std::string random_tmp_file = "/tmp/a";
 
+class Response;
+class HttpRequestParser;
 class CGI {
   private:
+    HttpRequestParser & _Request;
+    Response           & _Response;
     //fd 0
     static const int fRead = 0;
     //fd 1
@@ -48,21 +51,24 @@ class CGI {
     //env has parsed request and meta-variables
 
     std::string       _body; // save cgi output into body
-
+    //trim
+    std::string & lefttrim(std::string & s, const char * t);
+    std::string & righttrim(std::string & s, const char * t);
+    std::string & trim(std::string & s, const char * t);
     //initialize env
     int initEnv( void );
 
   public:
     //Constructor
-    // CGI( const Request & Request, const Response & Response );
-    CGI(void);
+    CGI(HttpRequestParser & Request, Response & Response);
+    // CGI(void);
     //Destructor
     ~CGI( void );
     
     int execute( void );
     //parse headers and body from response
-    // void parseHeadersAndBody(std::map<std::string, std::string> & headers, std::string & body);
-    void parseHeadersAndBody( void);
+    void parseHeadersAndBody(std::map<std::string, std::string> &  headers, std::string & body);
+    // void parseHeadersAndBody( void);
 
 };
 
