@@ -219,7 +219,7 @@ void Parser::secondparser(_type::const_iterator & it)
       throw Parser::ParserException("Error! unknown directive: '" + *it + "' in 'server' block");
     }
   }  
-  this->printparser("----Server Block----");
+  // this->printparser("----Server Block----");
   return ;
 }
 

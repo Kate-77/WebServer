@@ -410,6 +410,7 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
         callErrorPage(server, 404);
     else 
         cgi.parseHeadersAndBody(cgi_headers, this->_body);
+        
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
