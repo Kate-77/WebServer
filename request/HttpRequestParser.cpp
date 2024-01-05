@@ -22,6 +22,7 @@ HttpRequestParser::HttpRequestParser() {
 	bodyFileFD = -1;
 	req_done = false;
 	reqLine_Headers = "";
+	bytes_written = 0;
 }
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -282,27 +283,33 @@ void HttpRequestParser::parse_headers(std::istringstream &headers)
 
 }
 
-void HttpRequestParser::parse_body(unsigned char *buf, ssize_t nbytes, int &Done)
+void HttpRequestParser::parse_body(unsigned char *buf, size_t nbytes, int &Done)
 {
 	//handle parsing normal
 	if (headers_map.find("Content-Length") != headers_map.end())
 	{
+		size_t content_length = std::stoi(headers_map.find("Content-Length")->second.c_str());
+		// printf("nbytes		   = [%ld]\n", nbytes);
 		if (write(this->bodyFileFD, buf, nbytes) != -1)
-			this->bytes_written = nbytes;
+			this->bytes_written += nbytes;
 		else
 			throw 500;
-		ssize_t content_length = atoi(headers_map.find("Content-Length")->second.c_str());
-		if (bytes_written > content_length)
-			throw 409;
 		if (content_length == bytes_written)
 		{
 			Done = 1;
 			close(this->bodyFileFD);
 		}
+		else if (bytes_written > content_length)
+		{
+		// printf("bytes_written  = [%ld]\n", bytes_written);
+		// printf("content_length = [%ld]\n", content_length);
+			throw 409;
+		}
 	}
 	//handle chunked
 	else if (headers_map.find("Transfer-Encoding") != headers_map.end())
 	{
+		printf("chunked*****\n");
 		parse_chunked_body(buf, nbytes, Done);
 	}
 	else

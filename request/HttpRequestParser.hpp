@@ -20,7 +20,7 @@ class HttpRequestParser {
 		std::map<std::string, std::string> headers_map;
 		bool req_done;
 		std::string reqLine_Headers; //
-		ssize_t bytes_written; //
+		size_t bytes_written; //
 	public:
 
 		std::string bodyFileName;
@@ -61,6 +61,6 @@ class HttpRequestParser {
 		void parse_request_line(std::string request_line);
 		std::string generateName();
 		void parse_headers(std::istringstream &headers);
-		void parse_body(unsigned char *buf, ssize_t nbytes, int &Done);
+		void parse_body(unsigned char *buf, size_t nbytes, int &Done);
 		void parse_chunked_body(unsigned char *buf, ssize_t nbytes, int &Done);
 };
