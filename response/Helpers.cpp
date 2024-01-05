@@ -346,7 +346,9 @@ void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestP
         std::vector<std::string>::const_iterator it = this->_location->getIndex().begin();
         while (it != this->_location->getIndex().end()) 
         {
-            std::string indexPath = constructFilePath(directoryPath + "/" + *it);
+            printf("construct: %s\n", it->c_str());
+            // std::string indexPath = constructFilePath(directoryPath + "/" + *it);
+            std::string indexPath = directoryPath + *it;
             if (!access(indexPath.c_str(), F_OK))
             {
                 handleCgiOrFileGet(request, indexPath, server);
@@ -371,22 +373,25 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 // Get Method (file?cgi:normal)
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-	std::map<std::string, std::string> pp = server.getCgi();
-    std::map<std::string, std::string>::const_iterator it = pp.begin();
-    std::string fileExtension = getExtension(path);
-    while (it != server.getCgi().end()) 
-    {
-        if ( fileExtension == it->first)
-        {
-			std::map<std::string, std::string> mm =server.getCgi();
-            std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
-            if (it1 != server.getCgi().end())
-                this->_cgi_bin = it1->second;
-            handleCgi(request, path, server);
-            break ;
-        }
-        ++it;
-    }
+    (void ) request;
+	// std::map<std::string, std::string> pp = server.getCgi();
+    // std::map<std::string, std::string>::const_iterator it = pp.begin();
+    // std::string fileExtension = getExtension(path);
+    // while (it != server.getCgi().end()) 
+    // {
+    //     if ( fileExtension == it->first)
+    //     {
+	// 		std::map<std::string, std::string> mm =server.getCgi();
+    //         std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
+    //         if (it1 != server.getCgi().end())
+    //             this->_cgi_bin = it1->second;
+    //         handleCgi(request, path, server);
+    //         break ;
+    //     }
+    //     ++it;
+    // }
+    printf("salaaaam anjilo");
+    
     serveFile(path, server);
 }
 
@@ -420,25 +425,28 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
 void Response::renderFile(Parser &server, const std::string &file)
 {
     this->_file_path = file;
+    printf("file:kjhfkwjef -> %s\n", file.c_str());
 
     this->_file_fd.open(file, std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
+        printf("haaahowa ya zebbii\n");
         std::ifstream::pos_type fileSize = _file_fd.tellg();
         _file_fd.seekg(0, std::ios::beg);
 
-        std::vector<char> fileBuffer(fileSize);
-        if (_file_fd.read(fileBuffer.data(), fileSize)) {
+        // std::vector<char> fileBuffer(fileSize);
+        // if (_file_fd.read(fileBuffer.data(), fileSize)) {
             this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
                          "Connection: close\r\n"
                          "Content-Type: " + getFileType(file) + "\r\n"
                          "Content-Length: " + printNumber(fileSize) + "\r\n\r\n";
             
-            this->_response = std::string(fileBuffer.data(), fileSize);
+            // this->_response = std::string(fileBuffer.data(), fileSize);
+            this->_contentLength = fileSize;
             this->_errorContentLength = fileSize;
-        } 
-        else
-            callErrorPage(server, 500); // Internal Server Error
+        // } 
+        // else
+        //     callErrorPage(server, 500); // Internal Server Error
 
         _file_fd.close();
     } 
@@ -449,7 +457,7 @@ void Response::renderFile(Parser &server, const std::string &file)
 void Response::serveFile(const std::string &filePath, Parser &server) 
 {
     std::ifstream fileStream(filePath);
-    if (fileStream.good())
+    if (fileStream.good() && !access(filePath.c_str(), F_OK))
         renderFile(server, filePath);
     else if (access(filePath.c_str(), F_OK))
         callErrorPage(server, 404);
@@ -476,6 +484,7 @@ bool endSlash(std::string file)
 
 std::string createPath(const std::string &path)
 {
+    printf("path : %s\n", path.c_str());
     // Check if the string is empty
     if (path.empty())
         return "/";
@@ -491,7 +500,9 @@ std::string Response::constructFilePath(const std::string &path)
 {
     std::string file = path;
 
-    if (_location->getslocation() != "/") {
+        printf("file : %s\n", file.c_str());
+
+    if (this->_locationPath != "/") {
         file.replace(0, _location->getslocation().length(), createPath(_location->getRoot()+ "/"));
     }
 

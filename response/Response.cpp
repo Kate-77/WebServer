@@ -150,6 +150,7 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
     std::string file = constructFilePath(request.getPath());
+    std::cout << " filee : " << file << std::endl;
     if (checkDirectory(file))
     {
         printf("watti \n");
