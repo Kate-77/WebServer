@@ -160,7 +160,7 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
     std::string file = constructFilePath(request.getPath());
     std::string extension = getExtension(file);
 
-    if (!_location->getUpload_store().empty())
+    if (_location->getUpload_store() == false)
         handleFilePost(request, server, file);
     else if (checkDirectory(request.getPath()))
         handleDirectoryPost(request, server, file);

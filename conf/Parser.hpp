@@ -45,12 +45,12 @@ class Parser {
     std::map<int, std::string>            _error_page; //defines the URI that will be shown for the specified errors
     std::vector<std::string>              _limit_except; //Limits allowed HTTP methods inside a location.
     std::string                           _client_max_body_size; //sets the max allowed size of the client request body
-    std::string                           _upload_store; //Specifies a directory to which output files will be saved to. 
-    std::map<int, std::string>            _return; //Stops processing and returns the specified code to a client.
+    bool                                  _upload_store; //Specifies a directory to which output files will be saved to. 
+    std::string                           _return; //Stops processing and returns the specified code to a client.
     std::map<std::string, std::string>    _cgi;
     std::string                           _slocation;
     unsigned int                          _body_size_bytes;
-    std::map<int, std::string>      _code_status;
+    std::map<int, std::string>            _code_status;
     //Copy constructor / inutile
     Parser(const Parser & other); 
 
@@ -101,8 +101,8 @@ class Parser {
     std::map<int, std::string>            getError_page(void); 
     std::vector<std::string>              getLimit_except(void); 
     std::string &                         getClient_max_body_size(void); 
-    std::string &                         getUpload_store(void); 
-    std::map<int, std::string>            getReturn(void); 
+    bool        &                         getUpload_store(void); 
+    std::string &                         getReturn(void); 
     std::map<std::string, std::string>    getCgi(void);
     std::string &                         getslocation(void);
     unsigned int &                        getbodysizebytes(void);

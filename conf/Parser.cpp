@@ -163,13 +163,9 @@ void Parser::printparser(const std::string & str) const
   }
 
   std::cout << "client_max_body_size: " << this->_client_max_body_size << " in bytes: " << this->_body_size_bytes << std::endl;
-  std::cout << "upload_store:         " << this->_upload_store << std::endl;
+  std::cout << "upload_store:         " << std::boolalpha << this->_upload_store << std::endl;
 
-  std::cout << "return:" << std::endl;
- for (std::map<int, std::string>::const_iterator it = this->_return.begin(); it != this->_return.end(); ++it) 
-  {
-    std::cout << "    " << it->first << " " << it->second << std::endl;
-  }
+  std::cout << "return:" << this->_return << std::endl;
 
   std::cout << "cgi:" << std::endl;
   for (std::map<std::string, std::string>::const_iterator it = this->_cgi.begin(); it != this->_cgi.end(); ++it) 
@@ -223,7 +219,7 @@ void Parser::secondparser(_type::const_iterator & it)
       throw Parser::ParserException("Error! unknown directive: '" + *it + "' in 'server' block");
     }
   }  
-  // this->printparser("----Server Block----");
+  this->printparser("----Server Block----");
   return ;
 }
 
@@ -282,13 +278,13 @@ std::string &                         Parser::getClient_max_body_size(void)
       return (this->_client_max_body_size);
 } 
 
-std::string &                         Parser::getUpload_store(void)
+bool &                         Parser::getUpload_store(void)
 {
   return (this->_upload_store);
       
 } 
 
-std::map<int, std::string>            Parser::getReturn(void)
+std::string &           Parser::getReturn(void)
 {
       return (this->_return);
 } 
@@ -352,7 +348,7 @@ void Parser::parseLocation(_type::const_iterator & it)
     throw Parser::ParserException("Error! duplicate value in  'location' block ");
   }
   //uri
-  if(it->find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%\\") == std::string::npos)
+  if(it->find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~/#[]@!$&'()+,;=%") == std::string::npos)
     it++;
   // check opening  brace
   if ("{" != *it) 
@@ -805,8 +801,18 @@ void Parser::parseUploadStore(_type::const_iterator & it)
     throw Parser::ParserException("Error! not enough values in directive 'upload_store'");
   }
 
-  // save 
-  this->_upload_store = *it;
+// save 
+  if ("on" == *it) 
+  {
+    this->_upload_store = true;
+  } 
+  else if ("off" == *it) 
+  {
+    this->_upload_store = false;
+  } 
+  else {
+    throw Parser::ParserException("Error! unknown value: '" + *it + "' in 'upload_store' directive");
+  }
 
   // check semicolon
   ++it;
@@ -851,7 +857,7 @@ void Parser::parseAlias(_type::const_iterator & it)
 
 void Parser::parseReturn(_type::const_iterator & it) 
 {
-  // check next token is not a closed brace, return requires two values
+  // check next token is not a closed brace
   if ("}" == *it) 
   {
     throw Parser::ParserException("Error! missing value and ';' near directive 'return'");
@@ -860,61 +866,11 @@ void Parser::parseReturn(_type::const_iterator & it)
   {
     throw Parser::ParserException("Error! not enough values in directive 'return'");
   };
-  std::vector<int> returnvalue;
-  std::map<int, std::string>::const_iterator itcs;
-  while (it->find_first_not_of("0123456789") == std::string::npos) 
-    {
-      // check semicolon && check status code is 1.. | 2.. | 4.. | 5.. or 3..
-      // text is optional
-      // if ("301" == *it || "302" == *it || "303" == *it || "307" == *it
-      //     || (it->length() == 3 && ('1' == (*it)[0] || '2' == (*it)[0] || '4' == (*it)[0] || '5' == (*it)[0])))  
-      int number = atoi(it->c_str());
-      itcs = this->_code_status.find(number);  
-      if(this->_code_status.end() != itcs)
-        {
-            returnvalue.push_back(atoi(it->c_str()));
-        } 
-      else 
-      {
-        throw Parser::ParserException("Error! invalid return status code in directive 'return'");
-      }
-      ++it;
-      if ("}" == *it) 
-      {
-        throw Parser::ParserException("Error! missing ';' near directive 'return'");
-       }
-      if (";" == *it) 
-      {
-        for (std::vector<int>::const_iterator n = returnvalue.begin(); n != returnvalue.end(); ++n) 
-         {
-                this->_return[*n] = "";
-         }
-         return ;
-       }
-       //text
-      if(it->find_first_not_of("0123456789") != std::string::npos)
-       {
-         --it;
-         break ;
-       }
-    }
-  ++it;
-  if ("}" == *it) 
-  {
-    throw Parser::ParserException("Error! missing value and ';' near directive 'return'");
-  }
-  if (";" == *it) 
-  {
-    throw Parser::ParserException("Error! not enough values in directive 'return'");
-  }
   //save
-  for (std::vector<int>::const_iterator n = returnvalue.begin(); n != returnvalue.end(); ++n) 
-  {
-      this->_return[*n] = *it;
-  }
-  // check semicolon
+  this->_return = *it;
   ++it;
-  if ("}" == *it) 
+  //check semicolon
+  if ("}" == *it)
   {
     throw Parser::ParserException("Error! missing ';' near directive 'return'");
   }
