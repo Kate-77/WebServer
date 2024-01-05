@@ -367,15 +367,14 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 // Get Method (file?cgi:normal)
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    std::map<std::string, std::string>::const_iterator it = server.getCgi().begin();
+    std::map<std::string, std::string>cgis = server.getCgi();
+    std::map<std::string, std::string>::const_iterator it = cgis.begin();
     std::string fileExtension = getExtension(path);
-    while (it != server.getCgi().end()) 
+    while (it != cgis.end()) 
     {
         if ( fileExtension == it->first)
         {
-            std::map<std::string, std::string>::const_iterator it1 = server.getCgi().find(it->first);
-            if (it1 != server.getCgi().end())
-                this->_cgi_bin = it1->second;
+            this->_cgi_bin = it->second;
             handleCgi(request, path, server);
             break ;
         }
