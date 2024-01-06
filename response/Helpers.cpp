@@ -56,6 +56,7 @@ std::string getFileType(const std::string& filePath)
         fileExtensions[".xul"] = "application/vnd.mozilla.xul+xml";
         fileExtensions[".zip"] = "application/zip";
         fileExtensions[".7z"] = "application/x-7z-compressed";
+		fileExtensions[".mp4"] = "video/mp4";
 
 
     std::string extension = getExtension(filePath);
@@ -139,6 +140,9 @@ std::string getExtensionFromType(const std::string &contentType)
         contentTypeToExtension["application/vnd.mozilla.xul+xml"] = ".xul";
         contentTypeToExtension["application/zip"] = ".zip";
         contentTypeToExtension["application/x-7z-compressed"] = ".7z";
+		contentTypeToExtension["video/mp4"] = ".mp4";
+
+
 
      std::map<std::string, std::string>::const_iterator it = contentTypeToExtension.find(contentType);
     if (it != contentTypeToExtension.end()) {
@@ -342,18 +346,26 @@ int Response::findLocation(Parser &server, const std::string& path)
 // Get Method for directory case
 void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server) 
 {
+	printf("handleDirectoryGet: %s\n", directoryPath.c_str());
     if (!_location->getIndex().empty()) {
         std::vector<std::string>::const_iterator it = this->_location->getIndex().begin();
         while (it != this->_location->getIndex().end()) 
         {
-            printf("construct: %s\n", it->c_str());
+            // printf("construct: %s, %s\n", it->c_str(), *it->c_str());
             // std::string indexPath = constructFilePath(directoryPath + "/" + *it);
-            std::string indexPath = directoryPath + *it;
+            std::string indexPath = repetetiveSlash(directoryPath + "/" + *it);
+			printf("indexPath: %s\n", indexPath.c_str());
             if (!access(indexPath.c_str(), F_OK))
             {
+				std::cout << "hanaa" << std::endl;
                 handleCgiOrFileGet(request, indexPath, server);
                 break ;
             }
+			else
+			{
+				std::cout << "hanaa2" << std::endl;
+				callErrorPage(server, 404);
+			}
             ++it;
         }
     }
@@ -390,7 +402,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
     //     }
     //     ++it;
     // }
-    printf("salaaaam anjilo");
+    printf("salaaaam anjilo\n");
     
     serveFile(path, server);
 }
@@ -457,6 +469,7 @@ void Response::renderFile(Parser &server, const std::string &file)
 
 void Response::serveFile(const std::string &filePath, Parser &server) 
 {
+	std::cout << "serveFile: " << filePath << std::endl;
     std::ifstream fileStream(filePath);
     if (fileStream.good() && !access(filePath.c_str(), F_OK))
         renderFile(server, filePath);

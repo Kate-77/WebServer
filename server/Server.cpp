@@ -261,7 +261,7 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
 	// // 1-head
 	ssize_t keep_track = 0;
 	// printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sending response\n");
-	printf("salaaaam \n");
+	// printf("salaaaam \n");
 	if(response._head.size() != 0)
     {
 		// printf("sending head: %s\n", response._head.c_str());
@@ -322,7 +322,7 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
 		}
 		response._file_fd.close();
 	}
-	std::cout << "sent:  " << response.sent << " constent length: " << response._contentLength << std::endl;
+	// std::cout << "sent:  " << response.sent << " constent length: " << response._contentLength << std::endl;
 	if (response.sent == response._contentLength)
 	{
 		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!5\n");

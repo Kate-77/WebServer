@@ -106,6 +106,7 @@ void Response::callErrorPage(Parser& server, int code)
         if (this->_file_fd.is_open()) {
             this->_errorContentLength = this->_file_fd.tellg();
             this->_file_fd.seekg(0, std::ios::beg);
+			// this->_contentLength = this->_errorContentLength;
 
             this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_errorContentLength) + "\r\n\r\n";
         } 

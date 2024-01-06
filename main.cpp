@@ -7,6 +7,7 @@
 
 int main(int ac, char **av)
 {
+	signal(SIGPIPE, SIG_IGN);
  	Lexer a;
     if (ac > 2)
     {
