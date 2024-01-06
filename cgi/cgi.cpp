@@ -3,6 +3,7 @@
 // kill -9 $(lsof -ti:5000,5001,5002)
 CGI::CGI(  HttpRequestParser & Request, Response & Response ) : _Request(Request), _Response(Response)
 {
+  
  this->_requestBody = this->_Request.bodyFileName; //-->request body
   //get current directory pathname: Absolut Path ex: /Users/abboutah/....../websev/
   char * tmp = getcwd(NULL, 0); // arguments 1:current pathname to buf, size of buf
@@ -109,7 +110,7 @@ int CGI::execute(void)
     // WUNTRACED : recevoir l'information concernant également les fils bloqués si on ne l'a pas encore reçue.
     // Dans le cas où cela ne vous intéresse pas, il suffit de mettre le paramètre 0.
     // Notez que waitpid(-1, status, 0) correspond à la fonction wait.
-    ret = waitpid(pid, &status, WNOHANG); //WNOHANG
+    ret = waitpid(pid, &status, 0); //WNOHANG
     // WIFEXITED(status) Elle renvoie vrai si le statut provient d'un processus fils qui s'est terminé en quittant le main avec return ou avec un appel à exit.
     // WEXITSTATUS(status) Elle renvoie le code de retour du processus fils passé à exit ou à return.
     // Cette macro est utilisable uniquement si vous avez utilisé WIFEXITED avant, et que cette dernière a renvoyé vrai.
@@ -148,6 +149,7 @@ int CGI::execute(void)
     a.rlim_max = 30;
     setrlimit(RLIMIT_CPU, &a);
     // alarm(30);
+    //std::cout << "here" << std::endl;
     if(execve(this->_av[0], this->_av, this->_env) == -1)
     {
       std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
@@ -180,8 +182,8 @@ int CGI::execute(void)
     //buffer.get()
     this->_body.insert(this->_body.length(), buffer, static_cast<std::string::size_type>(aux_ret)); //save the output
   }  
-  // std::cout << "-------CGI OUTPUT-------" << std::endl;
-  // std::cout << this->_body << std::endl;
+  std::cout << "-------CGI OUTPUT-------" << std::endl;
+  std::cout << this->_body << std::endl;
   return (200); // 200 ok
 }
 
@@ -217,10 +219,11 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
 {
   std::string key, value;
   std::string::size_type sep;
-
+  
   // iterate line by line //revision
   for (std::string::size_type eol = this->_body.find(end_of_file); eol != std::string::npos; eol = this->_body.find(end_of_file)) 
   {
+    std::cout << "heeere error" << std::endl;
     // if no more headers (two consecutive new lines)
     if (0 == eol) 
     {
@@ -236,7 +239,9 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
       continue ;
     }
     key   = this->_body.substr(0, sep);
+    std::cout << "%KEY" << key << std::endl;
     value = this->_body.substr(sep + 1, eol - sep - 1);
+    std::cout << "%VALUE" << value << std::endl;
     if (headers.end() != headers.find(key)) 
     {
       this->_body.erase(0, eol + end_of_file.length());
@@ -247,7 +252,6 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
     {
       headers.erase(key);
     }
-
     this->_body.erase(0, eol + end_of_file.length());
   }
 
@@ -258,7 +262,11 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
   {
     this->_body.erase(static_cast<std::string::size_type>(atoi(contentLength->second.c_str())));
   }
-
+  
+  // for(std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); it++)
+  // {
+  //     printf("HOUNA ## cgi: %s | %s\n",it->first.c_str(), it->second.c_str());
+  // }
   // body
   body = this->_body;
 }

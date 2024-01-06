@@ -151,9 +151,9 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 			return;
 		}
    		parseRequestLine_Headers(reqLine_Headers);
-	printf("method **********= [%s]\n", getMethod().c_str());
-	printf("path = [%s]\n", getPath().c_str());
-		printf("headers done\n");
+		// printf("method **********= [%s]\n", getMethod().c_str());
+		// printf("path = [%s]\n", getPath().c_str());
+		// printf("headers done\n");
 		if (bodyStart)
 			body_first = true;
 		req_done = true;
@@ -179,7 +179,7 @@ void HttpRequestParser::parseRequestLine_Headers(std::string reqLine_Headers)
 	std::istringstream iss(reqLine_Headers);
 	std::string request_line;
 
-	printf("reqLine_Headers = [%s]\n", reqLine_Headers.c_str());
+	//printf("reqLine_Headers = [%s]\n", reqLine_Headers.c_str());
 	std::getline(iss, request_line);
 
 	// Parse the request request_line

@@ -59,7 +59,7 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
         callErrorPage(server, _status_code);
         return;
     }
-    int foundLocation = findLocation(server, request.getPath());
+    int foundLocation = findLocation(server, request.getPath()); // add 301 condition (return)
     if (foundLocation == -1)
     {
         callErrorPage(server, 404);
@@ -88,8 +88,10 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 // Errors
 void Response::callErrorPage(Parser& server, int code) 
 {
+    (void)server;
     std::string path;
-    const std::map<int, std::string> &_error_pages = server.getError_page();
+    const std::map<int, std::string> _error_pages = _location->getError_page();
+    std::map<int, std::string>::const_iterator it = _error_pages.find(code);
 
     if (code == 301) 
     {
@@ -97,17 +99,18 @@ void Response::callErrorPage(Parser& server, int code)
         this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nLocation: " + this->_locationPath + "/" + "\r\n\r\n";
         return;
     }
-    printf("callError\n");
-    if (_error_pages.find(code) != _error_pages.end()) {
-        path = _error_pages.find(code)->second;
-        this->_file_path = path;
-        this->_file_fd.open(path, std::ios::in | std::ios::binary | std::ios::ate);
+
+    printf("#error: %s\n", it->second.c_str());
+    if (it != _error_pages.end()) { // TO DEBUG
+        this->_file_path = _location->getRoot() + it->second ;
+        printf("error page : |%s|\n", _file_path.c_str());
+        this->_file_fd.open(path, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
 
         if (this->_file_fd.is_open()) {
-            this->_errorContentLength = this->_file_fd.tellg();
-            this->_file_fd.seekg(0, std::ios::beg);
-			// this->_contentLength = this->_errorContentLength;
 
+            this->_errorContentLength = this->_file_fd.tellg();
+            this->_contentLength = this->_file_fd.tellg();
+            this->_file_fd.seekg(0, std::ios::beg);
             this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_errorContentLength) + "\r\n\r\n";
         } 
         else
@@ -123,6 +126,7 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
     std::string path;
     path = request.getPath();
 
+    printf("#################  DELETE  ###############\n");
     // check file existence
     if (access(path.c_str(), F_OK) == -1)
         callErrorPage(server, 404);
@@ -150,12 +154,11 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
 // Get Method
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
+    printf("#################  GET  ###############\n");
     std::string file = constructFilePath(request.getPath());
-    std::cout << " filee : " << file << std::endl;
+
     if (checkDirectory(file))
-    {
-        printf("watti \n");
-        handleDirectoryGet(file, request, server);}
+        handleDirectoryGet(file, request, server);
     else
         handleFileGet(file, request, server);
 }
@@ -163,17 +166,13 @@ void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 // Post Method
 void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
 {
+    printf("#################  POST  ###############\n");
     std::string file = constructFilePath(request.getPath());
-    std::string extension = getExtension(file);
-	std::cout << " filee : " << file << std::endl;
-	std::cout << " extension : " << extension << std::endl;
 
     if (_location->getUpload_store() == true)
-	{
-		std::cout << "upload store false" << std::endl;
-        handleFilePost(request, server, file);}
-    else if (checkDirectory(request.getPath()))
+        handleFilePost(request, server, file);
+    else if (checkDirectory(request.getPath())) // HOW TO TEST THIS?
         handleDirectoryPost(request, server, file);
-    else
+    else //CG left
         handleDirFile(request, server, file);
 }

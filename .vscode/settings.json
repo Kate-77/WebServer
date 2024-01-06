@@ -74,6 +74,7 @@
 		"__string": "cpp",
 		"__tuple": "cpp",
 		"chrono": "cpp",
-		"stack": "cpp"
+		"stack": "cpp",
+		"filesystem": "cpp"
 	}
 }

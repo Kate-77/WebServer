@@ -1,290 +1,10 @@
+
 # include "Response.hpp"
 
-// Content type
-std::string getFileType(const std::string& filePath)
-{
-    std::map<std::string, std::string> fileExtensions;
-        fileExtensions[".html"] = "text/html";
-        fileExtensions[".txt"] = "text/plain";
-        fileExtensions[".pdf"] = "application/pdf";
-        fileExtensions[".aac"] = "audio/aac";
-        fileExtensions[".css"] = "text/css";
-        fileExtensions[".csv"] = "text/csv";
-        fileExtensions[".doc"] = "application/msword";
-        fileExtensions[".epub"] = "application/epub+zip";
-        fileExtensions[".gif"] = "image/gif";
-        fileExtensions[".htm"] = "text/html";
-        fileExtensions[".html"] = "text/html";
-        fileExtensions[".ics"] = "text/calendar";
-        fileExtensions[".jar"] = "application/java-archive";
-        fileExtensions[".jpeg"] = "image/jpeg";
-        fileExtensions[".jpg"] = "image/jpeg";
-        fileExtensions[".js"] = "application/javascript";
-        fileExtensions[".json"] = "application/json";
-        fileExtensions[".mpeg"] = "video/mpeg";
-        fileExtensions[".mpkg"] = "application/vnd.apple.installer+xml";
-        fileExtensions[".odp"] = "application/vnd.oasis.opendocument.presentation";
-        fileExtensions[".ods"] = "application/vnd.oasis.opendocument.spreadsheet";
-        fileExtensions[".odt"] = "application/vnd.oasis.opendocument.text";
-        fileExtensions[".oga"] = "audio/ogg";
-        fileExtensions[".ogv"] = "video/ogg";
-        fileExtensions[".ogx"] = "application/ogg";
-        fileExtensions[".otf"] = "font/otf";
-        fileExtensions[".png"] = "image/png";
-        fileExtensions[".pdf"] = "application/pdf";
-        fileExtensions[".ppt"] = "application/vnd.ms-powerpoint";
-        fileExtensions[".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-        fileExtensions[".rar"] = "application/x-rar-compressed";
-        fileExtensions[".rtf"] = "application/rtf";
-        fileExtensions[".sh"] = "application/x-sh";
-        fileExtensions[".svg"] = "image/svg+xml";
-        fileExtensions[".swf"] = "application/x-shockwave-flash";
-        fileExtensions[".tar"] = "application/x-tar";
-        fileExtensions[".tif"] = "image/tiff";
-        fileExtensions[".tiff"] = "image/tiff";
-        fileExtensions[".ts"] = "application/typescript";
-        fileExtensions[".ttf"] = "font/ttf";
-        fileExtensions[".vsd"] = "application/vnd.visio";
-        fileExtensions[".wav"] = "audio/x-wav";
-        fileExtensions[".weba"] = "audio/webm";
-        fileExtensions[".webm"] = "video/webm";
-        fileExtensions[".webp"] = "image/webp";
-        fileExtensions[".xhtml"] = "application/xhtml+xml";
-        fileExtensions[".xls"] = "application/vnd.ms-excel";
-        fileExtensions[".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        fileExtensions[".xml"] = "application/xml";
-        fileExtensions[".xul"] = "application/vnd.mozilla.xul+xml";
-        fileExtensions[".zip"] = "application/zip";
-        fileExtensions[".7z"] = "application/x-7z-compressed";
-		fileExtensions[".mp4"] = "video/mp4";
-
-
-    std::string extension = getExtension(filePath);
-    if (!extension.empty()) 
-    {
-        // Search for the file type in the map
-        std::map<std::string, std::string>::const_iterator it = fileExtensions.find(extension);
-        if (it != fileExtensions.end())
-            return it->second; // Return the corresponding file type
-    }
-
-    // Default to application/octet-stream if the file type is not recognized
-    return "application/octet-stream";
-}
-
-// Get extension of file
-std::string getExtension(const std::string &path) 
-{
-    // Find the last dot in the file path
-    size_t position = path.rfind('.');
-    
-    // Check if a dot was found and it's not the last character in the path
-    if (position != std::string::npos && position != path.length() - 1) 
-        return path.substr(position);
-    else
-        return "";
-}
-
-std::string getExtensionFromType(const std::string &contentType)
-{
-    std::map<std::string, std::string> contentTypeToExtension;
-        contentTypeToExtension["text/html"] = ".html";
-        contentTypeToExtension["text/plain"] = ".txt";
-        contentTypeToExtension["application/pdf"] = ".pdf";
-        contentTypeToExtension["audio/aac"] = ".aac";
-        contentTypeToExtension["text/css"] = ".css";
-        contentTypeToExtension["text/csv"] = ".csv";
-        contentTypeToExtension["application/msword"] = ".doc";
-        contentTypeToExtension["application/epub+zip"] = ".epub";
-        contentTypeToExtension["image/gif"] = ".gif";
-        contentTypeToExtension["text/html"] = ".htm";
-        contentTypeToExtension["text/html"] = ".html";
-        contentTypeToExtension["text/calendar"] = ".ics";
-        contentTypeToExtension["application/java-archive"] = ".jar";
-        contentTypeToExtension["image/jpeg"] = ".jpeg";
-        contentTypeToExtension["image/jpeg"] = ".jpg";
-        contentTypeToExtension["application/javascript"] = ".js";
-        contentTypeToExtension["application/json"] = ".json";
-        contentTypeToExtension["video/mpeg"] = ".mpeg";
-        contentTypeToExtension["application/vnd.apple.installer+xml"] = ".mpkg";
-        contentTypeToExtension["application/vnd.oasis.opendocument.presentation"] = ".odp";
-        contentTypeToExtension["application/vnd.oasis.opendocument.spreadsheet"] = ".ods";
-        contentTypeToExtension["application/vnd.oasis.opendocument.text"] = ".odt";
-        contentTypeToExtension["audio/ogg"] = ".oga";
-        contentTypeToExtension["video/ogg"] = ".ogv";
-        contentTypeToExtension["application/ogg"] = ".ogx";
-        contentTypeToExtension["font/otf"] = ".otf";
-        contentTypeToExtension["image/png"] = ".png";
-        contentTypeToExtension["application/pdf"] = ".pdf";
-        contentTypeToExtension["application/vnd.ms-powerpoint"] = ".ppt";
-        contentTypeToExtension["application/vnd.openxmlformats-officedocument.presentationml.presentation"] = ".pptx";
-        contentTypeToExtension["application/x-rar-compressed"] = ".rar";
-        contentTypeToExtension["application/rtf"] = ".rtf";
-        contentTypeToExtension["application/x-sh"] = ".sh";
-        contentTypeToExtension["image/svg+xml"] = ".svg";
-        contentTypeToExtension["application/x-shockwave-flash"] = ".swf";
-        contentTypeToExtension["application/x-tar"] = ".tar";
-        contentTypeToExtension["image/tiff"] = ".tif";
-        contentTypeToExtension["image/tiff"] = ".tiff";
-        contentTypeToExtension["application/typescript"] = ".ts";
-        contentTypeToExtension["font/ttf"] = ".ttf";
-        contentTypeToExtension["application/vnd.visio"] = ".vsd";
-        contentTypeToExtension["audio/x-wav"] = ".wav";
-        contentTypeToExtension["audio/webm"] = ".weba";
-        contentTypeToExtension["video/webm"] = ".webm";
-        contentTypeToExtension["image/webp"] = ".webp";
-        contentTypeToExtension["application/xhtml+xml"] = ".xhtml";
-        contentTypeToExtension["application/vnd.ms-excel"] = ".xls";
-        contentTypeToExtension["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] = ".xlsx";
-        contentTypeToExtension["application/xml"] = ".xml";
-        contentTypeToExtension["application/vnd.mozilla.xul+xml"] = ".xul";
-        contentTypeToExtension["application/zip"] = ".zip";
-        contentTypeToExtension["application/x-7z-compressed"] = ".7z";
-		contentTypeToExtension["video/mp4"] = ".mp4";
-
-
-
-     std::map<std::string, std::string>::const_iterator it = contentTypeToExtension.find(contentType);
-    if (it != contentTypeToExtension.end()) {
-        return it->second;
-    }
-
-    return "";
-}
-
-// Check nature of file requested
-bool checkDirectory(std::string path)
-{
-	struct stat info;
-
-    if (stat(path.c_str(), &info) != 0)
-       return 0;
-    return S_ISDIR(info.st_mode);
-}
-
-// Check if directory is empty
-bool checkDirectoryEmpty(std::string path)
-{
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir (path.c_str())) != NULL) {
-        while ((ent = readdir (dir)) != NULL) {
-            if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
-                closedir (dir);
-                return false;
-            }
-        }
-        closedir (dir);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-std::string Response::statusMessage(int code) 
-{
-    this->_status_codes[100] = "Continue";
-    this->_status_codes[101] = "Switching Protocols";
-    this->_status_codes[102] = "Processing";
-    this->_status_codes[200] = "OK";
-    this->_status_codes[201] = "Created";
-    this->_status_codes[202] = "Accepted";
-    this->_status_codes[203] = "Non-Authoritative Information";
-    this->_status_codes[204] = "No Content";
-    this->_status_codes[205] = "Reset Content";
-    this->_status_codes[206] = "Partial Content";
-    this->_status_codes[207] = "Multi-Status";
-    this->_status_codes[208] = "Already Reported";
-    this->_status_codes[226] = "IM Used";
-    this->_status_codes[300] = "Multiple Choices";
-    this->_status_codes[301] = "Moved Permanently";
-    this->_status_codes[302] = "Found";
-    this->_status_codes[303] = "See Other";
-    this->_status_codes[304] = "Not Modified";
-    this->_status_codes[305] = "Use Proxy";
-    this->_status_codes[306] = "Switch Proxy";
-    this->_status_codes[307] = "Temporary Redirect";
-    this->_status_codes[308] = "Permanent Redirect";
-    this->_status_codes[400] = "Bad Request";
-    this->_status_codes[401] = "Unauthorized";
-    this->_status_codes[402] = "Payment Required";
-    this->_status_codes[403] = "Forbidden";
-    this->_status_codes[404] = "Not Found";
-    this->_status_codes[405] = "Method Not Allowed";
-    this->_status_codes[406] = "Not Acceptable";
-    this->_status_codes[407] = "Proxy Authentication Required";
-    this->_status_codes[408] = "Request Timeout";
-    this->_status_codes[409] = "Conflict";
-    this->_status_codes[410] = "Gone";
-    this->_status_codes[411] = "Length Required";
-    this->_status_codes[412] = "Precondition Failed";
-    this->_status_codes[413] = "Payload Too Large";
-    this->_status_codes[414] = "URI Too Long";
-    this->_status_codes[415] = "Unsupported Media Type";
-    this->_status_codes[416] = "Range Not Satisfiable";
-    this->_status_codes[417] = "Expectation Failed";
-    this->_status_codes[418] = "I'm a teapot";
-    this->_status_codes[421] = "Misdirected Request";
-    this->_status_codes[422] = "Unprocessable Entity";
-    this->_status_codes[423] = "Locked";
-    this->_status_codes[424] = "Failed Dependency";
-    this->_status_codes[425] = "Too Early";
-    this->_status_codes[426] = "Upgrade Required";
-    this->_status_codes[428] = "Precondition Required";
-    this->_status_codes[429] = "Too Many Requests";
-    this->_status_codes[431] = "Request Header Fields Too Large";
-    this->_status_codes[451] = "Unavailable For Legal Reasons";
-    this->_status_codes[500] = "Internal Server Error";
-    this->_status_codes[501] = "Not Implemented";
-    this->_status_codes[502] = "Bad Gateway";
-    this->_status_codes[503] = "Service Unavailable";
-    this->_status_codes[504] = "Gateway Timeout";
-    this->_status_codes[505] = "HTTP Version Not Supported";
-    this->_status_codes[506] = "Variant Also Negotiates";
-    this->_status_codes[507] = "Insufficient Storage";
-    this->_status_codes[508] = "Loop Detected";
-    this->_status_codes[510] = "Not Extended";
-    this->_status_codes[511] = "Network Authentication Required";
-
-    std::map<int, std::string>::const_iterator it = _status_codes.find(code);
-    if (it != _status_codes.end()) {
-        return it->second;
-    } else {
-        return "Unknown Status";
-    }
-}
-
-std::string printNumber(int value)
-{
-    if (value == 0) {
-        return "0";
-    }
-
-    std::string result;
-    bool is_negative = false;
-
-    if (value < 0) {
-        is_negative = true;
-        value = -value;
-    }
-
-    while (value > 0) {
-        char digit = '0' + (value % 10);
-        result = digit + result;
-        value /= 10;
-    }
-
-    if (is_negative) {
-        result = '-' + result;
-    }
-
-    return result;
-}
 
 // Generate error html page
 void Response::generateErrorPage(int code)
 {
-    printf("generateError\n");
     std::string errorStatus = statusMessage(code);
     std::string errorBody = "<!DOCTYPE html>\n";
     errorBody += "<html>\n";
@@ -316,7 +36,6 @@ void Response::generateErrorPage(int code)
     this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(errorBody.size()) + "\r\n\r\n";
     this->_response = errorBody;
     this->_contentLength = errorBody.size();
-    printf("response: %s\n", this->_response.c_str());
 }
 
 // Check if url matched a conf location
@@ -335,7 +54,7 @@ int Response::findLocation(Parser &server, const std::string& path)
         if (path.compare(0, _locationPath.length(), _locationPath) == 0)
         {
             this->_location = it->second;
-            printf("location: %s\n", _locationPath.c_str());
+            printf("location match : %s\n", _locationPath.c_str());
             return 42; // Match found
         }
         ++it;
@@ -346,26 +65,18 @@ int Response::findLocation(Parser &server, const std::string& path)
 // Get Method for directory case
 void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server) 
 {
-	printf("handleDirectoryGet: %s\n", directoryPath.c_str());
     if (!_location->getIndex().empty()) {
         std::vector<std::string>::const_iterator it = this->_location->getIndex().begin();
         while (it != this->_location->getIndex().end()) 
         {
-            // printf("construct: %s, %s\n", it->c_str(), *it->c_str());
-            // std::string indexPath = constructFilePath(directoryPath + "/" + *it);
             std::string indexPath = repetetiveSlash(directoryPath + "/" + *it);
-			printf("indexPath: %s\n", indexPath.c_str());
             if (!access(indexPath.c_str(), F_OK))
             {
-				std::cout << "hanaa" << std::endl;
                 handleCgiOrFileGet(request, indexPath, server);
                 break ;
             }
 			else
-			{
-				std::cout << "hanaa2" << std::endl;
 				callErrorPage(server, 404);
-			}
             ++it;
         }
     }
@@ -385,24 +96,27 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 // Get Method (file?cgi:normal)
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    (void ) request;
-	// std::map<std::string, std::string> pp = server.getCgi();
-    // std::map<std::string, std::string>::const_iterator it = pp.begin();
-    // std::string fileExtension = getExtension(path);
-    // while (it != server.getCgi().end()) 
-    // {
-    //     if ( fileExtension == it->first)
-    //     {
-	// 		std::map<std::string, std::string> mm =server.getCgi();
-    //         std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
-    //         if (it1 != server.getCgi().end())
-    //             this->_cgi_bin = it1->second;
-    //         handleCgi(request, path, server);
-    //         break ;
-    //     }
-    //     ++it;
-    // }
-    printf("salaaaam anjilo\n");
+    //(void ) request;
+	std::map<std::string, std::string> pp = _location->getCgi();
+    std::map<std::string, std::string>::const_iterator it = pp.begin();
+    std::string fileExtension = getExtension(path);
+    while (it != pp.end()) 
+    {
+        if ( fileExtension == it->first)
+        {
+            printf("wach hna\n");
+			std::map<std::string, std::string> mm =_location->getCgi();
+            std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
+            if (it1 != mm.end())
+            {
+                printf("wach lheh\n");
+                this->_cgi_bin = it1->second;
+            }
+            handleCgi(request, path, server);
+            break ;
+        }
+        ++it;
+    }
     
     serveFile(path, server);
 }
@@ -410,57 +124,69 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
 void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
     std::string key, value; //split the key and the value
+    const std::string   end_of_file = "\r\n"; //seperator
+    this->_file = path;
     std::map<std::string, std::string>  cgi_headers; //create map headers
-    // const std::string   end_of_file = "\r\n"; //seperator
+    serveFile(_file, server);
     std::istringstream a(this->_head);
     std::string line;
     while(std::getline(a, line))
     {
         std::istringstream b(line);
+        std::cout << "line : " << line <<  std::endl;
+        if(line.find(':') == std::string::npos | line.find(':') == 0)
+        {
+            std::getline(b, key, ' '); //key
+            std::getline(b, value); //value
+            cgi_headers[key] = key;
+             std::cout << "key1: " << key << "value1: " << value << std::endl;
+            continue ;
+        }
         std::getline(b, key, ':'); //key
         std::getline(b, value); //value
         std::cout << "key: " << key << "value: " << value << std::endl;
         cgi_headers[key] = value; // assign
     }
-    this->_file = path;
+    printf("cgi path: %s\n", path.c_str());
     CGI cgi = CGI(request, *this);
     this->_status_code = cgi.execute();
     if (this->_status_code == 500)
         callErrorPage(server, 500);
-    else if (this->_status_code == 404)
-        callErrorPage(server, 404);
-    else 
-        cgi.parseHeadersAndBody(cgi_headers, this->_body);
-        
+    else if (this->_status_code == 502)
+        callErrorPage(server, 502);
+    else
+    {
+
+        cgi.parseHeadersAndBody(cgi_headers, this->_response);
+        this->_head.erase();
+        for(std::map<std::string, std::string>::const_iterator it = cgi_headers.begin(); it != cgi_headers.end(); it++)
+        {
+            printf("#FIRST : %s | #SECOND %s\n",it->first.c_str(), it->second.c_str());
+            this->_head += it->first + ":" + it->second + end_of_file;
+            // printf("houna: %s\n", this->_head.c_str());
+        }
+        this->_head += "\r\n\r\n";
+    }
+    printf("response cgi: %s\n", this->_response.c_str());
+    printf("cgi header: %s\n", this->_head.c_str());
+    printf("here?\n");
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
 {
     this->_file_path = file;
-    printf("file:kjhfkwjef -> %s\n", file.c_str());
 
-    // this->_file_fd.open(file, std::ios::binary | std::ios::ate);
 	this->_file_fd.open(file, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
-        printf("haaahowa ya zebbii\n");
         std::ifstream::pos_type fileSize = _file_fd.tellg();
         _file_fd.seekg(0, std::ios::beg);
-
-        // std::vector<char> fileBuffer(fileSize);
-        // if (_file_fd.read(fileBuffer.data(), fileSize)) {
-            this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
-                         "Connection: close\r\n"
-                         "Content-Type: " + getFileType(file) + "\r\n"
-                         "Content-Length: " + printNumber(fileSize) + "\r\n\r\n";
-            
-            // this->_response = std::string(fileBuffer.data(), fileSize);
-            this->_contentLength = fileSize;
-            this->_errorContentLength = fileSize;
-        // } 
-        // else
-        //     callErrorPage(server, 500); // Internal Server Error
-
+        this->_contentLength = fileSize;
+        this->_errorContentLength = fileSize;
+        this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
+                    "Connection: close\r\n"
+                    "Content-Type: " + getFileType(_file_path) + "\r\n"
+                    "Content-Length: " + printNumber(_contentLength) + "\r\n\r\n";
         _file_fd.close();
     } 
     else
@@ -475,52 +201,10 @@ void Response::serveFile(const std::string &filePath, Parser &server)
         renderFile(server, filePath);
     else if (access(filePath.c_str(), F_OK))
         callErrorPage(server, 404);
+    else if (access(filePath.c_str(), R_OK))
+        callErrorPage(server, 401);
     else
         callErrorPage(server, 403);
-}
-
-std::string repetetiveSlash(std::string file)
-{
-    size_t pos = 0;
-    while ((pos = file.find("//", pos)) != std::string::npos) {
-        file.erase(pos, 1);  // Erase one of the consecutive slashes
-    }
-    return file;
-}
-
-bool endSlash(std::string file)
-{
-    if (file.back() == '/')
-        return 1;
-    else
-        return 0;
-}
-
-std::string createPath(const std::string &path)
-{
-    printf("path : %s\n", path.c_str());
-    // Check if the string is empty
-    if (path.empty())
-        return "/";
-
-    // Add a slash at the end if it's not already there
-    if (path.back() != '/')
-        return path + '/';
-
-    return path;
-}
-
-std::string Response::constructFilePath(const std::string &path)
-{
-    std::string file = path;
-
-        printf("file : %s\n", file.c_str());
-
-    if (this->_locationPath != "/") {
-        file.replace(0, _location->getslocation().length(), createPath(_location->getRoot()+ "/"));
-    }
-
-    return repetetiveSlash(file);
 }
 
 // Get Method listing directory in autoindex case
@@ -539,6 +223,7 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
             else {
                 dirEntryPath = request.getPath() + "/" + ent->d_name;
             }
+            printf("chno dirPath? : %s\n", dirEntryPath.c_str());
 
             output += "<li><a href=\"" + dirEntryPath + "\">" + ent->d_name + "</a></li>";
         }
@@ -546,61 +231,56 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
 
         output += "</ul></body></html>";
         this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
-                             "Connection: close\r\n"
-                             "Content-Type: text/html\r\n"
-                             "Content-Length: " + printNumber(output.size()) + "\r\n\r\n";
+                        "Connection: close\r\n"
+                        "Content-Type: text/html\r\n"
+                        "Content-Length: " + printNumber(output.size()) + "\r\n\r\n";
 
-        this->_response = this->_head + output;
+        this->_response = output;
         this->_errorContentLength = this->_response.size();
+        this->_contentLength = this->_response.size();
     } 
     else {
         callErrorPage(server, 403);
     }
 }
 
-std::string generateName() 
-{
-    std::string name = "uploads/";
-    std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    for (int i = 0; i < 5; i++) {
-        name += charset[rand() % charset.size()];
-    }
-    return name;
-}
-
 void Response::handleFilePost(HttpRequestParser &request, Parser &server, const std::string &file) 
 {
-    this->_contentType = request.getHeadersMap().find("Content-Type")->second;  
-	printf("handleFilePost: %s\n", file.c_str());
-	printf("handleFilePost type: %s\n", _contentType.c_str());
+    (void) file;
+    struct stat status;
+    this->_contentType = request.getHeadersMap().find("Content-Type")->second;
 	this->_post_file_name = request.getBodyFileName();
     std::string name = generateName();
-	printf("handleFilePost name: %s\n", name.c_str());
-    //this->contentType = getFileType(file);
-    std::string filename = name + getExtensionFromType(_contentType);
+    this->_file_path = name + getExtensionFromType(_contentType);
     std::string uploadDirectory = repetetiveSlash(_location->getRoot() + "/uploads/");
-	std::cout << "uploadDirectory: " << uploadDirectory << std::endl;
+
     // Check if the upload directory exists
-    if (access(uploadDirectory.c_str(), F_OK) == -1) {
+    if (access(uploadDirectory.c_str(), F_OK)) {
         callErrorPage(server, 404);
         return;
     }
 
-    this->_file_path = uploadDirectory + filename;
     // Move the uploaded file to the destination
-    // if (std::rename(this->_post_file_name.c_str(), this->_file_path.c_str()) != 0) {
-    //     std::remove(this->_post_file_name.c_str());
-    // }
-	std::rename(this->_post_file_name.c_str(), this->_file_path.c_str());
-    // Respond with 201 Created and location header
-    this->_head = "HTTP/1.1 201 Created\r\nContent-Type: " + getFileType(file) +
-           "\r\nContent-Length: 0\r\nLocation: " + this->_file_path + "\r\n\r\n";
+    else if (std::rename(this->_post_file_name.c_str(), this->_file_path.c_str()) != 0)
+        std::remove(this->_post_file_name.c_str());
+
+    // Create header
+    stat(_file_path.c_str(), &status);
+    this->_contentLength = status.st_size;
+    this->_errorContentLength = status.st_size;
+    this->_status_code = 201;
+    this->_head = "HTTP/1.1 " + printNumber(this->_status_code) + " Created"
+                + "\r\nConnection: close"
+                + "\r\nLocation: " + this->_locationPath  + this->_file_path
+                + "\r\nContent-Type: " + this->_contentType
+                + "\r\nContent-Length: " + printNumber(_contentLength) + "\r\n\r\n";
 }
 
 void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file)
 {
     // Handle directory requests
-    if (endSlash(request.getPath())) {
+    if (endSlash(request.getPath()) && request.getPath().size() != 1) {
+        printf("bayna hna\n");
         if (!this->_location->getIndex().empty())
             handleDirFile(request, server, file);
         else
@@ -612,19 +292,37 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 
 void Response::handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 {
+    printf("wach katdkhel a3chiri?\n");
     // Handle directory requests with index file
 
-	std::map<std::string, std::string> ee;
-    std::map<std::string, std::string>::const_iterator it = ee.begin();
-    std::string fileExtension = getExtension(path);
+	// std::map<std::string, std::string> ee;
+    // std::map<std::string, std::string>::const_iterator it = ee.begin();
+    // std::string fileExtension = getExtension(path);
     bool cgi = 0;
-    while (it != server.getCgi().end()) 
+    // while (it != server.getCgi().end()) 
+    // {
+    //     if ( fileExtension == it->first)
+    //     {
+	// 		std::map<std::string, std::string> mm = server.getCgi();
+    //         std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
+    //         if (it1 != server.getCgi().end())
+    //             this->_cgi_bin = it1->second;
+    //         handleCgi(request, path, server);
+    //         cgi = 1;
+    //         break ;
+    //     }
+    //     ++it;
+    // }
+    std::map<std::string, std::string> pp = _location->getCgi();
+    std::map<std::string, std::string>::const_iterator it = pp.begin();
+    std::string fileExtension = getExtension(path);
+    while (it != pp.end()) 
     {
         if ( fileExtension == it->first)
         {
-			std::map<std::string, std::string> mm = server.getCgi();
+			std::map<std::string, std::string> mm =_location->getCgi();
             std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
-            if (it1 != server.getCgi().end())
+            if (it1 != mm.end())
                 this->_cgi_bin = it1->second;
             handleCgi(request, path, server);
             cgi = 1;

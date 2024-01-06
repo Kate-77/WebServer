@@ -277,7 +277,6 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
     }
 	else if (response._response.size() != 0)
 	{
-		printf("alleuh\n");
 		// std::cout << response._response.c_str() << std::endl;
 		keep_track = send(response.client_fd, response._response.c_str(), response._response.size(), 0);
 		if (keep_track <= 0)
