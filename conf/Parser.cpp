@@ -280,8 +280,7 @@ std::string &                         Parser::getClient_max_body_size(void)
 
 bool &                         Parser::getUpload_store(void)
 {
-  return (this->_upload_store);
-      
+	return (this->_upload_store);
 } 
 
 std::string &           Parser::getReturn(void)

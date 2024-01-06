@@ -21,6 +21,7 @@ class Response
 	  size_t					sent;
       std::string                _file;
       std::string                _file_path; // path of file
+	  std::string				 _post_file_name;
       std::fstream               _file_fd; // file descriptor
       std::string                _cgi_bin;
       std::string                _response; // response to send to client
@@ -73,7 +74,7 @@ class Response
       //std::string getStatus(); // get status code
       //std::string getLocation(); // get location of resource
       //std::string getContentType(); // get content type of resource
-      //std::string getContentLength(); // get content length of resource   
+      std::string getContentLength(); // get content length of resource   
 };
 
 std::string getFileType(const std::string& filePath);

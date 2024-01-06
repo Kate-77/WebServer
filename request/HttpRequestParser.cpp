@@ -18,7 +18,7 @@ HttpRequestParser::HttpRequestParser() {
 	path = "";
 	query = "";
 	version = "";
-	bodyFileName = "/Users/zowa/Desktop/" + generateName();
+	bodyFileName = "./cache/" + generateName();
 	bodyFileFD = -1;
 	req_done = false;
 	reqLine_Headers = "";
@@ -151,15 +151,17 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 			return;
 		}
    		parseRequestLine_Headers(reqLine_Headers);
-		// printf("headers done\n");
+	printf("method **********= [%s]\n", getMethod().c_str());
+	printf("path = [%s]\n", getPath().c_str());
+		printf("headers done\n");
 		if (bodyStart)
 			body_first = true;
 		req_done = true;
 	}
 
-	if (getMethod() == "POST" && bodyStart && req_done)
+	if (getMethod() ==  "POST" &&  bodyStart && req_done)
 	{
-		// printf("body parse\n");
+		printf("body parse\n");
 		// printf("body start = [%s]\n", bodyStart);
 		bodyLength = nbytes;
 		if (body_first)
@@ -177,6 +179,7 @@ void HttpRequestParser::parseRequestLine_Headers(std::string reqLine_Headers)
 	std::istringstream iss(reqLine_Headers);
 	std::string request_line;
 
+	printf("reqLine_Headers = [%s]\n", reqLine_Headers.c_str());
 	std::getline(iss, request_line);
 
 	// Parse the request request_line

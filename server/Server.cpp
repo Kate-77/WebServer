@@ -142,11 +142,11 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 					close(clients[i].first.getClientSocket());
 					clients[i].first.response._file_fd.close();
 						// if (clients[i].first.request.getMethod() == "POST") {
-						// 	if (access(clients[i].first.request.bodyFileName.c_str(), F_OK) != -1) {
-						// 		remove(clients[i].first.request.bodyFileName.c_str());
-						// 	} else {
-						// 		std::cout << "Error delete" << std::endl;
-						// 	}
+							// if (access(clients[i].first.request.bodyFileName.c_str(), F_OK) != -1) {
+							// 	remove(clients[i].first.request.bodyFileName.c_str());
+							// } else {
+							// 	std::cout << "Error delete" << std::endl;
+							// }
 						// }
 					//clien size
 					// printf("clients size befor = %lu\n", clients.size());
@@ -322,7 +322,7 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
 		}
 		response._file_fd.close();
 	}
-	// std::cout << "sent:  " << response.sent << " constent length: " << response._contentLength << std::endl;
+	 std::cout << "sent:  " << response.sent << " constent length: " << response._contentLength << std::endl;
 	if (response.sent == response._contentLength)
 	{
 		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!5\n");

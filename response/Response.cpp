@@ -165,9 +165,13 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
 {
     std::string file = constructFilePath(request.getPath());
     std::string extension = getExtension(file);
+	std::cout << " filee : " << file << std::endl;
+	std::cout << " extension : " << extension << std::endl;
 
-    if (_location->getUpload_store() == false)
-        handleFilePost(request, server, file);
+    if (_location->getUpload_store() == true)
+	{
+		std::cout << "upload store false" << std::endl;
+        handleFilePost(request, server, file);}
     else if (checkDirectory(request.getPath()))
         handleDirectoryPost(request, server, file);
     else

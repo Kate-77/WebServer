@@ -571,23 +571,27 @@ std::string generateName()
 void Response::handleFilePost(HttpRequestParser &request, Parser &server, const std::string &file) 
 {
     this->_contentType = request.getHeadersMap().find("Content-Type")->second;  
+	printf("handleFilePost: %s\n", file.c_str());
+	printf("handleFilePost type: %s\n", _contentType.c_str());
+	this->_post_file_name = request.getBodyFileName();
     std::string name = generateName();
+	printf("handleFilePost name: %s\n", name.c_str());
     //this->contentType = getFileType(file);
     std::string filename = name + getExtensionFromType(_contentType);
-    std::string uploadDirectory = constructFilePath(_location->getRoot() + "/uploads/");
-
+    std::string uploadDirectory = repetetiveSlash(_location->getRoot() + "/uploads/");
+	std::cout << "uploadDirectory: " << uploadDirectory << std::endl;
     // Check if the upload directory exists
     if (access(uploadDirectory.c_str(), F_OK) == -1) {
-        callErrorPage(server, 409);
+        callErrorPage(server, 404);
         return;
     }
 
     this->_file_path = uploadDirectory + filename;
     // Move the uploaded file to the destination
-    if (std::rename(filename.c_str(), this->_file_path.c_str()) != 0) {
-        std::remove(filename.c_str());
-    }
-
+    // if (std::rename(this->_post_file_name.c_str(), this->_file_path.c_str()) != 0) {
+    //     std::remove(this->_post_file_name.c_str());
+    // }
+	std::rename(this->_post_file_name.c_str(), this->_file_path.c_str());
     // Respond with 201 Created and location header
     this->_head = "HTTP/1.1 201 Created\r\nContent-Type: " + getFileType(file) +
            "\r\nContent-Length: 0\r\nLocation: " + this->_file_path + "\r\n\r\n";
