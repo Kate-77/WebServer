@@ -247,8 +247,8 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
       this->_body.erase(0, eol + end_of_file.length());
       continue ;
     }
-    headers[key] = trim(value, " "); //erase whitespaces
-    if (true == headers[key].empty()) 
+    headers[trim(key, " \r\n")] = trim(value, " \r\n");    
+     if (true == headers[key].empty()) 
     {
       headers.erase(key);
     }
@@ -257,16 +257,12 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
 
   // security reason exploiting 'stack-smashing' or 'stack-overflow' vulnerabilities of the operating system.
   // revision
-  std::map<std::string, std::string>::const_iterator contentLength = headers.find("Content-Length");
-  if (headers.end() != contentLength) 
-  {
-    this->_body.erase(static_cast<std::string::size_type>(atoi(contentLength->second.c_str())));
-  }
-  
-  // for(std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); it++)
+  // std::map<std::string, std::string>::const_iterator contentLength = headers.find("Content-Length");
+  // if (headers.end() != contentLength) 
   // {
-  //     printf("HOUNA ## cgi: %s | %s\n",it->first.c_str(), it->second.c_str());
+  //   this->_body.erase(static_cast<std::string::size_type>(atoi(contentLength->second.c_str())));
   // }
+  headers["Content-Length"] =convert_to_string(this->_body.length());
   // body
   body = this->_body;
 }
@@ -305,7 +301,7 @@ int CGI::initEnv(void)
   if ("POST" == env["REQUEST_METHOD"])
    {
     //contains the size of the message-body attached to the request
-    env["CONTENT_LENGTH"] = this->_requestBody.length();
+    env["CONTENT_LENGTH"] = convert_to_string(this->_requestBody.length());
     env["CONTENT_TYPE"] = this->_Request.getHeadersMap().find("Content-Type")->second; //requesy
    }
   //get all request header // revision
@@ -351,6 +347,15 @@ int CGI::initEnv(void)
   //   std::cout << std::endl;
 
   return (0);
+}
+
+std::string	CGI::convert_to_string(size_t a)
+{
+	std::stringstream tmp;
+
+	tmp << a;
+
+	return tmp.str();
 }
 
 //    //iterate cgi extensions one by one to find the exact extension of the file

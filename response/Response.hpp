@@ -59,7 +59,7 @@ class Response
       void        handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server);
       void        handleFileGet(const std::string &filePath, HttpRequestParser &request, Parser &server);
       void        handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server);
-      void        handleCgi(HttpRequestParser &request, const std::string &cgiPath, Parser &server);
+      int         handleCgi(HttpRequestParser &request, const std::string &cgiPath, Parser &server);
       void        serveFile(const std::string &filePath, Parser &server);
       void        renderFile(Parser &server, const std::string &file);
       std::string constructFilePath(const std::string &path);
@@ -68,7 +68,10 @@ class Response
       void        handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file);
       void        handleDirectoryWithIndex(HttpRequestParser &request, Parser &server, const std::string &file);
       void        handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path);
-
+      //cgi trim
+      std::string & lefttrim(std::string & s, const char * t);
+      std::string & righttrim(std::string & s, const char * t);
+      std::string & trim(std::string & s, const char * t);
       //std::string getResponse(); // get response to send to client
       //std::string getBody(); // get body of response
       //std::string getStatus(); // get status code

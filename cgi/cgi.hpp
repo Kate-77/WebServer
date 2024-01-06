@@ -68,6 +68,7 @@ class CGI {
     int execute( void );
     //parse headers and body from response
     void parseHeadersAndBody(std::map<std::string, std::string> &  headers, std::string & body);
+    std::string	convert_to_string(size_t a);
     // void parseHeadersAndBody( void);
 };
 

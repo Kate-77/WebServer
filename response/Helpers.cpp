@@ -1,6 +1,4 @@
-
 # include "Response.hpp"
-
 
 // Generate error html page
 void Response::generateErrorPage(int code)
@@ -97,15 +95,14 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
     //(void ) request;
-	std::map<std::string, std::string> pp = _location->getCgi();
+    std::map<std::string, std::string> pp = _location->getCgi();
     std::map<std::string, std::string>::const_iterator it = pp.begin();
     std::string fileExtension = getExtension(path);
     while (it != pp.end()) 
     {
         if ( fileExtension == it->first)
         {
-            printf("wach hna\n");
-			std::map<std::string, std::string> mm =_location->getCgi();
+            std::map<std::string, std::string> mm =_location->getCgi();
             std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
             if (it1 != mm.end())
             {
@@ -113,7 +110,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
                 this->_cgi_bin = it1->second;
             }
             handleCgi(request, path, server);
-            break ;
+            //break ;
         }
         ++it;
     }
@@ -121,33 +118,36 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
     serveFile(path, server);
 }
 
-void Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
+
+int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
     std::string key, value; //split the key and the value
     const std::string   end_of_file = "\r\n"; //seperator
     this->_file = path;
+    this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
+                "Connection: close\r\n"
+                "Content-Type: " + getFileType(_file) + "\r\n"
+                "Content-Length: 0" + "\r\n\r\n";
     std::map<std::string, std::string>  cgi_headers; //create map headers
-    serveFile(_file, server);
+    // serveFile(_file, server);
     std::istringstream a(this->_head);
     std::string line;
     while(std::getline(a, line))
     {
         std::istringstream b(line);
-        std::cout << "line : " << line <<  std::endl;
+        // std::cout << "line: |" << line << std::endl;
         if(line.find(':') == std::string::npos | line.find(':') == 0)
         {
             std::getline(b, key, ' '); //key
             std::getline(b, value); //value
-            cgi_headers[key] = key;
-             std::cout << "key1: " << key << "value1: " << value << std::endl;
+            cgi_headers[key] = value;
             continue ;
         }
         std::getline(b, key, ':'); //key
         std::getline(b, value); //value
-        std::cout << "key: " << key << "value: " << value << std::endl;
         cgi_headers[key] = value; // assign
     }
-    printf("cgi path: %s\n", path.c_str());
+    
     CGI cgi = CGI(request, *this);
     this->_status_code = cgi.execute();
     if (this->_status_code == 500)
@@ -156,26 +156,35 @@ void Response::handleCgi(HttpRequestParser &request, const std::string &path, Pa
         callErrorPage(server, 502);
     else
     {
-
         cgi.parseHeadersAndBody(cgi_headers, this->_response);
         this->_head.erase();
-        for(std::map<std::string, std::string>::const_iterator it = cgi_headers.begin(); it != cgi_headers.end(); it++)
+        for(std::map<std::string, std::string>::iterator it = cgi_headers.end(); it != cgi_headers.begin(); it--)
         {
-            printf("#FIRST : %s | #SECOND %s\n",it->first.c_str(), it->second.c_str());
-            this->_head += it->first + ":" + it->second + end_of_file;
+            if(it->first.length() > 30 || it->first.empty() == true)
+                continue;
+            if(it->first == "Content-Length")
+                this->_contentLength = this->_response.length();
+            // printf("#FIRST : %s |%lu | #SECOND %s\n",it->first.c_str(), it->first.length(), it->second.c_str());
+            if(it->first == "HTTP/1.1")
+                {
+                    // std::cout << "here " << std::endl;
+                    this->_head += it->first  + " " + it->second + end_of_file;
+                    continue ;
+                }
+            this->_head += it->first + ": " + it->second + end_of_file;
             // printf("houna: %s\n", this->_head.c_str());
         }
+        std::cout << "final header:|" << this->_head << "|" << std::endl;
+        std::cout << "final body: |" << this->_response << "|" << std::endl;
         this->_head += "\r\n\r\n";
     }
-    printf("response cgi: %s\n", this->_response.c_str());
-    printf("cgi header: %s\n", this->_head.c_str());
-    printf("here?\n");
+    return (1);
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
 {
     this->_file_path = file;
-
+    printf("jiti?\n");
 	this->_file_fd.open(file, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
@@ -292,27 +301,12 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 
 void Response::handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 {
-    printf("wach katdkhel a3chiri?\n");
     // Handle directory requests with index file
 
 	// std::map<std::string, std::string> ee;
     // std::map<std::string, std::string>::const_iterator it = ee.begin();
     // std::string fileExtension = getExtension(path);
-    bool cgi = 0;
-    // while (it != server.getCgi().end()) 
-    // {
-    //     if ( fileExtension == it->first)
-    //     {
-	// 		std::map<std::string, std::string> mm = server.getCgi();
-    //         std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
-    //         if (it1 != server.getCgi().end())
-    //             this->_cgi_bin = it1->second;
-    //         handleCgi(request, path, server);
-    //         cgi = 1;
-    //         break ;
-    //     }
-    //     ++it;
-    // }
+    int cgi = 0;
     std::map<std::string, std::string> pp = _location->getCgi();
     std::map<std::string, std::string>::const_iterator it = pp.begin();
     std::string fileExtension = getExtension(path);
@@ -324,12 +318,40 @@ void Response::handleDirFile(HttpRequestParser &request, Parser &server, const s
             std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
             if (it1 != mm.end())
                 this->_cgi_bin = it1->second;
-            handleCgi(request, path, server);
-            cgi = 1;
+            cgi = handleCgi(request, path, server);
             break ;
         }
         ++it;
     }
+    printf("hanta jiti ! cgi: %d\n", cgi);
     if (!cgi)
         callErrorPage(server, 403);
+}
+
+std::string & Response::lefttrim(std::string & s, const char * t = " \t\n\r\f\v") 
+{
+  std::string::size_type index = s.find_first_not_of(t);
+  if (std::string::npos == index) 
+  {
+    return (s);
+  }
+  s.erase(0, index);
+  return (s);
+}
+
+std::string & Response::righttrim(std::string & s, const char * t = " \t\n\r\f\v") 
+{
+  std::string::size_type index = s.find_last_not_of(t);
+  if (std::string::npos == index) 
+  {
+    return (s);
+  }
+  s.erase(index + 1);
+  return (s);
+}
+
+// trim from left & right
+std::string & Response::trim(std::string & s, const char * t = " \t\n\r\f\v") 
+{
+  return (lefttrim(righttrim(s, t), t));
 }

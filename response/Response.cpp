@@ -104,14 +104,15 @@ void Response::callErrorPage(Parser& server, int code)
     if (it != _error_pages.end()) { // TO DEBUG
         this->_file_path = _location->getRoot() + it->second ;
         printf("error page : |%s|\n", _file_path.c_str());
-        this->_file_fd.open(path, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
-
+        this->_file_fd.open(_file_path, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
         if (this->_file_fd.is_open()) {
-
+            printf("#ERROR PATH#: %s\n", _file_path.c_str());
             this->_errorContentLength = this->_file_fd.tellg();
             this->_contentLength = this->_file_fd.tellg();
             this->_file_fd.seekg(0, std::ios::beg);
-            this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_errorContentLength) + "\r\n\r\n";
+            this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_contentLength) + "\r\n\r\n";
+            printf("#HEADER#: %s\n", _head.c_str());
+            _file_fd.close();
         } 
         else
             generateErrorPage(code);
@@ -121,7 +122,7 @@ void Response::callErrorPage(Parser& server, int code)
 }
 
 // Delete Method
-void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server) 
+void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server) // TO TEST
 {
     std::string path;
     path = request.getPath();
@@ -169,7 +170,10 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
     printf("#################  POST  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
-    if (_location->getUpload_store() == true)
+    printf("##file: %s\n", request.getPath().c_str());
+    if (request.getPath().empty()) // TO TEST
+        callErrorPage(server, 404);
+    else if (_location->getUpload_store() == true)
         handleFilePost(request, server, file);
     else if (checkDirectory(request.getPath())) // HOW TO TEST THIS?
         handleDirectoryPost(request, server, file);

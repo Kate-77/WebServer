@@ -20,6 +20,8 @@ std::string getFileType(const std::string& filePath)
         fileExtensions[".jpeg"] = "image/jpeg";
         fileExtensions[".jpg"] = "image/jpeg";
         fileExtensions[".js"] = "application/javascript";
+        fileExtensions[".py"] = "text/x-python";
+        fileExtensions[".pyc"] = "application/x-python-code";
         fileExtensions[".json"] = "application/json";
         fileExtensions[".mpeg"] = "video/mpeg";
         fileExtensions[".mpkg"] = "application/vnd.apple.installer+xml";
