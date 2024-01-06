@@ -427,7 +427,8 @@ void Response::renderFile(Parser &server, const std::string &file)
     this->_file_path = file;
     printf("file:kjhfkwjef -> %s\n", file.c_str());
 
-    this->_file_fd.open(file, std::ios::binary | std::ios::ate);
+    // this->_file_fd.open(file, std::ios::binary | std::ios::ate);
+	this->_file_fd.open(file, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
         printf("haaahowa ya zebbii\n");

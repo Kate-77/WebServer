@@ -1,0 +1,9 @@
+*.o
+webserv
+.vscode
+*.mp4
+*.jpeg
+*.png
+*.jpg
+*.gif
+*.txt
