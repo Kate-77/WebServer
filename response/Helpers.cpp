@@ -120,13 +120,13 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
 {
     std::string key, value; //split the key and the value
     const std::string   end_of_file = "\r\n"; //seperator
-    this->_file = path;
+    this->_file_path = path;
     this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
                 "Connection: close\r\n"
-                "Content-Type: " + getFileType(_file) + "\r\n"
+                "Content-Type: " + getFileType(_file_path) + "\r\n"
                 "Content-Length: 0" + "\r\n\r\n";
     std::map<std::string, std::string>  cgi_headers; //create map headers
-    // serveFile(_file, server);
+    // serveFile(_file_path, server);
     std::istringstream a(this->_head);
     std::string line;
     while(std::getline(a, line))
@@ -258,14 +258,15 @@ void Response::handleFilePost(HttpRequestParser &request, Parser &server, const 
 	this->_post_file_name = request.getBodyFileName();
     std::string name = generateName();
     this->_file_path = name + getExtensionFromType(_contentType);
+    //printf("ha file post: %s\n", _file_path.c_str());
     std::string uploadDirectory = repetetiveSlash(_location->getRoot() + "/uploads/");
+    //printf("ha upload dir post: %s\n", uploadDirectory.c_str());
 
     // Check if the upload directory exists
     if (access(uploadDirectory.c_str(), F_OK)) {
         callErrorPage(server, 404);
         return;
     }
-
     // Move the uploaded file to the destination
     else if (std::rename(this->_post_file_name.c_str(), this->_file_path.c_str()) != 0)
         std::remove(this->_post_file_name.c_str());
@@ -285,8 +286,9 @@ void Response::handleFilePost(HttpRequestParser &request, Parser &server, const 
 void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file)
 {
     // Handle directory requests
+    //printf("request path post : %lu | %s\n", request.getPath().size(), request.getPath().c_str());
     if (endSlash(request.getPath()) && request.getPath().size() != 1) {
-        // //printf("bayna hna\n");
+        //printf("bayna hna\n");
         if (!this->_location->getIndex().empty())
             handleDirFile(request, server, file);
         else

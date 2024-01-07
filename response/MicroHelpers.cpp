@@ -59,8 +59,17 @@ std::string getFileType(const std::string& filePath)
         fileExtensions[".zip"] = "application/zip";
         fileExtensions[".7z"] = "application/x-7z-compressed";
 		fileExtensions[".mp4"] = "video/mp4";
+        fileExtensions[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        fileExtensions[".mp3"] = "audio/mpeg";
         fileExtensions[".php"] = "application/x-httpd-php";
-
+        fileExtensions[".py"] = "application/x-httpd-python";
+        fileExtensions[".js"] = "application/x-javascript";
+        fileExtensions[".shtml"] = "text/x-server-parsed-html";
+        fileExtensions[".md"] = "text/x-markdown";
+        fileExtensions[".ts"] = "text/typescript";
+        fileExtensions[".ts"] = "application/typescript";
+        fileExtensions[".xml"] = "text/xml";
+        fileExtensions[".php"] = "application/x-httpd-php";
 
     std::string extension = getExtension(filePath);
     if (!extension.empty()) 
@@ -101,7 +110,6 @@ std::string getExtensionFromType(const std::string &contentType)
         contentTypeToExtension["application/epub+zip"] = ".epub";
         contentTypeToExtension["image/gif"] = ".gif";
         contentTypeToExtension["text/html"] = ".htm";
-        contentTypeToExtension["text/html"] = ".html";
         contentTypeToExtension["text/calendar"] = ".ics";
         contentTypeToExtension["application/java-archive"] = ".jar";
         contentTypeToExtension["image/jpeg"] = ".jpeg";
@@ -116,16 +124,13 @@ std::string getExtensionFromType(const std::string &contentType)
         contentTypeToExtension["audio/ogg"] = ".oga";
         contentTypeToExtension["video/ogg"] = ".ogv";
         contentTypeToExtension["application/ogg"] = ".ogx";
-        contentTypeToExtension["font/otf"] = ".otf";
         contentTypeToExtension["image/png"] = ".png";
         contentTypeToExtension["application/pdf"] = ".pdf";
         contentTypeToExtension["application/vnd.ms-powerpoint"] = ".ppt";
         contentTypeToExtension["application/vnd.openxmlformats-officedocument.presentationml.presentation"] = ".pptx";
         contentTypeToExtension["application/x-rar-compressed"] = ".rar";
-        contentTypeToExtension["application/rtf"] = ".rtf";
         contentTypeToExtension["application/x-sh"] = ".sh";
         contentTypeToExtension["image/svg+xml"] = ".svg";
-        contentTypeToExtension["application/x-shockwave-flash"] = ".swf";
         contentTypeToExtension["application/x-tar"] = ".tar";
         contentTypeToExtension["image/tiff"] = ".tif";
         contentTypeToExtension["image/tiff"] = ".tiff";
@@ -144,6 +149,17 @@ std::string getExtensionFromType(const std::string &contentType)
         contentTypeToExtension["application/zip"] = ".zip";
         contentTypeToExtension["application/x-7z-compressed"] = ".7z";
 		contentTypeToExtension["video/mp4"] = ".mp4";
+        contentTypeToExtension["application/x-httpd-php"] = ".php";
+        contentTypeToExtension["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
+        contentTypeToExtension["audio/mpeg"] = ".mp3";
+        contentTypeToExtension["application/x-httpd-python"] = ".py";
+        contentTypeToExtension["application/x-javascript"] = ".js";
+        contentTypeToExtension["text/x-server-parsed-html"] = ".shtml";
+        contentTypeToExtension["text/x-markdown"] = ".md";
+        contentTypeToExtension["text/typescript"] = ".ts";
+        contentTypeToExtension["application/typescript"] = ".ts";
+        contentTypeToExtension["text/xml"] = ".xml";
+        contentTypeToExtension["application/x-httpd-php"] = ".php";
 
      std::map<std::string, std::string>::const_iterator it = contentTypeToExtension.find(contentType);
     if (it != contentTypeToExtension.end()) {
@@ -323,7 +339,7 @@ std::string Response::constructFilePath(const std::string &path)
         file.replace(0, _location->getslocation().length(), createPath(_location->getRoot()+ "/"));
     }
     else
-        file = _location->getRoot();
+        file = _location->getRoot() + path;
     //printf("construct file after : %s\n", file.c_str());
     //printf("root hahwa: %s\n", _location->getRoot().c_str());
     return repetetiveSlash(file);
