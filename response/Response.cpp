@@ -169,7 +169,7 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
     std::string file = constructFilePath(request.getPath());
 
 	// CHECK when POST doesnt have a body response
-    else if (_location->getUpload_store() == true){
+    if (_location->getUpload_store() == true){
 		//printf("allo\n");
         handleFilePost(request, server, file);}
     else if (checkDirectory(request.getPath())) // HOW TO TEST THIS?
