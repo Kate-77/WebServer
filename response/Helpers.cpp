@@ -3,6 +3,7 @@
 // Generate error html page
 void Response::generateErrorPage(int code)
 {
+	printf("generate error page start\n");
     std::string errorStatus = statusMessage(code);
     std::string errorBody = "<!DOCTYPE html>\n";
     errorBody += "<html>\n";
@@ -52,7 +53,6 @@ int Response::findLocation(Parser &server, const std::string& path)
         if (path.compare(0, _locationPath.length(), _locationPath) == 0)
         {
             this->_location = it->second;
-            // //printf("location match : %s\n", _locationPath.c_str());
             return 42; // Match found
         }
         ++it;
@@ -94,7 +94,6 @@ void Response::handleFileGet(const std::string &filePath, HttpRequestParser &req
 // Get Method (file?cgi:normal)
 void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
-    //(void ) request;
     std::map<std::string, std::string> pp = _location->getCgi();
     std::map<std::string, std::string>::const_iterator it = pp.begin();
     std::string fileExtension = getExtension(path);
@@ -106,13 +105,9 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
             std::map<std::string, std::string> mm =_location->getCgi();
             std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
             if (it1 != mm.end())
-            {
-                // //printf("wach lheh\n");
                 this->_cgi_bin = it1->second;
-            }
             handleCgi(request, path, server);
 			cgi = 1;
-            //break ;
         }
         ++it;
     }

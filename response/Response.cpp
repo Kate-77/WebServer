@@ -69,9 +69,7 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 		std::cout << "handleResponse salamzzzzzzz: " << request.getStatusCode() << std::endl;
         return;
     }
-    
-    //printf("location: %s\n", this->_locationPath.c_str());
-    //printf("start3\n");
+
     if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
     {
         callErrorPage(server, 405);
@@ -96,6 +94,7 @@ void Response::callErrorPage(Parser& server, int code)
     (void)server;
     std::string path;
 
+	printf("call error page start, code: %d\n", code);
     std::map<int, std::string> _error_pages = _location->getError_page();
 	if (code == 301) 
     {
@@ -169,12 +168,7 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
     printf("#################  POST  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
-    //printf("##file: %s\n", request.getPath().c_str());
-    if (request.getPath().empty()) // TO TEST
-	{
-		//printf("dkhlti?\n");
-        callErrorPage(server, 404);
-	}
+	// CHECK when POST doesnt have a body response
     else if (_location->getUpload_store() == true){
 		//printf("allo\n");
         handleFilePost(request, server, file);}
