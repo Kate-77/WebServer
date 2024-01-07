@@ -141,22 +141,20 @@ void Response::callErrorPage(Parser& server, int code)
 // Delete Method
 void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server) // TO TEST
 {
-    std::string path;
-    path = request.getPath();
-
-    //printf("#################  DELETE  ###############\n");
+    printf("#################  DELETE  ###############\n");
     // check file existence 
 	// construct path
-    if (access(path.c_str(), F_OK) == -1)
+	this->_file_path = constructFilePath(request.getPath());
+    if (access(_file_path.c_str(), F_OK) == -1)
         callErrorPage(server, 404);
     // if it exists, we check if it's writable to be able to delete it
-    else if (access(path.c_str(), W_OK) == -1)
+    else if (access(_file_path.c_str(), W_OK) == -1)
         callErrorPage(server, 403);
-    else if (checkDirectory(path))
+    else if (checkDirectory(_file_path))
     {
         // if it's a dir, we check if it's empty
-        if (checkDirectoryEmpty(path)) {
-            if (rmdir(path.c_str()))
+        if (checkDirectoryEmpty(_file_path)) {
+            if (rmdir(_file_path.c_str()))
                 callErrorPage(server, 403);
             else
                 callErrorPage(server, 204);
@@ -164,7 +162,7 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
         else
             callErrorPage(server, 403);
     }
-    else if (std::remove(path.c_str()))
+    else if (std::remove(_file_path.c_str()))
         callErrorPage(server, 403);
     else
         callErrorPage(server, 204);

@@ -127,12 +127,12 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 			// //printf("******write start*********\n");
 			if (FD_ISSET(clients[i].first.getClientSocket(), &tmp_write_fds))
 			{
-				std::cerr << "YYYYYYYYYYYYY__00" << std::endl;
+				////std::cerr << "YYYYYYYYYYYYY__00" << std::endl;
 				clients[i].first.response.client_fd = clients[i].first.getClientSocket();
 
 				if(!clients[i].first.response.res_initialized)
 				{
-					std::cerr << "YYYYYYYYYYYYY__01" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__01" << std::endl;
 
 
 
@@ -154,24 +154,24 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 
 
 					clients[i].first.response.handleResponse(clients[i].first.request , *clients[i].second);
-					std::cerr << "YYYYYYYYYYYYY__02" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__02" << std::endl;
 
 
 
 					clients[i].first.response.res_initialized = true;
 				}
-					std::cerr << "YYYYYYYYYYYYY__03" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__03" << std::endl;
 
 				if (clients[i].first.response.client_done)
 				{
-					std::cerr << "YYYYYYYYYYYYY__04" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__04" << std::endl;
 					//printf("client done & removed from write\n");
 					FD_CLR(clients[i].first.getClientSocket(), &master_write_fds);
-					std::cerr << "YYYYYYYYYYYYY__05" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__05" << std::endl;
 					close(clients[i].first.getClientSocket());
-					std::cerr << "YYYYYYYYYYYYY__06" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__06" << std::endl;
 					clients[i].first.response._file_fd.close();
-					std::cerr << "YYYYYYYYYYYYY__07" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__07" << std::endl;
 						// if (clients[i].first.request.getMethod() == "POST") {
 							// if (access(clients[i].first.request.bodyFileName.c_str(), F_OK) != -1) {
 							// 	remove(clients[i].first.request.bodyFileName.c_str());
@@ -182,18 +182,18 @@ void Server::handleServers(std::vector<std::pair<Socket, Parser *> > & servers)
 					//clien size
 					// //printf("clients size befor = %lu\n", clients.size());
 					clients.erase(clients.begin() + i);
-					std::cerr << "YYYYYYYYYYYYY__08" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__08" << std::endl;
 					// //printf("clients size after = %lu\n", clients.size());
 					// //printf("i = %lu\n", i);
 					i--;
 				}
 				else
 				{
-					std::cerr << "YYYYYYYYYYYYY__09" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__09" << std::endl;
 					//send response
 					// //printf("sending response\n");
 					resp_send(clients[i].first.response, clients[i].first.request);
-					std::cerr << "YYYYYYYYYYYYY__10" << std::endl;
+					////std::cerr << "YYYYYYYYYYYYY__10" << std::endl;
 					// resp_send(clients[i].first.response);
 				}
 			} 
