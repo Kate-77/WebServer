@@ -39,7 +39,7 @@ class Parser {
     std::map<std::string, Parser *>       _location; //allows to route request to correct location within the file system. 
     std::vector<std::string>              _server_name; //determine which server block is used for a given request.
     std::string                           _root; //site's document root folder
-    std::string                           _alias; // remap url to a different directory other than root location
+    // std::string                           _alias; // remap url to a different directory other than root location
     std::vector<std::string>              _index; //defines files that will be used as an index
     bool                                  _autoindex; //automatically generate a listing 
     std::map<int, std::string>            _error_page; //defines the URI that will be shown for the specified errors
@@ -95,7 +95,7 @@ class Parser {
     std::map<std::string, Parser *> &     getLocation(void);
     std::map<int, std::string>  &         getstatuscode(void);
     std::string &                         getRoot(void);
-    std::string &                         getAlias(void); 
+    // std::string &                         getAlias(void); 
     std::vector<std::string>         &    getIndex(void); 
     bool        &                         getAutoindex(void); 
     std::map<int, std::string>            &getError_page(void); 

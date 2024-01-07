@@ -52,25 +52,24 @@ Response & Response::operator=(Response const & rhs)
 // Starting here
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
-	int foundLocation = findLocation(server, request.getPath()); // add 301 condition (return)
+	int foundLocation = findLocation(server, request.getPath());
     if (foundLocation == -1)
     {
-        //printf("wach hna houma hna?\n");
+        printf("no location found\n");
         callErrorPage(server, 404);
         return;
     }
 	
-	std::cout << "handleResponse salam: " << request.getStatusCode() << std::endl;
 	std::cout << " request URL " << request.getPath() << std::endl; // HNA MOCHKIL KBIR REDIRECT
-    if (request.getStatusCode() != -1) 
+    // request parsing throwing an error
+    if (request.getStatusCode() != -1)
     {
+	    std::cout << "status code coming from request: " << request.getStatusCode() << std::endl;
         this->_status_code = request.getStatusCode();
-		printf("status code: %d\n", this->_status_code);
         callErrorPage(server, _status_code);
-		std::cout << "handleResponse salamzzzzzzz: " << request.getStatusCode() << std::endl;
         return;
     }
-
+    // non allowed method
     if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
     {
         callErrorPage(server, 405);
@@ -79,7 +78,7 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
     else {
         if (_location->getReturn().size() != 0)
         {
-            //printf("return path: %s\n", _location->getReturn().c_str());
+            printf("redirection path: %s\n", _location->getReturn().c_str());
             this->_head = "HTTP/1.1 301 Moved Permanently\r\nLocation: " + _location->getReturn() + "\r\n\r\n";
         }
         else if (request.getMethod() == "GET")
@@ -136,10 +135,10 @@ void Response::callErrorPage(Parser& server, int code)
 void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server) // TO TEST
 {
     printf("#################  DELETE  ###############\n");
-    // check file existence 
 	// construct path
 	this->_file_path = constructFilePath(request.getPath());
     printf("file DELETE : %s\n", _file_path.c_str());
+    // check file existence 
     if (access(_file_path.c_str(), F_OK) == -1)
         callErrorPage(server, 404);
     // if it exists, we check if it's writable to be able to delete it
@@ -167,9 +166,10 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
     printf("#################  GET  ###############\n");
-    std::string file = constructFilePath(request.getPath());
 
-    printf("file GET: %s\n", file.c_str());
+    printf("request file coming: %s\n", request.getPath().c_str());
+    std::string file = constructFilePath(request.getPath());
+    printf("file GET after: %s\n", file.c_str());
 
     if (checkDirectory(file))
         handleDirectoryGet(file, request, server);
@@ -183,7 +183,7 @@ void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
     printf("#################  POST  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
-    printf("file POST: %s\n", file.c_str());
+    printf("file POST after construction: %s\n", file.c_str());
 
 	// CHECK when POST doesnt have a body response
     if (_location->getUpload_store() == true)

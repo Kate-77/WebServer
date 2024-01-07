@@ -1,5 +1,5 @@
 <?php
-$target_dir = "/Users/abboutah/Desktop/uploads";
+$target_dir = "/Users/kmoutaou/Documents/WebServer/var/www/php/uploads";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 $uploadOk = 1;
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));

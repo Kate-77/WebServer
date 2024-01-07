@@ -46,10 +46,6 @@ int Response::findLocation(Parser &server, const std::string& path)
     while (it != locations.rend()) {
         this->_locationPath = it->first;
 
-        // If locationPath contains a slash at the end, remove it
-        // if (!this->_locationPath.empty() && this->_locationPath.back() == '/') {
-        //     this->_locationPath.pop_back();
-        // }
         if (path.compare(0, _locationPath.length(), _locationPath) == 0)
         {
             this->_location = it->second;
@@ -106,15 +102,15 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
             std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
             if (it1 != mm.end())
                 this->_cgi_bin = it1->second;
-            handleCgi(request, path, server);
-			cgi = 1;
+            cgi = handleCgi(request, path, server);
         }
         ++it;
     }
     if (!cgi)
-    	serveFile(path, server);
+    {
+        printf("wach dkhlti hna?\n");
+    	serveFile(path, server);}
 }
-
 
 int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
@@ -132,7 +128,7 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
     while(std::getline(a, line))
     {
         std::istringstream b(line);
-        // std::cout << "line: |" << line << std::endl;
+        std::cout << "line: |" << line << std::endl;
         if(line.find(':') == std::string::npos || line.find(':') == 0)
         {
             std::getline(b, key, ' '); //key
@@ -159,9 +155,10 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
         {
             if(it->first.length() > 30 || it->first.empty() == true)
                 continue;
-            if(it->first == "Content-Length")
+            if(it->first == "Content-Length"){
                 this->_contentLength = this->_response.length();
-            // //printf("#FIRST : %s |%lu | #SECOND %s\n",it->first.c_str(), it->first.length(), it->second.c_str());
+                this->_errorContentLength = this->_response.length();
+                }
             if(it->first == "HTTP/1.1")
                 {
                     // std::cout << "here " << std::endl;
@@ -171,10 +168,11 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
             this->_head += it->first + ": " + it->second + end_of_file;
             // //printf("houna: %s\n", this->_head.c_str());
         }
-        std::cout << "final header:|" << this->_head << "|" << std::endl;
-        std::cout << "final body: |" << this->_response << "|" << std::endl;
         this->_head += "\r\n\r\n";
     }
+    std::cout << "final header:|" << this->_head << "|" << std::endl;
+    std::cout << "final body: |" << this->_response << "|" << std::endl;
+    std::cout << "final content length: " << this->_contentLength << "|" << std::endl;
     return (1);
 }
 
@@ -253,16 +251,26 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
 void Response::handleFilePost(HttpRequestParser &request, Parser &server, const std::string &file) 
 {
     (void) file;
+    // to calculate the uploaded file size
     struct stat status;
+    // to make an extensionf or the file uploaded
     this->_contentType = request.getHeadersMap().find("Content-Type")->second;
+    //get the filename from the request
 	this->_post_file_name = request.getBodyFileName();
+    // generate a name for the file to upload
     std::string name = generateName();
-    this->_file_path = name + getExtensionFromType(_contentType);
-    //printf("ha file post: %s\n", _file_path.c_str());
     std::string uploadDirectory = repetetiveSlash(_location->getRoot() + "/uploads/");
-    //printf("ha upload dir post: %s\n", uploadDirectory.c_str());
+    // final file path
+    this->_file_path = uploadDirectory + name + getExtensionFromType(_contentType);
+    printf("ha file post: %s\n", _file_path.c_str());
 
-    // Check if the upload directory exists
+    if (_contentType.empty())
+    {
+        printf("had content type khawi\n");
+        callErrorPage(server, 400);
+        return;
+    }
+    // Check if the upload direcπtory exists
     if (access(uploadDirectory.c_str(), F_OK)) {
         callErrorPage(server, 404);
         return;
@@ -301,10 +309,6 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 void Response::handleDirFile(HttpRequestParser &request, Parser &server, const std::string &path)
 {
     // Handle directory requests with index file
-
-	// std::map<std::string, std::string> ee;
-    // std::map<std::string, std::string>::const_iterator it = ee.begin();
-    // std::string fileExtension = getExtension(path);
     int cgi = 0;
     std::map<std::string, std::string> pp = _location->getCgi();
     std::map<std::string, std::string>::const_iterator it = pp.begin();
@@ -322,7 +326,6 @@ void Response::handleDirFile(HttpRequestParser &request, Parser &server, const s
         }
         ++it;
     }
-    //printf("hanta jiti ! cgi: %d\n", cgi);
     if (!cgi)
         callErrorPage(server, 403);
 }

@@ -90,3 +90,4 @@ std::string repetetiveSlash(std::string file);
 bool endSlash(std::string file);
 std::string createPath(const std::string &path);
 std::string generateName();
+std::string repetetiveSlash(std::string file);

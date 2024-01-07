@@ -17,16 +17,16 @@ Parser::Parser(void) : _root(Default_Root),
   this->_sDirectives["server_name"]      = &Parser::parseServerName;  //done
   this->_sDirectives["root"]         = &Parser::parseRoot;
   this->_sDirectives["index"]        = &Parser::parseIndex;       //done
-  this->_sDirectives["autoindex"]      = &Parser::parseAutoindex;     //done
+  // this->_sDirectives["autoindex"]      = &Parser::parseAutoindex;     //done
   this->_sDirectives["error_page"]     = &Parser::parseErrorPage;             //DONE
   this->_sDirectives["limit_except"]     = &Parser::parseLimitExcept;         //DONE
   this->_sDirectives["client_max_body_size"] = &Parser::parseClientMaxBodySize; //done
   this->_sDirectives["upload_store"]     = &Parser::parseUploadStore; //DONE
-  this->_sDirectives["cgi"]          = &Parser::parseCgi;           //done
+  // this->_sDirectives["cgi"]          = &Parser::parseCgi;           //done
   this->_sDirectives["return"]         = &Parser::parseReturn; //done
   //location block
   //the second iterator is a pointer to function of return type void and  vector iterator parametre
-  this->_lDirectives["alias"]          = &Parser::parseAlias; 
+  // this->_lDirectives["alias"]          = &Parser::parseAlias; 
   this->_lDirectives["return"]         = &Parser::parseReturn; //done
   this->_lDirectives["root"]         = &Parser::parseRoot;    //done
   this->_lDirectives["index"]          = &Parser::parseIndex;       //done
@@ -143,7 +143,7 @@ void Parser::printparser(const std::string & str) const
   }
 
   std::cout << "root:  " << this->_root << std::endl;
-  std::cout << "alias: " << this->_alias << std::endl;
+  // std::cout << "alias: " << this->_alias << std::endl;
 
   std::cout << "index:" << std::endl;
   for (std::vector<std::string>::const_iterator it = this->_index.begin(); it != this->_index.end(); ++it) 
@@ -252,10 +252,10 @@ std::string &                         Parser::getRoot(void)
       return (this->_root);
 }
 
-std::string &                         Parser::getAlias(void)
-{
-      return (this->_alias);
-} 
+// std::string &                         Parser::getAlias(void)
+// {
+//       return (this->_alias);
+// } 
 
 std::vector<std::string>         &    Parser::getIndex(void)
 {
@@ -830,33 +830,33 @@ void Parser::parseUploadStore(_type::const_iterator & it)
   return ;
 }
 
-void Parser::parseAlias(_type::const_iterator & it) 
-{
-  // check next token is not a closed brace
-  if ("}" == *it) 
-  {
-    throw Parser::ParserException("Error! missing value and ';' near directive 'alias'");
-  }
-  if (";" == *it) 
-  {
-    throw Parser::ParserException("Error! not enough values in directive 'alias'");
-  }
+// void Parser::parseAlias(_type::const_iterator & it) 
+// {
+//   // check next token is not a closed brace
+//   if ("}" == *it) 
+//   {
+//     throw Parser::ParserException("Error! missing value and ';' near directive 'alias'");
+//   }
+//   if (";" == *it) 
+//   {
+//     throw Parser::ParserException("Error! not enough values in directive 'alias'");
+//   }
 
-  // save 
-  this->_alias = *it;
+//   // save 
+//   this->_alias = *it;
 
-  // check semicolon
-  ++it;
-  if ("}" == *it) 
-  {
-    throw Parser::ParserException("Error! missing ';' near directive 'alias'");
-  }
-  if (";" != *it) 
-  {
-    throw Parser::ParserException("Error! too many values in directive 'alias'");
-  }
-  return ;
-}
+//   // check semicolon
+//   ++it;
+//   if ("}" == *it) 
+//   {
+//     throw Parser::ParserException("Error! missing ';' near directive 'alias'");
+//   }
+//   if (";" != *it) 
+//   {
+//     throw Parser::ParserException("Error! too many values in directive 'alias'");
+//   }
+//   return ;
+// }
 
 void Parser::parseReturn(_type::const_iterator & it) 
 {

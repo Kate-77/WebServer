@@ -70,6 +70,12 @@ std::string getFileType(const std::string& filePath)
         fileExtensions[".ts"] = "application/typescript";
         fileExtensions[".xml"] = "text/xml";
         fileExtensions[".php"] = "application/x-httpd-php";
+        fileExtensions[".pl"] = "text/x-perl";
+        fileExtensions[".pl"] = "application/perl";
+        fileExtensions[".pl"] = "application/x-perl";
+        fileExtensions[".rb"] = "text/x-ruby";
+        fileExtensions[".rb"] = "application/ruby";
+        fileExtensions[".rb"] = "application/x-ruby";
 
     std::string extension = getExtension(filePath);
     if (!extension.empty()) 
@@ -159,7 +165,12 @@ std::string getExtensionFromType(const std::string &contentType)
         contentTypeToExtension["text/typescript"] = ".ts";
         contentTypeToExtension["application/typescript"] = ".ts";
         contentTypeToExtension["text/xml"] = ".xml";
-        contentTypeToExtension["application/x-httpd-php"] = ".php";
+        contentTypeToExtension["text/x-perl"] = ".pl";
+        contentTypeToExtension["application/perl"] = ".pl";
+        contentTypeToExtension["application/x-perl"] = ".pl";
+        contentTypeToExtension["text/x-ruby"] = ".rb";
+        contentTypeToExtension["application/ruby"] = ".rb";
+        contentTypeToExtension["application/x-ruby"] = ".rb";
 
      std::map<std::string, std::string>::const_iterator it = contentTypeToExtension.find(contentType);
     if (it != contentTypeToExtension.end()) {
@@ -333,22 +344,19 @@ std::string Response::constructFilePath(const std::string &path)
 {
     std::string file = path;
 
-    //printf("construct file before : %s\n", file.c_str());
-
     if (this->_locationPath != "/") {
-        file.replace(0, _location->getslocation().length(), createPath(_location->getRoot()+ "/"));
+        file.replace(0, _location->getslocation().length(), createPath(_location->getRoot() + "/"));
     }
     else
-        file = _location->getRoot() + path;
-    //printf("construct file after : %s\n", file.c_str());
-    //printf("root hahwa: %s\n", _location->getRoot().c_str());
+        file = _location->getRoot() + path; // delete
+        //file = _location->getRoot(); // GET
     return repetetiveSlash(file);
 }
 
 
 std::string generateName() 
 {
-    std::string name = "uploads/";
+    std::string name;
     std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     for (int i = 0; i < 5; i++) {
         name += charset[rand() % charset.size()];

@@ -302,9 +302,10 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
 	// //printf("salaaaam \n");
 	if(response._head.size() != 0)
     {
+		printf("FINAL RESP HEAD: %s\n", response._head.c_str());
 		// //printf("sending head: %s\n", response._head.c_str());
         keep_track = send(response.client_fd, response._head.c_str(), response._head.size(), 0) ;
-
+		printf("AGAIN: %s\n", response._head.c_str());
         if(response.sent < 0)
         {
 			// //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n");
@@ -315,7 +316,7 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
     }
 	else if (response._response.size() != 0)
 	{
-		// //std::cout << response._response.c_str() << std::endl;
+		std::cout << "FINAL RESP:" << response._response.c_str() << std::endl;
 		keep_track = send(response.client_fd, response._response.c_str(), response._response.size(), 0);
 		if (keep_track <= 0)
 		{

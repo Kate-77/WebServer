@@ -29,7 +29,8 @@ CGI::CGI(  HttpRequestParser & Request, Response & Response ) : _Request(Request
   {
     return ;
   }
-  this->_requestFilePath = cwd + "/" + Response._file; //get file from response
+  this->_requestFilePath = cwd + "/" + Response._file_path; //get file from response
+  std::cout << this->_requestFilePath << std::endl;
   return ;
 }
 
@@ -149,7 +150,6 @@ int CGI::execute(void)
     a.rlim_max = 30;
     setrlimit(RLIMIT_CPU, &a);
     // alarm(30);
-    //std::cout << "here" << std::endl;
     if(execve(this->_av[0], this->_av, this->_env) == -1)
     {
       std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
@@ -223,7 +223,6 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
   // iterate line by line //revision
   for (std::string::size_type eol = this->_body.find(end_of_file); eol != std::string::npos; eol = this->_body.find(end_of_file)) 
   {
-    std::cout << "heeere error" << std::endl;
     //if no more headers (two consecutive new lines)
     if (0 == eol) 
     {
@@ -247,6 +246,8 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
       this->_body.erase(0, eol + end_of_file.length());
       continue ;
     }
+    if (trim(key, " \r\n")  == "Content-type")
+      key = "Content-Type";
     headers[trim(key, " \r\n")] = trim(value, " \r\n");    
      if (true == headers[key].empty()) 
     {
@@ -265,6 +266,7 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
   headers["Content-Length"] =convert_to_string(this->_body.length());
   // body
   body = this->_body;
+  printf("______CGI BODY_____\n%s\n", body.c_str());
 }
 
 int CGI::initEnv(void) 
