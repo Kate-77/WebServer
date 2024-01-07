@@ -4,7 +4,11 @@
 
 
 
-Parser::Parser(void) : _root(Default_Root), _autoindex(false), _client_max_body_size(ClientMaxBodySize), _return(), _body_size_bytes(1000000) 
+Parser::Parser(void) : _root(Default_Root),
+					   _autoindex(false), 
+					   _client_max_body_size(ClientMaxBodySize), 
+					   _return(),
+					   _body_size_bytes(1000000)
 {
   //server block
   //the second iterator is a pointer to function of return type void and  vector iterator parametre
@@ -263,7 +267,7 @@ bool        &                         Parser::getAutoindex(void)
       return (this->_autoindex);
 } 
 
-std::map<int, std::string>            Parser::getError_page(void)
+std::map<int, std::string>            &Parser::getError_page(void)
 {
       return (this->_error_page);
 } 
@@ -707,7 +711,7 @@ void Parser::parseErrorPage(_type::const_iterator & it)
   // save all pages with associated number
   for (std::vector<int>::const_iterator n = verror.begin(); n != verror.end(); ++n) 
   {
-    this->_error_page[*n] = *it;
+	this->_error_page.insert(std::pair<int, std::string>(*n, *it));
   }
 
   // check semicolon

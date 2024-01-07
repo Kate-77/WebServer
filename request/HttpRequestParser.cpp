@@ -134,7 +134,7 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 
 	if (req_done == false)
 	{
-		// printf("header parse\n");
+		// //printf("header parse\n");
 		const char* doubleCRLF = "\r\n\r\n";
 		unsigned char* bodyStartPtr = static_cast<unsigned char*>(memmem(buf, nbytes, doubleCRLF, strlen(doubleCRLF)));
 		
@@ -151,9 +151,9 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 			return;
 		}
    		parseRequestLine_Headers(reqLine_Headers);
-		// printf("method **********= [%s]\n", getMethod().c_str());
-		// printf("path = [%s]\n", getPath().c_str());
-		// printf("headers done\n");
+		// //printf("method **********= [%s]\n", getMethod().c_str());
+		// //printf("path = [%s]\n", getPath().c_str());
+		// //printf("headers done\n");
 		if (bodyStart)
 			body_first = true;
 		req_done = true;
@@ -161,8 +161,8 @@ void HttpRequestParser::parseRequest(ssize_t nbytes, unsigned char *buf, int &Do
 
 	if (getMethod() ==  "POST" &&  bodyStart && req_done)
 	{
-		printf("body parse\n");
-		// printf("body start = [%s]\n", bodyStart);
+		// //printf("body parse\n");
+		// //printf("body start = [%s]\n", bodyStart);
 		bodyLength = nbytes;
 		if (body_first)
 		{
@@ -179,14 +179,14 @@ void HttpRequestParser::parseRequestLine_Headers(std::string reqLine_Headers)
 	std::istringstream iss(reqLine_Headers);
 	std::string request_line;
 
-	//printf("reqLine_Headers = [%s]\n", reqLine_Headers.c_str());
+	////printf("reqLine_Headers = [%s]\n", reqLine_Headers.c_str());
 	std::getline(iss, request_line);
 
 	// Parse the request request_line
 	parse_request_line(request_line);
 
 	// Parse the headers
-	parse_headers(iss);
+		parse_headers(iss);
 }
 
 void HttpRequestParser::parse_request_line(std::string request_line)
@@ -292,7 +292,7 @@ void HttpRequestParser::parse_body(unsigned char *buf, size_t nbytes, int &Done)
 	if (headers_map.find("Content-Length") != headers_map.end())
 	{
 		size_t content_length = std::stoi(headers_map.find("Content-Length")->second.c_str());
-		// printf("nbytes		   = [%ld]\n", nbytes);
+		// //printf("nbytes		   = [%ld]\n", nbytes);
 		if (write(this->bodyFileFD, buf, nbytes) != -1)
 			this->bytes_written += nbytes;
 		else
@@ -304,19 +304,22 @@ void HttpRequestParser::parse_body(unsigned char *buf, size_t nbytes, int &Done)
 		}
 		else if (bytes_written > content_length)
 		{
-		// printf("bytes_written  = [%ld]\n", bytes_written);
-		// printf("content_length = [%ld]\n", content_length);
+		// //printf("bytes_written  = [%ld]\n", bytes_written);
+		// //printf("content_length = [%ld]\n", content_length);
 			throw 409;
 		}
 	}
 	//handle chunked
 	else if (headers_map.find("Transfer-Encoding") != headers_map.end())
 	{
-		printf("chunked*****\n");
+		//printf("chunked*****\n");
 		parse_chunked_body(buf, nbytes, Done);
 	}
 	else
+	{
+		std::cerr << "___THROW__411___" << std::endl;
 		throw 411;
+	}
 }
 bool verif_chunk(unsigned char *buffer)
 {
@@ -356,7 +359,7 @@ void HttpRequestParser::parse_chunked_body(unsigned char *buf, ssize_t nbytes, i
 				// {
 				// // 	// buf = tmp;
 				// // 	// parse_chunked_body(buf, chunk, Done);
-				// // 	// printf("tmp = [%s]\n", tmp);
+				// // 	// //printf("tmp = [%s]\n", tmp);
 				// write(this->bodyFileFD, "*****", 5);
 				// write(this->bodyFileFD, tmp, chunk);
 				// 	throw 999;
@@ -378,18 +381,18 @@ void HttpRequestParser::parse_chunked_body(unsigned char *buf, ssize_t nbytes, i
 	{
 		
 		nbytes = nbytes - 7;
-				// printf("nbytes = [%ld]\n", nbytes);
-				// printf("buf = [%s]\n", buf);
+				// //printf("nbytes = [%ld]\n", nbytes);
+				// //printf("buf = [%s]\n", buf);
 		// if (nbytes > 0)
 		// {
 			if(write(this->bodyFileFD, buf, nbytes) == -1)
 				// {
-				// 	printf("buf = [%s]\n", buf);
-				// 	printf("nbytes = [%ld]\n", nbytes);
+				// 	//printf("buf = [%s]\n", buf);
+				// 	//printf("nbytes = [%ld]\n", nbytes);
 				throw 500;
 				// }
 				// else 
-				// printf("mzyaaaaaaaan\n");
+				// //printf("mzyaaaaaaaan\n");
 
 		// }
 		Done = 1;

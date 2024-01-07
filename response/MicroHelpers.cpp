@@ -301,7 +301,7 @@ bool endSlash(std::string file)
 
 std::string createPath(const std::string &path)
 {
-    printf("path : %s\n", path.c_str());
+    //printf("path : %s\n", path.c_str());
     // Check if the string is empty
     if (path.empty())
         return "/";
@@ -317,15 +317,15 @@ std::string Response::constructFilePath(const std::string &path)
 {
     std::string file = path;
 
-    printf("construct file before : %s\n", file.c_str());
+    //printf("construct file before : %s\n", file.c_str());
 
     if (this->_locationPath != "/") {
         file.replace(0, _location->getslocation().length(), createPath(_location->getRoot()+ "/"));
     }
     else
         file = _location->getRoot();
-    printf("construct file after : %s\n", file.c_str());
-    printf("root hahwa: %s\n", _location->getRoot().c_str());
+    //printf("construct file after : %s\n", file.c_str());
+    //printf("root hahwa: %s\n", _location->getRoot().c_str());
     return repetetiveSlash(file);
 }
 

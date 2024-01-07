@@ -52,7 +52,7 @@ int Response::findLocation(Parser &server, const std::string& path)
         if (path.compare(0, _locationPath.length(), _locationPath) == 0)
         {
             this->_location = it->second;
-            printf("location match : %s\n", _locationPath.c_str());
+            // //printf("location match : %s\n", _locationPath.c_str());
             return 42; // Match found
         }
         ++it;
@@ -106,7 +106,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
             std::map<std::string, std::string>::const_iterator it1 = mm.find(it->first);
             if (it1 != mm.end())
             {
-                printf("wach lheh\n");
+                // //printf("wach lheh\n");
                 this->_cgi_bin = it1->second;
             }
             handleCgi(request, path, server);
@@ -135,8 +135,8 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
     while(std::getline(a, line))
     {
         std::istringstream b(line);
-        // std::cout << "line: |" << line << std::endl;
-        if(line.find(':') == std::string::npos | line.find(':') == 0)
+        // //std::cout << "line: |" << line << std::endl;
+        if(line.find(':') == std::string::npos || line.find(':') == 0)
         {
             std::getline(b, key, ' '); //key
             std::getline(b, value); //value
@@ -164,18 +164,18 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
                 continue;
             if(it->first == "Content-Length")
                 this->_contentLength = this->_response.length();
-            // printf("#FIRST : %s |%lu | #SECOND %s\n",it->first.c_str(), it->first.length(), it->second.c_str());
+            // //printf("#FIRST : %s |%lu | #SECOND %s\n",it->first.c_str(), it->first.length(), it->second.c_str());
             if(it->first == "HTTP/1.1")
                 {
-                    // std::cout << "here " << std::endl;
+                    // //std::cout << "here " << std::endl;
                     this->_head += it->first  + " " + it->second + end_of_file;
                     continue ;
                 }
             this->_head += it->first + ": " + it->second + end_of_file;
-            // printf("houna: %s\n", this->_head.c_str());
+            // //printf("houna: %s\n", this->_head.c_str());
         }
-        std::cout << "final header:|" << this->_head << "|" << std::endl;
-        std::cout << "final body: |" << this->_response << "|" << std::endl;
+        //std::cout << "final header:|" << this->_head << "|" << std::endl;
+        //std::cout << "final body: |" << this->_response << "|" << std::endl;
         this->_head += "\r\n\r\n";
     }
     return (1);
@@ -184,7 +184,7 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
 void Response::renderFile(Parser &server, const std::string &file)
 {
     this->_file_path = file;
-    printf("jiti?\n");
+    // //printf("jiti?\n");
 	this->_file_fd.open(file, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
@@ -204,7 +204,7 @@ void Response::renderFile(Parser &server, const std::string &file)
 
 void Response::serveFile(const std::string &filePath, Parser &server) 
 {
-	std::cout << "serveFile: " << filePath << std::endl;
+	//std::cout << "serveFile: " << filePath << std::endl;
     std::ifstream fileStream(filePath);
     if (fileStream.good() && !access(filePath.c_str(), F_OK))
         renderFile(server, filePath);
@@ -232,7 +232,7 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
             else {
                 dirEntryPath = request.getPath() + "/" + ent->d_name;
             }
-            printf("chno dirPath? : %s\n", dirEntryPath.c_str());
+            // //printf("chno dirPath? : %s\n", dirEntryPath.c_str());
 
             output += "<li><a href=\"" + dirEntryPath + "\">" + ent->d_name + "</a></li>";
         }
@@ -289,7 +289,7 @@ void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, c
 {
     // Handle directory requests
     if (endSlash(request.getPath()) && request.getPath().size() != 1) {
-        printf("bayna hna\n");
+        // //printf("bayna hna\n");
         if (!this->_location->getIndex().empty())
             handleDirFile(request, server, file);
         else
@@ -323,7 +323,7 @@ void Response::handleDirFile(HttpRequestParser &request, Parser &server, const s
         }
         ++it;
     }
-    printf("hanta jiti ! cgi: %d\n", cgi);
+    //printf("hanta jiti ! cgi: %d\n", cgi);
     if (!cgi)
         callErrorPage(server, 403);
 }

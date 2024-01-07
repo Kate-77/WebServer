@@ -52,21 +52,26 @@ Response & Response::operator=(Response const & rhs)
 // Starting here
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
-    
-    if (request.getStatusCode() != -1) 
-    {
-        this->_status_code = request.getStatusCode();
-        callErrorPage(server, _status_code);
-        return;
-    }
-    int foundLocation = findLocation(server, request.getPath()); // add 301 condition (return)
+	int foundLocation = findLocation(server, request.getPath()); // add 301 condition (return)
     if (foundLocation == -1)
     {
         callErrorPage(server, 404);
         return;
     }
-    printf("location: %s\n", this->_locationPath.c_str());
-    printf("start3\n");
+	
+	std::cout << "handleResponse salam: " << request.getStatusCode() << std::endl;
+	std::cout << " request URL " << request.getPath() << std::endl;
+    if (request.getStatusCode() != -1) 
+    {
+        this->_status_code = request.getStatusCode();
+		printf("status code: %d\n", this->_status_code);
+        callErrorPage(server, _status_code);
+		std::cout << "handleResponse salamzzzzzzz: " << request.getStatusCode() << std::endl;
+        return;
+    }
+    
+    //printf("location: %s\n", this->_locationPath.c_str());
+    //printf("start3\n");
     if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
     {
         callErrorPage(server, 405);
@@ -90,9 +95,21 @@ void Response::callErrorPage(Parser& server, int code)
 {
     (void)server;
     std::string path;
-    const std::map<int, std::string> _error_pages = _location->getError_page();
-    std::map<int, std::string>::const_iterator it = _error_pages.find(code);
 
+	std::cout << "hanaa " << code << std::endl;
+	// if (_location->getError_page().empty())
+		//std::cout << "empty" << std::endl;
+    std::map<int, std::string> _error_pages = _location->getError_page();
+	std::cout << "error pages size: " << _error_pages.size() << std::endl;
+	std::cout << "error pages size: " << _error_pages.size() << std::endl;
+	// std::cout << "error pages size: " << _error_pages.size() << std::endl;
+	// for (std::map<int, std::string>::const_iterator it = _error_pages.begin(); it != _error_pages.end(); it++)
+	// {
+	// 	//std::cout << "code: " << it->first << std::endl;
+	// 	//std::cout << "path: " << it->second << std::endl;
+	// }
+    // std::map<int, std::string>::const_iterator it = _error_pages.find(code);
+	// //std::cout << "code: " << code << std::endl;
     if (code == 301) 
     {
         // Handle redirect separately
@@ -100,18 +117,18 @@ void Response::callErrorPage(Parser& server, int code)
         return;
     }
 
-    printf("#error: %s\n", it->second.c_str());
-    if (it != _error_pages.end()) { // TO DEBUG
-        this->_file_path = _location->getRoot() + it->second ;
-        printf("error page : |%s|\n", _file_path.c_str());
+    // //printf("#error: %s\n", it->second.c_str());
+    if (_error_pages.find(code) != _error_pages.end()) { // TO DEBUG
+        this->_file_path = _error_pages.find(code)->second ;
+        //printf("error page : |%s|\n", _file_path.c_str());
         this->_file_fd.open(_file_path, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
         if (this->_file_fd.is_open()) {
-            printf("#ERROR PATH#: %s\n", _file_path.c_str());
+            //printf("#ERROR PATH#: %s\n", _file_path.c_str());
             this->_errorContentLength = this->_file_fd.tellg();
             this->_contentLength = this->_file_fd.tellg();
             this->_file_fd.seekg(0, std::ios::beg);
             this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_contentLength) + "\r\n\r\n";
-            printf("#HEADER#: %s\n", _head.c_str());
+            //printf("#HEADER#: %s\n", _head.c_str());
             _file_fd.close();
         } 
         else
@@ -127,8 +144,9 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
     std::string path;
     path = request.getPath();
 
-    printf("#################  DELETE  ###############\n");
-    // check file existence
+    //printf("#################  DELETE  ###############\n");
+    // check file existence 
+	// construct path
     if (access(path.c_str(), F_OK) == -1)
         callErrorPage(server, 404);
     // if it exists, we check if it's writable to be able to delete it
@@ -155,7 +173,7 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
 // Get Method
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
-    printf("#################  GET  ###############\n");
+    //printf("#################  GET  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
     if (checkDirectory(file))
@@ -167,16 +185,27 @@ void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 // Post Method
 void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
 {
-    printf("#################  POST  ###############\n");
+    //printf("#################  POST  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
-    printf("##file: %s\n", request.getPath().c_str());
+    //printf("##file: %s\n", request.getPath().c_str());
     if (request.getPath().empty()) // TO TEST
+	{
+		//printf("dkhlti?\n");
         callErrorPage(server, 404);
-    else if (_location->getUpload_store() == true)
-        handleFilePost(request, server, file);
+	}
+    else if (_location->getUpload_store() == true){
+		//printf("allo\n");
+        handleFilePost(request, server, file);}
     else if (checkDirectory(request.getPath())) // HOW TO TEST THIS?
+	{
+		//printf("ma allo \n");
         handleDirectoryPost(request, server, file);
+	}
+		
     else //CG left
+	{
+		printf(" ma3ert  \n");
         handleDirFile(request, server, file);
+	}
 }
