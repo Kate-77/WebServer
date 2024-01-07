@@ -224,7 +224,7 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
   for (std::string::size_type eol = this->_body.find(end_of_file); eol != std::string::npos; eol = this->_body.find(end_of_file)) 
   {
     std::cout << "heeere error" << std::endl;
-    // if no more headers (two consecutive new lines)
+    //if no more headers (two consecutive new lines)
     if (0 == eol) 
     {
       this->_body.erase(0, eol + end_of_file.length());
@@ -239,9 +239,9 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
       continue ;
     }
     key   = this->_body.substr(0, sep);
-    std::cout << "%KEY" << key << std::endl;
+    // std::cout << "%KEY" << key << std::endl;
     value = this->_body.substr(sep + 1, eol - sep - 1);
-    std::cout << "%VALUE" << value << std::endl;
+    // std::cout << "%VALUE" << value << std::endl;
     if (headers.end() != headers.find(key)) 
     {
       this->_body.erase(0, eol + end_of_file.length());

@@ -98,6 +98,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
     std::map<std::string, std::string> pp = _location->getCgi();
     std::map<std::string, std::string>::const_iterator it = pp.begin();
     std::string fileExtension = getExtension(path);
+	int	cgi = 0;
     while (it != pp.end()) 
     {
         if ( fileExtension == it->first)
@@ -110,12 +111,13 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
                 this->_cgi_bin = it1->second;
             }
             handleCgi(request, path, server);
+			cgi = 1;
             //break ;
         }
         ++it;
     }
-    
-    serveFile(path, server);
+    if (!cgi)
+    	serveFile(path, server);
 }
 
 
@@ -135,7 +137,7 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
     while(std::getline(a, line))
     {
         std::istringstream b(line);
-        // //std::cout << "line: |" << line << std::endl;
+        // std::cout << "line: |" << line << std::endl;
         if(line.find(':') == std::string::npos || line.find(':') == 0)
         {
             std::getline(b, key, ' '); //key
@@ -167,15 +169,15 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
             // //printf("#FIRST : %s |%lu | #SECOND %s\n",it->first.c_str(), it->first.length(), it->second.c_str());
             if(it->first == "HTTP/1.1")
                 {
-                    // //std::cout << "here " << std::endl;
+                    // std::cout << "here " << std::endl;
                     this->_head += it->first  + " " + it->second + end_of_file;
                     continue ;
                 }
             this->_head += it->first + ": " + it->second + end_of_file;
             // //printf("houna: %s\n", this->_head.c_str());
         }
-        //std::cout << "final header:|" << this->_head << "|" << std::endl;
-        //std::cout << "final body: |" << this->_response << "|" << std::endl;
+        std::cout << "final header:|" << this->_head << "|" << std::endl;
+        std::cout << "final body: |" << this->_response << "|" << std::endl;
         this->_head += "\r\n\r\n";
     }
     return (1);
@@ -204,7 +206,7 @@ void Response::renderFile(Parser &server, const std::string &file)
 
 void Response::serveFile(const std::string &filePath, Parser &server) 
 {
-	//std::cout << "serveFile: " << filePath << std::endl;
+	std::cout << "serveFile: " << filePath << std::endl;
     std::ifstream fileStream(filePath);
     if (fileStream.good() && !access(filePath.c_str(), F_OK))
         renderFile(server, filePath);

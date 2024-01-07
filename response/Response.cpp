@@ -96,39 +96,22 @@ void Response::callErrorPage(Parser& server, int code)
     (void)server;
     std::string path;
 
-	std::cout << "hanaa " << code << std::endl;
-	// if (_location->getError_page().empty())
-		//std::cout << "empty" << std::endl;
     std::map<int, std::string> _error_pages = _location->getError_page();
-	std::cout << "error pages size: " << _error_pages.size() << std::endl;
-	std::cout << "error pages size: " << _error_pages.size() << std::endl;
-	// std::cout << "error pages size: " << _error_pages.size() << std::endl;
-	// for (std::map<int, std::string>::const_iterator it = _error_pages.begin(); it != _error_pages.end(); it++)
-	// {
-	// 	//std::cout << "code: " << it->first << std::endl;
-	// 	//std::cout << "path: " << it->second << std::endl;
-	// }
-    // std::map<int, std::string>::const_iterator it = _error_pages.find(code);
-	// //std::cout << "code: " << code << std::endl;
-    if (code == 301) 
+	if (code == 301) 
     {
         // Handle redirect separately
         this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nLocation: " + this->_locationPath + "/" + "\r\n\r\n";
         return;
     }
 
-    // //printf("#error: %s\n", it->second.c_str());
     if (_error_pages.find(code) != _error_pages.end()) { // TO DEBUG
         this->_file_path = _error_pages.find(code)->second ;
-        //printf("error page : |%s|\n", _file_path.c_str());
         this->_file_fd.open(_file_path, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
         if (this->_file_fd.is_open()) {
-            //printf("#ERROR PATH#: %s\n", _file_path.c_str());
             this->_errorContentLength = this->_file_fd.tellg();
             this->_contentLength = this->_file_fd.tellg();
             this->_file_fd.seekg(0, std::ios::beg);
             this->_head = "HTTP/1.1 " + printNumber(code) + " " + statusMessage(code) + "\r\nContent-Type: text/html\r\nContent-Length: " + printNumber(this->_contentLength) + "\r\n\r\n";
-            //printf("#HEADER#: %s\n", _head.c_str());
             _file_fd.close();
         } 
         else
@@ -171,7 +154,7 @@ void    Response::handleDeleteRequest(HttpRequestParser &request, Parser &server
 // Get Method
 void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 {
-    //printf("#################  GET  ###############\n");
+    printf("#################  GET  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
     if (checkDirectory(file))
@@ -183,7 +166,7 @@ void Response::handleGetRequest(HttpRequestParser &request, Parser &server)
 // Post Method
 void Response::handlePostRequest(HttpRequestParser &request, Parser &server)
 {
-    //printf("#################  POST  ###############\n");
+    printf("#################  POST  ###############\n");
     std::string file = constructFilePath(request.getPath());
 
     //printf("##file: %s\n", request.getPath().c_str());
