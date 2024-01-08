@@ -1,7 +1,7 @@
 NAME	=		webserv
 
 CC		= 		c++
-CFLAGS	= 		-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CFLAGS	= 		-Wall -Wextra -Werror -std=c++98 -g3
 
 SRC		=		main.cpp conf/Lexer.cpp conf/Parser.cpp cgi/cgi.cpp server/Socket.cpp server/Server.cpp server/Client.cpp request/HttpRequestParser.cpp response/Response.cpp response/Helpers.cpp response/MicroHelpers.cpp
 
@@ -29,4 +29,3 @@ re: fclean all
 test:  re
 		make clean && ./webserv 
 
-	

@@ -1,10 +1,31 @@
 #include "cgi.hpp"
 
 // kill -9 $(lsof -ti:5000,5001,5002)
+
+std::string readFdToString(int fd) {
+    // Determine the size of the file
+    off_t fileSize = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);  // Reset the file pointer to the beginning
+
+    // Read the file contents into a string
+    std::string content(fileSize, '\0');
+    ssize_t bytesRead = read(fd, &content[0], fileSize);
+
+    if (bytesRead == -1) {
+        // Handle error
+        std::cerr << "Error reading file descriptor" << std::endl;
+        return "";
+    }
+
+    return content;
+}
+
+
 CGI::CGI(  HttpRequestParser & Request, Response & Response ) : _Request(Request), _Response(Response)
 {
   
- this->_requestBody = this->_Request.bodyFileName; //-->request body
+  this->_requestBody  = readFdToString(this->_Request.getBodyFileFD());
+  std::cout << "---------- BOOOOODY -------" <<  this->_requestBody << std::endl;
   //get current directory pathname: Absolut Path ex: /Users/abboutah/....../websev/
   char * tmp = getcwd(NULL, 0); // arguments 1:current pathname to buf, size of buf
   if (NULL == tmp) 
@@ -66,8 +87,20 @@ int CGI::execute(void)
 {
   // env
   std::cout << "cgi here" << std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << "====================" <<std::endl;
+  std::cout << this->_requestBody << std::endl;
   int ret = this->initEnv();
-  if (0 != ret) 
+  if (0 != ret)
   {
     return (500); // 500 internal server error
   }
@@ -93,6 +126,7 @@ int CGI::execute(void)
   else if (pid > 0) //parent
   {
     close(fd[CGI::fRead]); // close read side
+    std::cout << this->_requestBody.c_str() << " " << this->_requestBody.length() << std::endl;
     ssize_t aux_ret = write(fd[CGI::fWrite], this->_requestBody.c_str(), this->_requestBody.length()); //write body
     if (-1 == aux_ret) 
     {
