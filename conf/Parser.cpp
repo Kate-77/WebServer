@@ -33,7 +33,7 @@ Parser::Parser(void) : _root(Default_Root),
   this->_lDirectives["autoindex"]        = &Parser::parseAutoindex;     //done
   this->_lDirectives["error_page"]       = &Parser::parseErrorPage; //done
   this->_lDirectives["limit_except"]     = &Parser::parseLimitExcept;     //DONE
-  this->_lDirectives["client_max_body_size"] = &Parser::parseClientMaxBodySize; //done
+  // this->_lDirectives["client_max_body_size"] = &Parser::parseClientMaxBodySize; //done
   this->_lDirectives["upload_store"]     = &Parser::parseUploadStore;
   this->_lDirectives["cgi"]          = &Parser::parseCgi;             //done
   this->init_code_status();
@@ -272,7 +272,7 @@ std::map<int, std::string>            &Parser::getError_page(void)
       return (this->_error_page);
 } 
 
-std::vector<std::string>              Parser::getLimit_except(void)
+std::vector<std::string>              &Parser::getLimit_except(void)
 {
       return (this->_limit_except);
 } 
@@ -773,12 +773,8 @@ void Parser::parseClientMaxBodySize(_type::const_iterator & it)
   }
   // save 
   this->_client_max_body_size = static_cast<std::string>(it->c_str());
-  if(this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'M' || this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'm')
-      this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()) * 1000000);
-  else if (this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'K' || this->_client_max_body_size[this->_client_max_body_size.length() - 1 ] == 'k')
-        this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()) * 1000);
-  else 
-      throw Parser::ParserException("Error! missing size unit(k K m M) near directive 'client_max_body_size'");
+  this->_body_size_bytes = static_cast<unsigned int>(atoi(this->_client_max_body_size.c_str()));
+
   // check semicolon
   ++it;
   if ("}" == *it) 

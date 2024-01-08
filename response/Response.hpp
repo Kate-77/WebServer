@@ -7,6 +7,8 @@
 #include <iostream>
 #include <istream>
 #include <string> 
+#include <time.h>
+#include <cstdlib>
 
 class Parser;
 class HttpRequestParser;

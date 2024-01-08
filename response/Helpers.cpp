@@ -112,34 +112,94 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
     	serveFile(path, server);}
 }
 
+// int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
+// {
+//     std::string key, value; //split the key and the value
+//     const std::string   end_of_file = "\r\n"; //seperator
+//     this->_file_path = path;
+//     this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
+//                 "Connection: close\r\n"
+//                 "Content-Type: " + getFileType(_file_path) + "\r\n"
+//                 "Content-Length: 0" + "\r\n\r\n";
+//     std::map<std::string, std::string>  cgi_headers; //create map headers
+//     // serveFile(_file_path, server);
+//     std::istringstream a(this->_head);
+//     std::string line;
+//     while(std::getline(a, line))
+//     {
+//         std::istringstream b(line);
+//         std::cout << "line: |" << line << std::endl;
+//         if(line.find(':') == std::string::npos || line.find(':') == 0)
+//         {
+//             std::getline(b, key, ' '); //key
+//             std::getline(b, value); //value
+//             cgi_headers[key] = value;
+//             continue ;
+//         }
+//         std::getline(b, key, ':'); //key
+//         std::getline(b, value); //value
+//         cgi_headers[key] = value; // assign
+//     }
+    
+//     CGI cgi = CGI(request, *this);
+//     this->_status_code = cgi.execute();
+//     if (this->_status_code == 500)
+//         callErrorPage(server, 500);
+//     else if (this->_status_code == 502)
+//         callErrorPage(server, 502);
+//     else
+//     {
+//         cgi.parseHeadersAndBody(cgi_headers, this->_response);
+//         this->_head.erase();
+//         for(std::map<std::string, std::string>::iterator it = cgi_headers.end(); it != cgi_headers.begin(); it--)
+//         {
+//             if(it->first.length() > 30 || it->first.empty() == true)
+//                 continue;
+//             if(it->first == "Content-Length"){
+//                 this->_contentLength = this->_response.length();
+//                 this->_errorContentLength = this->_response.length();
+//                 }
+//             if(it->first == "HTTP/1.1")
+//                 {
+//                     // std::cout << "here " << std::endl;
+//                     this->_head += it->first  + " " + it->second + end_of_file;
+//                     continue ;
+//                 }
+//             this->_head += it->first + ": " + it->second + end_of_file;
+//             // //printf("houna: %s\n", this->_head.c_str());
+//         }
+//         this->_head += "\r\n\r\n";
+//     }
+//     std::cout << "final header:|" << this->_head << "|" << std::endl;
+//     std::cout << "final body: |" << this->_response << "|" << std::endl;
+//     std::cout << "final content length: " << this->_contentLength << "|" << std::endl;
+//     return (1);
+// }
+
 int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
     std::string key, value; //split the key and the value
     const std::string   end_of_file = "\r\n"; //seperator
     this->_file_path = path;
-    this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
-                "Connection: close\r\n"
-                "Content-Type: " + getFileType(_file_path) + "\r\n"
-                "Content-Length: 0" + "\r\n\r\n";
-    std::map<std::string, std::string>  cgi_headers; //create map headers
-    // serveFile(_file_path, server);
-    std::istringstream a(this->_head);
-    std::string line;
-    while(std::getline(a, line))
-    {
-        std::istringstream b(line);
-        std::cout << "line: |" << line << std::endl;
-        if(line.find(':') == std::string::npos || line.find(':') == 0)
-        {
-            std::getline(b, key, ' '); //key
-            std::getline(b, value); //value
-            cgi_headers[key] = value;
-            continue ;
-        }
-        std::getline(b, key, ':'); //key
-        std::getline(b, value); //value
-        cgi_headers[key] = value; // assign
-    }
+    // std::map<std::string, std::string>  cgi_headers; //create map headers
+    // // serveFile(_file_path, server);
+    // std::istringstream a(this->_head);
+    // std::string line;
+    // while(std::getline(a, line))
+    // {
+    //     std::istringstream b(line);
+    //     std::cout << "line: |" << line << std::endl;
+    //     if(line.find(':') == std::string::npos || line.find(':') == 0)
+    //     {
+    //         std::getline(b, key, ' '); //key
+    //         std::getline(b, value); //value
+    //         cgi_headers[key] = value;
+    //         continue ;
+    //     }
+    //     std::getline(b, key, ':'); //key
+    //     std::getline(b, value); //value
+    //     cgi_headers[key] = value; // assign
+    // }
     
     CGI cgi = CGI(request, *this);
     this->_status_code = cgi.execute();
@@ -147,32 +207,56 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
         callErrorPage(server, 500);
     else if (this->_status_code == 502)
         callErrorPage(server, 502);
+    else if (this->_status_code == 408)
+        callErrorPage(server, 408);
     else
     {
-        cgi.parseHeadersAndBody(cgi_headers, this->_response);
-        this->_head.erase();
-        for(std::map<std::string, std::string>::iterator it = cgi_headers.end(); it != cgi_headers.begin(); it--)
-        {
-            if(it->first.length() > 30 || it->first.empty() == true)
-                continue;
-            if(it->first == "Content-Length"){
-                this->_contentLength = this->_response.length();
-                this->_errorContentLength = this->_response.length();
-                }
-            if(it->first == "HTTP/1.1")
-                {
-                    // std::cout << "here " << std::endl;
-                    this->_head += it->first  + " " + it->second + end_of_file;
-                    continue ;
-                }
-            this->_head += it->first + ": " + it->second + end_of_file;
-            // //printf("houna: %s\n", this->_head.c_str());
-        }
-        this->_head += "\r\n\r\n";
+        cgi.parseHeadersAndBody(this->_response);
+        //cgi.parseHeadersAndBody(this->_response);
+        // this->_head.erase();
+        // for(std::map<std::string, std::string>::iterator it = cgi_headers.end(); it != cgi_headers.begin(); it--)
+        // {
+        //     if(it->first.length() > 30 || it->first.empty() == true)
+        //         continue;
+        //     if(it->first == "Content-Length"){
+        //         this->_contentLength = this->_response.length();
+        //         this->_errorContentLength = this->_response.length();
+        //         }
+        //     if(it->first == "HTTP/1.1")
+        //         {
+        //             // std::cout << "here " << std::endl;
+        //             this->_head += it->first  + " " + it->second + end_of_file;
+        //             continue ;
+        //         }
+        //     this->_head += it->first + ": " + it->second + end_of_file;
+        //     // //printf("houna: %s\n", this->_head.c_str());
+        // }
+
+        std::cerr << "___DBG___CONTENT___00___ : " << _file_path << std::endl;
+        std::cerr << "___DBG___CONTENT___01___ : " << getFileType(_file_path) << std::endl;
+
+        this->_head = "HTTP/1.1 " + printNumber(_status_code) + " " + statusMessage(_status_code) +"\r\n"
+                "Connection: close\r\n" 
+                "Content-Type: " + cgi._type + "\r\n" +
+                "Content-Length: " + cgi._length + "\r\n\r\n";
+
+
+
+
+
+
+
+
+        this->_contentLength = this->_response.length();
     }
+    // int _TmpFd = open("/Users/kmoutaou/Documents/WebServer/a.txt", O_RDWR | O_APPEND, 0600);
+    // std::cout << "___FD___DBG___01___ : " << _TmpFd << std::endl;
+    // int ret_read = write(_TmpFd, this->_head.c_str(), this->_head.length());
+    // std::cout << "___RET___READ___DBG___01___ : " << ret_read << std::endl;
     std::cout << "final header:|" << this->_head << "|" << std::endl;
     std::cout << "final body: |" << this->_response << "|" << std::endl;
     std::cout << "final content length: " << this->_contentLength << "|" << std::endl;
+    // close(_TmpFd);
     return (1);
 }
 

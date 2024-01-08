@@ -358,7 +358,8 @@ std::string generateName()
 {
     std::string name;
     std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    for (int i = 0; i < 5; i++) {
+    srand(time(NULL));
+    for (int i = 0; i < 8; i++) {
         name += charset[rand() % charset.size()];
     }
     return name;

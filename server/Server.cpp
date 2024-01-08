@@ -259,7 +259,8 @@ void Server::handle_recv_err(int socket, ssize_t nbytes, int i, fd_set &master_r
 void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_set &master_read_fds, fd_set &master_write_fds)
 {
 	int Done = 0;
-	buf[nbytes] = '\0';
+	std::cout << "fdhsfhdfhdlkfhdf" << strlen((char *)buf)<< "|||||||||" << nbytes << std::endl;
+	buf[strlen((char *)buf)] = '\0';
 
 	try {
 		printf("***parse request****\n");

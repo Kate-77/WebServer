@@ -115,10 +115,16 @@ int CGI::execute(void)
     // WIFEXITED(status) Elle renvoie vrai si le statut provient d'un processus fils qui s'est terminé en quittant le main avec return ou avec un appel à exit.
     // WEXITSTATUS(status) Elle renvoie le code de retour du processus fils passé à exit ou à return.
     // Cette macro est utilisable uniquement si vous avez utilisé WIFEXITED avant, et que cette dernière a renvoyé vrai.
-    if (-1 == ret || (WIFEXITED(status) && 0 != WEXITSTATUS(status))) 
+    std::cout << "111111111110000000" << std::endl;
+    std::cout << WIFEXITED(status) << " "<< WEXITSTATUS(status) << std::endl;
+    if (WIFEXITED(status) && 408 == WEXITSTATUS(status))
+      return (408);
+    if (-1 == ret) 
     {
-      return (502); // 502 bad gateway
+      if ((WIFEXITED(status) && 0 != WEXITSTATUS(status)))
+        return (502); // 502 bad gateway
     }
+
   } 
   else //child
   {
@@ -146,10 +152,19 @@ int CGI::execute(void)
       return (500); // 500 internal server error
     }
     struct rlimit a;
-    a.rlim_cur = 30;
-    a.rlim_max = 30;
-    setrlimit(RLIMIT_CPU, &a);
-    // alarm(30);
+    a.rlim_cur = 10;
+    a.rlim_max = 15;
+    if (setrlimit(RLIMIT_CPU, &a) == 0)
+    {
+      signal(SIGALRM, timeout_handler);
+      alarm(10);  // Set the alarm for 10 seconds
+
+      // Your existing code for executing the CGI program
+
+      // Disable the alarm if the child process finishes before the timeout
+      alarm(0);
+    }
+    std::cerr << "456545645615615615615615616" << std::endl;
     if(execve(this->_av[0], this->_av, this->_env) == -1)
     {
       std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
@@ -215,7 +230,7 @@ std::string & CGI::trim(std::string & s, const char * t = " \t\n\r\f\v")
   return (lefttrim(righttrim(s, t), t));
 }
 
-void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std::string & body) 
+void CGI::parseHeadersAndBody(std::string & body) 
 {
   std::string key, value;
   std::string::size_type sep;
@@ -238,21 +253,21 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
       continue ;
     }
     key   = this->_body.substr(0, sep);
-    // std::cout << "%KEY" << key << std::endl;
+    std::cout << "%KEY" << key << std::endl;
     value = this->_body.substr(sep + 1, eol - sep - 1);
+    if(key == "Content-type" || key == "Content-Type")
+      this->_type = trim(value,  "\r\n");
     // std::cout << "%VALUE" << value << std::endl;
-    if (headers.end() != headers.find(key)) 
-    {
-      this->_body.erase(0, eol + end_of_file.length());
-      continue ;
-    }
-    if (trim(key, " \r\n")  == "Content-type")
-      key = "Content-Type";
-    headers[trim(key, " \r\n")] = trim(value, " \r\n");    
-     if (true == headers[key].empty()) 
-    {
-      headers.erase(key);
-    }
+    // if (headers.end() != headers.find(key)) 
+    // {
+    //   this->_body.erase(0, eol + end_of_file.length());
+    //   continue ;
+    // }
+    // headers[trim(key, " \r\n")] = trim(value, " \r\n");    
+    //  if (true == headers[key].empty()) 
+    // {
+    //   headers.erase(key);
+    // }
     this->_body.erase(0, eol + end_of_file.length());
   }
 
@@ -263,32 +278,72 @@ void CGI::parseHeadersAndBody(std::map<std::string, std::string> & headers, std:
   // {
   //   this->_body.erase(static_cast<std::string::size_type>(atoi(contentLength->second.c_str())));
   // }
-  headers["Content-Length"] =convert_to_string(this->_body.length());
-  // body
+  // headers["Content-Length"] =convert_to_string(this->_body.length());
+  this->_length = convert_to_string(this->_body.length());
+  // // body
   body = this->_body;
   printf("______CGI BODY_____\n%s\n", body.c_str());
 }
+
 
 int CGI::initEnv(void) 
 {
   std::map<std::string, std::string> env;
 
   // security reasons, to tell the cgi the server handled the request
-  env["REDIRECT_STATUS"] = "200"; 
   //  the dialect of CGI being used by the server to communicate with the script //for all requests
-  env["GATEWAY_INTERFACE"]  = "CGI/1.1";
   // URI path (not URL-encoded)   which could identify the CGI script (rather than the script's output).
-  env["SCRIPT_NAME"]        = this->_Path;
-  // the method which should be used by the script to process the request
+  
+  
+  
+  
+  
+  
+  
+  
+    // env["REQUEST_URI="] + request.getPath().substr(0, request.getPath().find_last_of("/")));
+    // env["SCRIPT_NAME="] +  request.getPath());
+    // env["PATH_TRANSLATED="] + response.get_full_path());
+    // env["QUERY_STRING="] + request.getQueryString());
+    // env["REQUEST_METHOD="] + request.getMethod());
+    // env["GETAWAY_INTERFACE=CGI]/1.1");
+    // env["REDIRECT_STATUS=200]");
+    // env["SERVER_SOFTWARE=webserv]/1.1");
+    // env["REMOTE_ADDR=0].0.0.0");
+    // env["REMOTE_PORT=0]");
+    // env["SERVER_PROTOCOL"]    = this->_Request.getVersion(); //Request
+  
+  
+  
+  
+  
+    env["REQUEST_URI"]        = this->_requestFilePath;
+    env["SCRIPT_NAME"]        = this->_Path;
+  env["PATH_TRANSLATED"]    = this->_requestFilePath;
+  env["QUERY_STRING"]       = this->_Request.getQuery(); //request
   env["REQUEST_METHOD"]     = this->_Request.getMethod(); //request
-  env["REQUEST_URI"]        = this->_requestFilePath;
-  // path to be interpreted by the CGI script.
+  env["GATEWAY_INTERFACE"]  = "CGI/1.1";
+  env["REDIRECT_STATUS"] = "200"; 
+  env["SERVER_SOFTWARE"]    = ""; // empty for security reasons
   env["PATH_INFO"]          = this->_requestFilePath;
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // the method which should be used by the script to process the request
+  // path to be interpreted by the CGI script.
   // taking the PATH_INFO value, parsing it as a local URI in its own right, and performing any virtual-to-physical 
   // translation appropriate to map it onto the server's document repository structure.
-  env["PATH_TRANSLATED"]    = this->_requestFilePath;
   //URL-encoded search or parameter string; it provides information to the CGI script to affect or refine the document to be returned by the script.
-  env["QUERY_STRING"]       = this->_Request.getQuery(); //request
   // the network address of the  client sending the request to the server.
   // env["REMOTE_ADDR"]        = "127.0.0.1"; // request
   // // the name of the server host to which the client request is directed. //for all requests
@@ -296,16 +351,20 @@ int CGI::initEnv(void)
   // // the TCP/IP port number on which this request is received from the client.
   // env["SERVER_PORT"]        = "80"; //request
   // the name and version of the application protocol used for this CGI request.
-  env["SERVER_PROTOCOL"]    = this->_Request.getVersion(); //Request
   // the name and version of the information server software making the CGI request (and running the gateway). //for all requests
-  env["SERVER_SOFTWARE"]    = ""; // empty for security reasons
 
-  if ("POST" == env["REQUEST_METHOD"])
+  if (env["REQUEST_METHOD"] == "POST")
    {
     //contains the size of the message-body attached to the request
-    env["CONTENT_LENGTH"] = convert_to_string(this->_requestBody.length());
+    std::cout << " Content Length request" <<  this->_Request.getHeadersMap().find("Content-Length")->second << std::endl;
+    env["CONTENT_LENGTH"] = this->_Request.getHeadersMap().find("Content-Length")->second;
     env["CONTENT_TYPE"] = this->_Request.getHeadersMap().find("Content-Type")->second; //requesy
    }
+  else
+    {
+      env["CONTENT_LENGTH"] = "0";
+      env["CONTENT_TYPE"] = "text/html; charset=UTF-8"; //requesy
+    }
   //get all request header // revision
   //get all request header and add HTTP + toupper
 
@@ -341,12 +400,12 @@ int CGI::initEnv(void)
     ++aux;
   }
   *aux = NULL;
-  // std::cout << "-------Meta-variables-------" << std::endl;
-  // for(std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++)
-  //   {
-  //       std::cout << it->first << "=" << it->second << std::endl;
-  //   }
-  //   std::cout << std::endl;
+  std::cout << "-------Meta-variables-------" << std::endl;
+  for(std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++)
+    {
+        std::cout << it->first << "=" << it->second << std::endl;
+    }
+    std::cout << std::endl;
 
   return (0);
 }

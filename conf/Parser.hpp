@@ -99,7 +99,7 @@ class Parser {
     std::vector<std::string>         &    getIndex(void); 
     bool        &                         getAutoindex(void); 
     std::map<int, std::string>            &getError_page(void); 
-    std::vector<std::string>              getLimit_except(void); 
+    std::vector<std::string>              &getLimit_except(void); 
     std::string &                         getClient_max_body_size(void); 
     bool        &                         getUpload_store(void); 
     std::string &                         getReturn(void); 

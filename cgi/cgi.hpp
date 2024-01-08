@@ -59,15 +59,18 @@ class CGI {
     int initEnv( void );
 
   public:
+    std::string       _length;
+    std::string       _type;
     //Constructor
     CGI(HttpRequestParser & Request, Response & Response);
     // CGI(void);
     //Destructor
     ~CGI( void );
     
+    void        handleTime(void);
     int execute( void );
     //parse headers and body from response
-    void parseHeadersAndBody(std::map<std::string, std::string> &  headers, std::string & body);
+    void parseHeadersAndBody(std::string & body);
     std::string	convert_to_string(size_t a);
     // void parseHeadersAndBody( void);
 };

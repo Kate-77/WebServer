@@ -52,11 +52,22 @@ Response & Response::operator=(Response const & rhs)
 // Starting here
 void    Response::handleResponse(HttpRequestParser & request, Parser &server)
 {
+    if (request.getMethod() == "POST")
+    {
+        unsigned int bytes = atoi(request.getHeadersMap().find("Content-Length")->second.c_str());
+        if (bytes > server.getbodysizebytes())
+        {
+            generateErrorPage(413);
+            return ;
+        }
+    }
+
 	int foundLocation = findLocation(server, request.getPath());
     if (foundLocation == -1)
     {
         printf("no location found\n");
-        callErrorPage(server, 404);
+        // callErrorPage(server, 404);
+        generateErrorPage(404);
         return;
     }
 	
@@ -70,7 +81,18 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
         return;
     }
     // non allowed method
-    if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
+    std::vector<std::string>::iterator it1 = this->_location->getLimit_except().begin();
+    std::vector<std::string>::iterator it2 = this->_location->getLimit_except().end();
+    // while (it != this->_location->getLimit_except().end())
+    // {
+    //     if (*it == request.getMethod())
+    //     {
+        std::cout << *it1 <<  request.getMethod() << std::endl;
+    if (!this->_location->getLimit_except().empty())
+    {
+        //std::cout << std::find(this->_location->getLimit_except().begin()
+    //if (std::find(this->_location->getLimit_except().begin(), this->_location->getLimit_except().end(), request.getMethod()) == this->_location->getLimit_except().end())
+    if (std::find(it1, it2, request.getMethod()) == it2)
     {
         callErrorPage(server, 405);
         return;
@@ -89,7 +111,9 @@ void    Response::handleResponse(HttpRequestParser & request, Parser &server)
             handleDeleteRequest(request, server);
         else
             callErrorPage(server, 405);
-    }
+    }}
+    else
+            callErrorPage(server, 405);
     return ;
 }
 
