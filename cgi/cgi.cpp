@@ -65,6 +65,7 @@ CGI::~CGI(void)
 int CGI::execute(void) 
 {
   // env
+  std::cout << "cgi here" << std::endl;
   int ret = this->initEnv();
   if (0 != ret) 
   {
@@ -112,19 +113,18 @@ int CGI::execute(void)
     // Dans le cas où cela ne vous intéresse pas, il suffit de mettre le paramètre 0.
     // Notez que waitpid(-1, status, 0) correspond à la fonction wait.
     ret = waitpid(pid, &status, 0); //WNOHANG
+    std::cout << "return: " << ret << std::endl;
+      // waitpid(pid, &status, WNOHANG); //WNOHANG
     // WIFEXITED(status) Elle renvoie vrai si le statut provient d'un processus fils qui s'est terminé en quittant le main avec return ou avec un appel à exit.
     // WEXITSTATUS(status) Elle renvoie le code de retour du processus fils passé à exit ou à return.
     // Cette macro est utilisable uniquement si vous avez utilisé WIFEXITED avant, et que cette dernière a renvoyé vrai.
-    std::cout << "111111111110000000" << std::endl;
-    std::cout << WIFEXITED(status) << " "<< WEXITSTATUS(status) << std::endl;
-    if (WIFEXITED(status) && 408 == WEXITSTATUS(status))
+    // WIFSIGNALED(status) returns true if the child process was terminated by a signal.
+    // WTERMSIG(status)  returns the number of the signal that caused the child process to terminate. This macro should only be employed if WIFSIGNALED returned true.
+    if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGALRM))
       return (408);
-    if (-1 == ret) 
-    {
-      if ((WIFEXITED(status) && 0 != WEXITSTATUS(status)))
+    // if (WIFEXITED(status) && 0 != WEXITSTATUS(status)) 
+    if (-1 == ret || (WIFEXITED(status) && 0 != WEXITSTATUS(status))) 
         return (502); // 502 bad gateway
-    }
-
   } 
   else //child
   {
@@ -151,20 +151,20 @@ int CGI::execute(void)
     {
       return (500); // 500 internal server error
     }
-    struct rlimit a;
-    a.rlim_cur = 10;
-    a.rlim_max = 15;
-    if (setrlimit(RLIMIT_CPU, &a) == 0)
-    {
-      signal(SIGALRM, timeout_handler);
-      alarm(10);  // Set the alarm for 10 seconds
+    // struct rlimit a;
+    // a.rlim_cur = 10;
+    // a.rlim_max = 15;
+    // if (setrlimit(RLIMIT_CPU, &a) == 0)
+    // {
+    //   signal(SIGALRM, timeout_handler);
+    //   alarm(10);  // Set the alarm for 10 seconds
 
-      // Your existing code for executing the CGI program
+    //   // Your existing code for executing the CGI program
 
-      // Disable the alarm if the child process finishes before the timeout
-      alarm(0);
-    }
-    std::cerr << "456545645615615615615615616" << std::endl;
+    //   // Disable the alarm if the child process finishes before the timeout
+    //   alarm(0);
+    // }
+    alarm(5);
     if(execve(this->_av[0], this->_av, this->_env) == -1)
     {
       std::cerr << "Error! execve() failed when running:  "<< this->_av[0] << std::endl;      
@@ -282,7 +282,7 @@ void CGI::parseHeadersAndBody(std::string & body)
   this->_length = convert_to_string(this->_body.length());
   // // body
   body = this->_body;
-  printf("______CGI BODY_____\n%s\n", body.c_str());
+  // printf("______CGI BODY_____\n%s\n", body.c_str());
 }
 
 
@@ -400,12 +400,12 @@ int CGI::initEnv(void)
     ++aux;
   }
   *aux = NULL;
-  std::cout << "-------Meta-variables-------" << std::endl;
-  for(std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++)
-    {
-        std::cout << it->first << "=" << it->second << std::endl;
-    }
-    std::cout << std::endl;
+  // std::cout << "-------Meta-variables-------" << std::endl;
+  // for(std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++)
+  //   {
+  //       std::cout << it->first << "=" << it->second << std::endl;
+  //   }
+  //   std::cout << std::endl;
 
   return (0);
 }

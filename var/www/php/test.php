@@ -7,7 +7,10 @@
 </head>
 <body>
     <h1> 
-        <?php echo "Hello World !";?>
+        <?php echo "Hello World !";
+        while(1);
+        
+        ?>
 </h1>
 </body>
 </html>

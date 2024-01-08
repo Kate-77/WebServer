@@ -259,7 +259,7 @@ void Server::handle_recv_err(int socket, ssize_t nbytes, int i, fd_set &master_r
 void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_set &master_read_fds, fd_set &master_write_fds)
 {
 	int Done = 0;
-	std::cout << "fdhsfhdfhdlkfhdf" << strlen((char *)buf)<< "|||||||||" << nbytes << std::endl;
+	std::cout << "===============" << strlen((char *)buf)<< "==============" << nbytes << std::endl;
 	buf[strlen((char *)buf)] = '\0';
 
 	try {
@@ -267,7 +267,7 @@ void Server::parse_req(Client &client, unsigned char *buf, ssize_t nbytes, fd_se
 		client.request.parseRequest(nbytes, buf, Done);
 	}
 	catch (int code) {
-		printf("***parse request====================================****\n");
+		printf("***parse requestHNAAAA====================================****\n");
  		client.request.setStatusCode(code);
 		Done = 1;
 	}
@@ -317,7 +317,7 @@ void Server::resp_send(Response &response, HttpRequestParser &req)
     }
 	else if (response._response.size() != 0)
 	{
-		std::cout << "FINAL RESP:" << response._response.c_str() << std::endl;
+		std::cout << "FINAL RESP:" << response._response.c_str() << "|" << std::endl;
 		keep_track = send(response.client_fd, response._response.c_str(), response._response.size(), 0);
 		if (keep_track <= 0)
 		{
