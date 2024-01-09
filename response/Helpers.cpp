@@ -3,7 +3,6 @@
 // Generate error html page
 void Response::generateErrorPage(int code)
 {
-	printf("generate error page start\n");
     std::string errorStatus = statusMessage(code);
     std::string errorBody = "<!DOCTYPE html>\n";
     errorBody += "<html>\n";
@@ -112,9 +111,7 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
         ++it;
     }
     if (!cgi)
-    {
-        printf("wach dkhlti hna?\n");
-    	serveFile(path, server);}
+    	serveFile(path, server);
 }
 
 int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
@@ -122,26 +119,6 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
     std::string key, value; //split the key and the value
     const std::string   end_of_file = "\r\n"; //seperator
     this->_file_path = path;
-    // std::map<std::string, std::string>  cgi_headers; //create map headers
-    // // serveFile(_file_path, server);
-    // std::istringstream a(this->_head);
-    // std::string line;
-    // while(std::getline(a, line))
-    // {
-    //     std::istringstream b(line);
-    //     std::cout << "line: |" << line << std::endl;
-    //     if(line.find(':') == std::string::npos || line.find(':') == 0)
-    //     {
-    //         std::getline(b, key, ' '); //key
-    //         std::getline(b, value); //value
-    //         cgi_headers[key] = value;
-    //         continue ;
-    //     }
-    //     std::getline(b, key, ':'); //key
-    //     std::getline(b, value); //value
-    //     cgi_headers[key] = value; // assign
-    // }
-    
     CGI cgi = CGI(request, *this);
     this->_status_code = cgi.execute();
     if (this->_status_code == 500)
@@ -153,58 +130,20 @@ int Response::handleCgi(HttpRequestParser &request, const std::string &path, Par
     else
     {
         cgi.parseHeadersAndBody(this->_response);
-        //cgi.parseHeadersAndBody(this->_response);
-        // this->_head.erase();
-        // for(std::map<std::string, std::string>::iterator it = cgi_headers.end(); it != cgi_headers.begin(); it--)
-        // {
-        //     if(it->first.length() > 30 || it->first.empty() == true)
-        //         continue;
-        //     if(it->first == "Content-Length"){
-        //         this->_contentLength = this->_response.length();
-        //         this->_errorContentLength = this->_response.length();
-        //         }
-        //     if(it->first == "HTTP/1.1")
-        //         {
-        //             // std::cout << "here " << std::endl;
-        //             this->_head += it->first  + " " + it->second + end_of_file;
-        //             continue ;
-        //         }
-        //     this->_head += it->first + ": " + it->second + end_of_file;
-        //     // //printf("houna: %s\n", this->_head.c_str());
-        // }
-
         std::cerr << "___DBG___CONTENT___00___ : " << _file_path << std::endl;
         std::cerr << "___DBG___CONTENT___01___ : " << getFileType(_file_path) << std::endl;
-
         this->_head = "HTTP/1.1 " + printNumber(_status_code) + " " + statusMessage(_status_code) +"\r\n"
                 "Connection: close\r\n" 
                 "Content-Type: " + cgi._type + "\r\n" +
                 "Content-Length: " + cgi._length + "\r\n\r\n";
-
-
-
-
-
-
-
-
         this->_contentLength = this->_response.length();
     }
-    // int _TmpFd = open("/Users/kmoutaou/Documents/WebServer/a.txt", O_RDWR | O_APPEND, 0600);
-    // std::cout << "___FD___DBG___01___ : " << _TmpFd << std::endl;
-    // int ret_read = write(_TmpFd, this->_head.c_str(), this->_head.length());
-    // std::cout << "___RET___READ___DBG___01___ : " << ret_read << std::endl;
-    std::cout << "final header:|" << this->_head << "|" << std::endl;
-    std::cout << "final body: |" << this->_response << "|" << std::endl;
-    std::cout << "final content length: " << this->_contentLength << "|" << std::endl;
-    // close(_TmpFd);
     return (1);
 }
 
 void Response::renderFile(Parser &server, const std::string &file)
 {
     this->_file_path = file;
-    // //printf("jiti?\n");
 	this->_file_fd.open(file, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
     if (_file_fd.is_open())
     {
@@ -224,7 +163,6 @@ void Response::renderFile(Parser &server, const std::string &file)
 
 void Response::serveFile(const std::string &filePath, Parser &server) 
 {
-	std::cout << "serveFile: " << filePath << std::endl;
     std::ifstream fileStream(filePath);
     if (fileStream.good() && !access(filePath.c_str(), F_OK))
         renderFile(server, filePath);
@@ -252,8 +190,6 @@ void Response::listDirectory(std::string file, HttpRequestParser &request, Parse
             else {
                 dirEntryPath = request.getPath() + "/" + ent->d_name;
             }
-            // //printf("chno dirPath? : %s\n", dirEntryPath.c_str());
-
             output += "<li><a href=\"" + dirEntryPath + "\">" + ent->d_name + "</a></li>";
         }
         closedir(dir);
@@ -287,11 +223,9 @@ void Response::handleFilePost(HttpRequestParser &request, Parser &server, const 
     std::string uploadDirectory = repetetiveSlash(_location->getRoot() + "/uploads/");
     // final file path
     this->_file_path = uploadDirectory + name + getExtensionFromType(_contentType);
-    printf("ha file post: %s\n", _file_path.c_str());
 
     if (_contentType.empty())
     {
-        printf("had content type khawi\n");
         callErrorPage(server, 400);
         return;
     }
@@ -319,9 +253,7 @@ void Response::handleFilePost(HttpRequestParser &request, Parser &server, const 
 void Response::handleDirectoryPost(HttpRequestParser &request, Parser &server, const std::string &file)
 {
     // Handle directory requests
-    //printf("request path post : %lu | %s\n", request.getPath().size(), request.getPath().c_str());
     if (endSlash(request.getPath()) && request.getPath().size() != 1) {
-        //printf("bayna hna\n");
         if (!this->_location->getIndex().empty())
             handleDirFile(request, server, file);
         else

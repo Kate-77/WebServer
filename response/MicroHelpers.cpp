@@ -328,7 +328,6 @@ bool endSlash(std::string file)
 
 std::string createPath(const std::string &path)
 {
-    //printf("path : %s\n", path.c_str());
     // Check if the string is empty
     if (path.empty())
         return "/";
@@ -349,7 +348,6 @@ std::string Response::constructFilePath(const std::string &path)
     }
     else
         file = _location->getRoot() + path; // delete
-        //file = _location->getRoot(); // GET
     return repetetiveSlash(file);
 }
 
