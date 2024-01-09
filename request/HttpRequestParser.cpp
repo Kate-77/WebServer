@@ -223,7 +223,15 @@ void HttpRequestParser::parse_request_line(std::string request_line)
 
 	if (this->method == "POST")
 	{
-		this->bodyFileFD = open(this->bodyFileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
+		this->bodyFileFD = open(this->bodyFileName.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0666);
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << "File Descriptor" << std::endl;
+		std::cout << this->bodyFileFD << std::endl;
 		if (this->bodyFileFD == -1)
 			throw 500;
 	}

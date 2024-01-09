@@ -191,6 +191,9 @@ void Lexer::preparsing(void)
       unsigned int port = (*it)->getPortnormal();
       std::string host = (*it)->getHostnormal();
       std::vector<std::string>::const_iterator iname = (*it)->getServerName().begin();
+      std::vector<std::string>::const_iterator last = (*it)->getServerName().end();
+      if (iname == last)
+        throw Parser::ParserException("Error! directive 'server name' not found");
       std::string name = (*iname);
     for(std::vector<Parser *>::const_iterator its = this->_parserv.begin(); its != it; its++)
     {

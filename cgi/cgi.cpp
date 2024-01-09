@@ -2,29 +2,53 @@
 
 // kill -9 $(lsof -ti:5000,5001,5002)
 
-std::string readFdToString(int fd) {
-    // Determine the size of the file
-    off_t fileSize = lseek(fd, 0, SEEK_END);
-    lseek(fd, 0, SEEK_SET);  // Reset the file pointer to the beginning
+std::string readFdToString(int fd, std::string name) {
+    // // Determine the size of the file
+    // off_t fileSize = lseek(fd, 0, SEEK_END);
+    // lseek(fd, 0, SEEK_SET);  // Reset the file pointer to the beginning
 
-    // Read the file contents into a string
-    std::string content(fileSize, '\0');
-    ssize_t bytesRead = read(fd, &content[0], fileSize);
+    // // Read the file contents into a string
+    // std::string content(fileSize, '\0');
+    // ssize_t bytesRead = read(fd, &content[0], fileSize);
 
-    if (bytesRead == -1) {
-        // Handle error
-        std::cerr << "Error reading file descriptor" << std::endl;
-        return "";
+    // if (bytesRead == -1) {
+    //     // Handle error
+    //     std::cerr << "Error reading file descriptor" << std::endl;
+    //     return "";
+    // }
+    std::string content;
+  char* buffer(new char[ (Default_buffer + 1) * sizeof(char)]);
+  close(fd);
+  // lseek(fd, 0, SEEK_SET);
+  int newFD =  open(name.c_str(), O_RDONLY, 0666);
+  for (ssize_t aux_ret = 0; ;) 
+  {
+    aux_ret = read(newFD, buffer, 10); 
+    if (0 == aux_ret) 
+    {
+      break ;
     }
-
-    return content;
+    if (-1 == aux_ret) 
+    {
+      std::cerr << "Error! read() failed with return code -1"<< std::endl;
+      std::cout << strerror(errno) << std::endl;
+      content = "";
+      delete[] buffer;
+      return content;
+    }
+    buffer[static_cast<size_t>(aux_ret)] = '\0';
+    //buffer.get()
+    content.insert(content.length(), buffer, static_cast<std::string::size_type>(aux_ret)); //save the output
+  }
+  delete[] buffer;
+  return content;
 }
 
 
 CGI::CGI(  HttpRequestParser & Request, Response & Response ) : _Request(Request), _Response(Response)
 {
   
-  this->_requestBody  = readFdToString(this->_Request.getBodyFileFD());
+  this->_requestBody  = readFdToString(this->_Request.getBodyFileFD(), this->_Request.bodyFileName);
   std::cout << "---------- BOOOOODY -------" <<  this->_requestBody << std::endl;
   //get current directory pathname: Absolut Path ex: /Users/abboutah/....../websev/
   char * tmp = getcwd(NULL, 0); // arguments 1:current pathname to buf, size of buf
@@ -86,19 +110,6 @@ CGI::~CGI(void)
 int CGI::execute(void) 
 {
   // env
-  std::cout << "cgi here" << std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << "====================" <<std::endl;
-  std::cout << this->_requestBody << std::endl;
   int ret = this->initEnv();
   if (0 != ret)
   {
@@ -147,7 +158,6 @@ int CGI::execute(void)
     // Dans le cas où cela ne vous intéresse pas, il suffit de mettre le paramètre 0.
     // Notez que waitpid(-1, status, 0) correspond à la fonction wait.
     ret = waitpid(pid, &status, 0); //WNOHANG
-    std::cout << "return: " << ret << std::endl;
       // waitpid(pid, &status, WNOHANG); //WNOHANG
     // WIFEXITED(status) Elle renvoie vrai si le statut provient d'un processus fils qui s'est terminé en quittant le main avec return ou avec un appel à exit.
     // WEXITSTATUS(status) Elle renvoie le code de retour du processus fils passé à exit ou à return.
@@ -225,14 +235,14 @@ int CGI::execute(void)
     {
       std::cerr << "Error! read() failed with return code -1"<< std::endl;
       this->_body = "";
+      delete[] buffer;
       return (500); // 500 internal server error
     }
     buffer[static_cast<size_t>(aux_ret)] = '\0'; //terminate string
     //buffer.get()
     this->_body.insert(this->_body.length(), buffer, static_cast<std::string::size_type>(aux_ret)); //save the output
-  }  
-  std::cout << "-------CGI OUTPUT-------" << std::endl;
-  std::cout << this->_body << std::endl;
+  }
+  delete[] buffer;
   return (200); // 200 ok
 }
 

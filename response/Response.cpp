@@ -136,7 +136,8 @@ void Response::callErrorPage(Parser& server, int code)
     if (!_error_pages.empty())
     {
         if (_error_pages.find(code) != _error_pages.end()) { // TO DEBUG
-            this->_file_path = _error_pages.find(code)->second ;
+            this->_file_path = repetetiveSlash(_location->getRoot() + "/" + _error_pages.find(code)->second);
+            printf("error page: %s\n", _file_path.c_str());
             this->_file_fd.open(_file_path, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
             if (this->_file_fd.is_open()) {
                 this->_errorContentLength = this->_file_fd.tellg();

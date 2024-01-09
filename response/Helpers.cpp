@@ -59,7 +59,12 @@ int Response::findLocation(Parser &server, const std::string& path)
 // Get Method for directory case
 void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestParser &request, Parser &server) 
 {
-    if (!_location->getIndex().empty()) {
+    if (!endSlash(request.getPath()))
+    {
+        this->_head = "HTTP/1.1 301 Moved Permanently\r\nLocation: " + request.getPath() + "/" + "\r\n\r\n";
+        return ;
+    }
+    else if (!_location->getIndex().empty()) {
         std::vector<std::string>::const_iterator it = this->_location->getIndex().begin();
         while (it != this->_location->getIndex().end()) 
         {
@@ -69,14 +74,14 @@ void Response::handleDirectoryGet(const std::string &directoryPath, HttpRequestP
                 handleCgiOrFileGet(request, indexPath, server);
                 break ;
             }
-			else
-				callErrorPage(server, 404);
+            else
+                callErrorPage(server, 404);
             ++it;
         }
     }
     else if (_location->getAutoindex()) {
         listDirectory(directoryPath, request, server);
-    } 
+    }
     else 
         callErrorPage(server, 403);
 }
@@ -111,70 +116,6 @@ void Response::handleCgiOrFileGet(HttpRequestParser &request, const std::string 
         printf("wach dkhlti hna?\n");
     	serveFile(path, server);}
 }
-
-// int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
-// {
-//     std::string key, value; //split the key and the value
-//     const std::string   end_of_file = "\r\n"; //seperator
-//     this->_file_path = path;
-//     this->_head = "HTTP/1.1 " + printNumber(200) + " OK\r\n"
-//                 "Connection: close\r\n"
-//                 "Content-Type: " + getFileType(_file_path) + "\r\n"
-//                 "Content-Length: 0" + "\r\n\r\n";
-//     std::map<std::string, std::string>  cgi_headers; //create map headers
-//     // serveFile(_file_path, server);
-//     std::istringstream a(this->_head);
-//     std::string line;
-//     while(std::getline(a, line))
-//     {
-//         std::istringstream b(line);
-//         std::cout << "line: |" << line << std::endl;
-//         if(line.find(':') == std::string::npos || line.find(':') == 0)
-//         {
-//             std::getline(b, key, ' '); //key
-//             std::getline(b, value); //value
-//             cgi_headers[key] = value;
-//             continue ;
-//         }
-//         std::getline(b, key, ':'); //key
-//         std::getline(b, value); //value
-//         cgi_headers[key] = value; // assign
-//     }
-    
-//     CGI cgi = CGI(request, *this);
-//     this->_status_code = cgi.execute();
-//     if (this->_status_code == 500)
-//         callErrorPage(server, 500);
-//     else if (this->_status_code == 502)
-//         callErrorPage(server, 502);
-//     else
-//     {
-//         cgi.parseHeadersAndBody(cgi_headers, this->_response);
-//         this->_head.erase();
-//         for(std::map<std::string, std::string>::iterator it = cgi_headers.end(); it != cgi_headers.begin(); it--)
-//         {
-//             if(it->first.length() > 30 || it->first.empty() == true)
-//                 continue;
-//             if(it->first == "Content-Length"){
-//                 this->_contentLength = this->_response.length();
-//                 this->_errorContentLength = this->_response.length();
-//                 }
-//             if(it->first == "HTTP/1.1")
-//                 {
-//                     // std::cout << "here " << std::endl;
-//                     this->_head += it->first  + " " + it->second + end_of_file;
-//                     continue ;
-//                 }
-//             this->_head += it->first + ": " + it->second + end_of_file;
-//             // //printf("houna: %s\n", this->_head.c_str());
-//         }
-//         this->_head += "\r\n\r\n";
-//     }
-//     std::cout << "final header:|" << this->_head << "|" << std::endl;
-//     std::cout << "final body: |" << this->_response << "|" << std::endl;
-//     std::cout << "final content length: " << this->_contentLength << "|" << std::endl;
-//     return (1);
-// }
 
 int Response::handleCgi(HttpRequestParser &request, const std::string &path, Parser &server) 
 {
