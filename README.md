@@ -1,6 +1,6 @@
 # HTTP Server in C++
 
-This is am HTTP server implemented in C++98 from scratch that was completed as part of a 42 core curriculum, it is capable of handling GET, POST, and DELETE methods and it supports multiplexing to handle multiple connections concurrently.
+This is an HTTP server implemented in C++98 from scratch that was completed as part of a 42 core curriculum, it is capable of handling GET, POST, and DELETE methods and it supports multiplexing to handle multiple connections concurrently.
 
 ## Features
 
